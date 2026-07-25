@@ -23,6 +23,9 @@ test-results/
 .DS_Store
 *.swp
 
+# Personal learning notes
+DEVELOPMENT_NOTES.md
+
 # Logs
 *.log
 npm-debug.log*

@@ -16,9 +16,9 @@ school applications.
 
 ### Award Stay Finder
 
-Enter a city and travel dates to compare Marriott hotels by cash price, points
-required, and redemption value. Results will highlight options such as the best
-point value and the lowest points cost.
+Enter a city, travel dates, and preferred Marriott brand tier to discover
+matching hotels. Open a hotel or add several hotels to a comparison view to
+review cash prices, points required, and redemption value side by side.
 
 ### Points Rebate Calculator
 
@@ -34,6 +34,9 @@ Estimate the real cost of a paid stay using:
 ```text
 Net stay cost = Cash price − (Points earned × User's point valuation)
 ```
+
+A future daily reference will estimate the cash value of 10,000 Marriott points
+from a transparent sample of representative cities and hotels.
 
 ## 🛠️ Tech Stack
 
@@ -57,7 +60,9 @@ Net stay cost = Cash price − (Points earned × User's point valuation)
 | Design the core user flows and interface | ⏳ |
 | Build the points rebate calculator | ⬜ |
 | Build hotel search and value ranking | ⬜ |
+| Add side-by-side hotel comparison | ⬜ |
 | Research and validate a live-data strategy | ⬜ |
+| Define the daily Marriott point-value methodology | ⬜ |
 | Add automated tests and data-quality checks | ⬜ |
 | Deploy the summer MVP to Cloudflare | ⬜ |
 
