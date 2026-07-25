@@ -45,5 +45,7 @@ next-env.d.ts
 /playwright-report/
 /test-results/
 
-# Personal learning notes
+# Personal learning notes (local only)
 DEVELOPMENT_NOTES.md
+PROTOTYPE_ACCEPTANCE.md
+/local-notes/
