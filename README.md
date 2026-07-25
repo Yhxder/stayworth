@@ -16,9 +16,10 @@ school applications.
 
 ### Award Stay Finder
 
-Enter a city, travel dates, and preferred Marriott brand tier to discover
-matching hotels. Open a hotel or add several hotels to a comparison view to
-review cash prices, points required, and redemption value side by side.
+Enter a city, travel dates, and preferred Marriott brand tier—Luxury, Premium,
+Select, Longer Stays, or Collections—to discover matching hotels. Select two to
+four hotels to review cash prices, points required, and redemption value side
+by side.
 
 ### Points Rebate Calculator
 
