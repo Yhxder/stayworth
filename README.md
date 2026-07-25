@@ -1,0 +1,82 @@
+# 🏨 StayWorth
+
+> Make every Marriott stay worth more.
+
+[![Status](https://img.shields.io/badge/status-planning-6C63FF?style=for-the-badge)](#-project-board)
+[![MVP](https://img.shields.io/badge/MVP-Marriott-1F2937?style=for-the-badge)](#-mvp-features)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages%20%2B%20D1-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](#%EF%B8%8F-tech-stack)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Planned-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](#%EF%B8%8F-tech-stack)
+
+StayWorth is a Marriott-focused decision tool for comparing cash rates, award
+redemptions, and the true net cost of a paid stay. The first public version is
+planned for summer 2026 as a portfolio project for internship and graduate
+school applications.
+
+## ✨ MVP Features
+
+### Award Stay Finder
+
+Enter a city and travel dates to compare Marriott hotels by cash price, points
+required, and redemption value. Results will highlight options such as the best
+point value and the lowest points cost.
+
+### Points Rebate Calculator
+
+Estimate the real cost of a paid stay using:
+
+- Marriott membership tier
+- Cash rate
+- Base and elite bonus points
+- Credit card earning multiplier
+- Optional welcome or promotional points
+- A custom cash value per 10,000 points
+
+```text
+Net stay cost = Cash price − (Points earned × User's point valuation)
+```
+
+## 🛠️ Tech Stack
+
+| Layer | Planned tools |
+| --- | --- |
+| Frontend | React, TypeScript, Vite |
+| Styling | Tailwind CSS |
+| Edge API | Cloudflare Workers |
+| Database | Cloudflare D1 |
+| Hosting | Cloudflare Pages |
+| Testing | Vitest, Playwright |
+| Delivery | GitHub Actions, Cloudflare |
+| Development | VS Code, Git |
+
+## 📊 Project Board
+
+| Milestone | Status |
+| --- | :---: |
+| Define the Marriott-only MVP | ✅ |
+| Initialize the repository and product README | ✅ |
+| Design the core user flows and interface | ⏳ |
+| Build the points rebate calculator | ⬜ |
+| Build hotel search and value ranking | ⬜ |
+| Research and validate a live-data strategy | ⬜ |
+| Add automated tests and data-quality checks | ⬜ |
+| Deploy the summer MVP to Cloudflare | ⬜ |
+
+**Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
+
+## 🎯 Product Principles
+
+- **Explainable:** show the calculation behind every recommendation.
+- **Comparable:** normalize cash rates and point prices before ranking.
+- **Personalized:** let users choose their own point valuation and earning setup.
+- **Trustworthy:** identify data sources, update times, and important limitations.
+
+## 🗺️ Current Scope
+
+The summer MVP supports Marriott only. Other hotel loyalty programs may be added
+after the calculation model, data pipeline, and user experience are validated.
+The live availability and pricing source is still under research.
+
+---
+
+StayWorth is an independent personal project and is not affiliated with,
+endorsed by, or sponsored by Marriott International.
