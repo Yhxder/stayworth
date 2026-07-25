@@ -58,13 +58,13 @@ from a transparent sample of representative cities and hotels.
 | --- | :---: |
 | Define the Marriott-only MVP | ✅ |
 | Initialize the repository and product README | ✅ |
-| Design the core user flows and interface | ⏳ |
-| Build the points rebate calculator | ⬜ |
-| Build hotel search and value ranking | ⬜ |
-| Add side-by-side hotel comparison | ⬜ |
+| Design the low-fidelity user flows and interface | ✅ |
+| Build the points rebate calculator | ⏳ |
+| Build hotel search and value ranking | ⏳ |
+| Add side-by-side hotel comparison | ⏳ |
 | Research and validate a live-data strategy | ⬜ |
 | Define the daily Marriott point-value methodology | ⬜ |
-| Add automated tests and data-quality checks | ⬜ |
+| Add automated tests and data-quality checks | ⏳ |
 | Deploy the summer MVP to Cloudflare | ⬜ |
 
 **Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
@@ -81,6 +81,16 @@ from a transparent sample of representative cities and hotels.
 The summer MVP supports Marriott only. Other hotel loyalty programs may be added
 after the calculation model, data pipeline, and user experience are validated.
 The live availability and pricing source is still under research.
+
+## 🧪 Local Prototype
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000` to use the low-fidelity prototype. Run `npm test`
+to verify the calculation rules and server-rendered interface.
 
 ---
 
