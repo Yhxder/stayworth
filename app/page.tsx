@@ -2,10 +2,18 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import {
+  EXCHANGE_RATE_REFERENCE_DATE,
+  EXCHANGE_RATE_SOURCE_URL,
+  convertCurrencyAmount,
+  currencyOptions,
+  type CurrencyCode,
+  formatCurrencyAmount,
+  getCurrencyConfig,
+} from "./lib/currencies";
+import {
   calculateCashValuePerTenThousand,
-  calculateEarnedPoints,
-  calculateNetStayCost,
   calculatePointsPerCurrencyUnit,
+  calculateRebateEstimate,
 } from "./lib/points";
 
 type ModuleName = "comparison" | "rebate";
@@ -125,9 +133,14 @@ export default function Home() {
   ]);
   const [comparisonOpen, setComparisonOpen] = useState(false);
 
+  const [currencyCode, setCurrencyCode] = useState<CurrencyCode>("CNY");
   const [cashPrice, setCashPrice] = useState(1235);
-  const [eligibleSpend, setEligibleSpend] = useState(1000);
-  const [exchangeRate, setExchangeRate] = useState(7.2);
+  const [ineligibleSpend, setIneligibleSpend] = useState(235);
+  const [nights, setNights] = useState(1);
+  const [exchangeRate, setExchangeRate] = useState(
+    getCurrencyConfig("CNY").unitsPerUsd,
+  );
+  const [baseRate, setBaseRate] = useState(10);
   const [memberTier, setMemberTier] = useState<MemberTier>("Platinum");
   const [cardMultiplier, setCardMultiplier] = useState(6);
   const [welcomePoints, setWelcomePoints] = useState(1000);
@@ -152,30 +165,50 @@ export default function Home() {
         : "";
 
   const calculatorError =
-    cashPrice <= 0
+    !Number.isFinite(cashPrice) || cashPrice <= 0
       ? "现金总价必须大于 0。"
-      : exchangeRate <= 0
-        ? "汇率必须大于 0。"
-        : pointValuation <= 0
-          ? "每万分价值必须大于 0。"
-          : "";
+      : !Number.isFinite(ineligibleSpend) || ineligibleSpend < 0
+        ? "不计分金额不能小于 0。"
+        : ineligibleSpend > cashPrice
+          ? "不计分金额不能高于现金总价。"
+          : !Number.isInteger(nights) || nights <= 0
+            ? "入住晚数必须是大于 0 的整数。"
+            : !Number.isFinite(exchangeRate) || exchangeRate <= 0
+              ? "汇率必须大于 0。"
+              : !Number.isFinite(cardMultiplier) || cardMultiplier < 0
+                ? "信用卡倍率不能小于 0。"
+                : !Number.isFinite(welcomePoints) || welcomePoints < 0
+                  ? "欢迎积分不能小于 0。"
+                  : !Number.isFinite(promotionalPoints) ||
+                      promotionalPoints < 0
+                    ? "活动积分不能小于 0。"
+                    : !Number.isFinite(pointValuation) ||
+                        pointValuation <= 0
+                      ? "每万分价值必须大于 0。"
+                      : "";
 
-  const earnedPointParts = calculateEarnedPoints({
-    cashPrice: Math.max(cashPrice, 1),
-    eligibleSpend,
-    exchangeRate: Math.max(exchangeRate, 0.01),
-    baseRate: 10,
-    eliteBonusRate: memberTiers[memberTier].bonusRate,
-    cardMultiplier,
-    welcomePoints,
-    promotionalPoints,
-  });
+  const rebateResult = calculatorError
+    ? null
+    : calculateRebateEstimate({
+        cashPrice,
+        ineligibleSpend,
+        nights,
+        exchangeRate,
+        baseRate,
+        eliteBonusRate: memberTiers[memberTier].bonusRate,
+        cardMultiplier,
+        welcomePoints,
+        promotionalPoints,
+        valuePerTenThousand: pointValuation,
+      });
 
-  const rebateResult = calculateNetStayCost({
-    cashPrice: Math.max(cashPrice, 1),
-    ...earnedPointParts,
-    valuePerTenThousand: Math.max(pointValuation, 1),
-  });
+  function handleCurrencyChange(nextCurrency: CurrencyCode) {
+    setPointValuation((currentValue) =>
+      convertCurrencyAmount(currentValue, currencyCode, nextCurrency),
+    );
+    setCurrencyCode(nextCurrency);
+    setExchangeRate(getCurrencyConfig(nextCurrency).unitsPerUsd);
+  }
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -495,7 +528,25 @@ export default function Home() {
               </div>
               <div className="field-grid">
                 <label>
-                  <span>现金总价（人民币）</span>
+                  <span>结算币种</span>
+                  <select
+                    onChange={(event) =>
+                      handleCurrencyChange(event.target.value as CurrencyCode)
+                    }
+                    value={currencyCode}
+                  >
+                    {currencyOptions.map((currency) => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.label} · {currency.code}
+                      </option>
+                    ))}
+                  </select>
+                  <small>
+                    不改写酒店价格；每万分价值会按参考汇率换算
+                  </small>
+                </label>
+                <label>
+                  <span>现金总价（{currencyCode}）</span>
                   <input
                     min="1"
                     onChange={(event) =>
@@ -506,29 +557,73 @@ export default function Home() {
                   />
                 </label>
                 <label>
-                  <span>可赚基础积分的消费</span>
+                  <span>不计分金额（{currencyCode}）</span>
                   <input
                     min="0"
                     onChange={(event) =>
-                      setEligibleSpend(Number(event.target.value))
+                      setIneligibleSpend(Number(event.target.value))
                     }
                     type="number"
-                    value={eligibleSpend}
+                    value={ineligibleSpend}
                   />
-                  <small>暂不包含税费等不合资格消费</small>
+                  <small>例如多数税费、服务费和第三方费用</small>
                 </label>
                 <label>
-                  <span>美元兑人民币汇率</span>
+                  <span>入住晚数</span>
                   <input
-                    min="0.01"
+                    min="1"
+                    onChange={(event) => setNights(Number(event.target.value))}
+                    step="1"
+                    type="number"
+                    value={nights}
+                  />
+                </label>
+                <label>
+                  <span>1 美元约等于多少 {currencyCode}</span>
+                  <input
+                    min="0.0001"
                     onChange={(event) =>
                       setExchangeRate(Number(event.target.value))
                     }
-                    step="0.01"
+                    step="0.0001"
                     type="number"
                     value={exchangeRate}
                   />
+                  <small>参考值可以按实际账单汇率修改</small>
                 </label>
+                <label>
+                  <span>品牌基础积分倍率</span>
+                  <select
+                    onChange={(event) => setBaseRate(Number(event.target.value))}
+                    value={baseRate}
+                  >
+                    <option value={10}>常规万豪品牌 · 10×（含艾美）</option>
+                    <option value={5}>部分长住及精选品牌 · 5×</option>
+                    <option value={4}>StudioRes · 4×</option>
+                  </select>
+                </label>
+              </div>
+              <div className="rate-reference" role="note">
+                <strong>参考汇率日期：{EXCHANGE_RATE_REFERENCE_DATE}</strong>
+                <span>
+                  非实时数据 · 1 USD ≈ {exchangeRate} {currencyCode} · 可手动修改
+                </span>
+                <a
+                  href={EXCHANGE_RATE_SOURCE_URL}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  查看欧洲央行来源
+                </a>
+              </div>
+            </div>
+
+            <div className="form-section">
+              <div className="form-section-title">
+                <span>2</span>
+                <h3>加入信用卡与活动</h3>
+              </div>
+              <div className="field-grid">
                 <label>
                   <span>会员等级</span>
                   <select
@@ -544,23 +639,14 @@ export default function Home() {
                     ))}
                   </select>
                 </label>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <div className="form-section-title">
-                <span>2</span>
-                <h3>加入信用卡与活动</h3>
-              </div>
-              <div className="field-grid">
                 <label>
-                  <span>信用卡倍数</span>
+                  <span>信用卡倍率（Brilliant 为 6×）</span>
                   <input
                     min="0"
                     onChange={(event) =>
                       setCardMultiplier(Number(event.target.value))
                     }
-                    step="1"
+                    step="0.1"
                     type="number"
                     value={cardMultiplier}
                   />
@@ -588,7 +674,7 @@ export default function Home() {
                   />
                 </label>
                 <label>
-                  <span>自定义每万分价值</span>
+                  <span>每万分价值（{currencyCode}）</span>
                   <input
                     min="1"
                     onChange={(event) =>
@@ -604,40 +690,84 @@ export default function Home() {
 
           <aside className="calculation-result" aria-live="polite">
             <p className="step-label">ESTIMATED RESULT</p>
-            <h3>预计真实入住成本</h3>
-            {calculatorError ? (
+            <h3>
+              {rebateResult?.isNetReturn
+                ? "预计净回报"
+                : "预计有效入住成本"}
+            </h3>
+            {calculatorError || !rebateResult ? (
               <div className="calculator-error" role="alert">
                 <strong>暂时无法计算</strong>
-                <p>{calculatorError}</p>
+                <p>{calculatorError || "请输入有效的计算数据。"}</p>
               </div>
             ) : (
               <>
-                <strong>{formatMoney(rebateResult.netStayCost)}</strong>
+                <strong>
+                  {formatCurrencyAmount(
+                    Math.abs(rebateResult.netStayCost),
+                    currencyCode,
+                  )}
+                </strong>
                 <p>
-                  现金价 {formatMoney(cashPrice)} − 积分回血{" "}
-                  {formatMoney(rebateResult.rebateValue)}
+                  {rebateResult.isNetReturn
+                    ? `积分估值比现金总价高 ${formatCurrencyAmount(
+                        Math.abs(rebateResult.netStayCost),
+                        currencyCode,
+                      )}`
+                    : `现金价 ${formatCurrencyAmount(
+                        cashPrice,
+                        currencyCode,
+                      )} − 积分回血 ${formatCurrencyAmount(
+                        rebateResult.rebateValue,
+                        currencyCode,
+                      )}`}
                 </p>
+
+                <dl className="result-metrics">
+                  <div>
+                    <dt>合资格消费</dt>
+                    <dd>
+                      {formatCurrencyAmount(
+                        rebateResult.eligibleSpend,
+                        currencyCode,
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>每晚有效成本</dt>
+                    <dd>
+                      {formatCurrencyAmount(
+                        rebateResult.netCostPerNight,
+                        currencyCode,
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>回血比例</dt>
+                    <dd>{rebateResult.rebatePercentage}%</dd>
+                  </div>
+                </dl>
 
                 <dl className="breakdown-list">
                   <div>
                     <dt>基础积分</dt>
-                    <dd>{formatPoints(earnedPointParts.basePoints)}</dd>
+                    <dd>{formatPoints(rebateResult.basePoints)}</dd>
                   </div>
                   <div>
                     <dt>会员等级加成</dt>
-                    <dd>{formatPoints(earnedPointParts.eliteBonusPoints)}</dd>
+                    <dd>{formatPoints(rebateResult.eliteBonusPoints)}</dd>
                   </div>
                   <div>
                     <dt>信用卡积分</dt>
-                    <dd>{formatPoints(earnedPointParts.cardPoints)}</dd>
+                    <dd>{formatPoints(rebateResult.cardPoints)}</dd>
                   </div>
                   <div>
                     <dt>欢迎积分</dt>
-                    <dd>{formatPoints(earnedPointParts.welcomePoints)}</dd>
+                    <dd>{formatPoints(rebateResult.welcomePoints)}</dd>
                   </div>
                   <div>
                     <dt>活动积分</dt>
-                    <dd>{formatPoints(earnedPointParts.promotionalPoints)}</dd>
+                    <dd>{formatPoints(rebateResult.promotionalPoints)}</dd>
                   </div>
                   <div className="total-row">
                     <dt>预计赚取总积分</dt>
@@ -649,12 +779,15 @@ export default function Home() {
                   <span>计算方法</span>
                   <code>
                     {formatPoints(rebateResult.totalPoints)} ÷ 10,000 ×{" "}
-                    {formatMoney(pointValuation)} ={" "}
-                    {formatMoney(rebateResult.rebateValue)}
+                    {formatCurrencyAmount(pointValuation, currencyCode)} ={" "}
+                    {formatCurrencyAmount(
+                      rebateResult.rebateValue,
+                      currencyCode,
+                    )}
                   </code>
                 </div>
-                <small>
-                  这是原型估算。不同品牌、税费、汇率和促销规则会影响最终入账积分。
+                <small className="refund-disclaimer">
+                  积分回血不是现金退款；入住时仍需支付完整现金总价。不同品牌、税费、汇率和促销规则会影响最终入账积分。
                 </small>
               </>
             )}
