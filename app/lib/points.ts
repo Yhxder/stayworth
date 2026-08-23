@@ -19,9 +19,34 @@ export type EarnedPointsInput = {
   promotionalPoints: number;
 };
 
+export type RebateEstimateInput = {
+  cashPrice: number;
+  ineligibleSpend: number;
+  nights: number;
+  exchangeRate: number;
+  baseRate: number;
+  eliteBonusRate: number;
+  cardMultiplier: number;
+  welcomePoints: number;
+  promotionalPoints: number;
+  valuePerTenThousand: number;
+};
+
 function assertGreaterThanZero(value: number, label: string) {
   if (!Number.isFinite(value) || value <= 0) {
     throw new RangeError(`${label} must be greater than zero.`);
+  }
+}
+
+function assertNonNegative(value: number, label: string) {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new RangeError(`${label} cannot be negative.`);
+  }
+}
+
+function assertPositiveInteger(value: number, label: string) {
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new RangeError(`${label} must be a positive integer.`);
   }
 }
 
@@ -91,5 +116,55 @@ export function calculateNetStayCost(input: NetStayCostInput) {
     totalPoints,
     rebateValue,
     netStayCost: roundToTwo(input.cashPrice - rebateValue),
+  };
+}
+
+export function calculateRebateEstimate(input: RebateEstimateInput) {
+  assertGreaterThanZero(input.cashPrice, "Cash price");
+  assertNonNegative(input.ineligibleSpend, "Ineligible spend");
+  assertPositiveInteger(input.nights, "Nights");
+  assertGreaterThanZero(input.exchangeRate, "Exchange rate");
+  assertNonNegative(input.baseRate, "Base rate");
+  assertNonNegative(input.eliteBonusRate, "Elite bonus rate");
+  assertNonNegative(input.cardMultiplier, "Card multiplier");
+  assertNonNegative(input.welcomePoints, "Welcome points");
+  assertNonNegative(input.promotionalPoints, "Promotional points");
+  assertGreaterThanZero(
+    input.valuePerTenThousand,
+    "Value per ten thousand points",
+  );
+
+  if (input.ineligibleSpend > input.cashPrice) {
+    throw new RangeError("Ineligible spend cannot exceed cash price.");
+  }
+
+  const eligibleSpend = roundToTwo(
+    input.cashPrice - input.ineligibleSpend,
+  );
+  const earnedPoints = calculateEarnedPoints({
+    cashPrice: input.cashPrice,
+    eligibleSpend,
+    exchangeRate: input.exchangeRate,
+    baseRate: input.baseRate,
+    eliteBonusRate: input.eliteBonusRate,
+    cardMultiplier: input.cardMultiplier,
+    welcomePoints: input.welcomePoints,
+    promotionalPoints: input.promotionalPoints,
+  });
+  const netCost = calculateNetStayCost({
+    cashPrice: input.cashPrice,
+    ...earnedPoints,
+    valuePerTenThousand: input.valuePerTenThousand,
+  });
+
+  return {
+    eligibleSpend,
+    ...earnedPoints,
+    ...netCost,
+    netCostPerNight: roundToTwo(netCost.netStayCost / input.nights),
+    rebatePercentage: roundToTwo(
+      (netCost.rebateValue / input.cashPrice) * 100,
+    ),
+    isNetReturn: netCost.netStayCost < 0,
   };
 }
