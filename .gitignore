@@ -44,6 +44,7 @@ next-env.d.ts
 # Playwright
 /playwright-report/
 /test-results/
+/.playwright-cli/
 
 # Personal learning notes (local only)
 DEVELOPMENT_NOTES.md

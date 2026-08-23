@@ -662,6 +662,86 @@ dd {
   grid-row: 1 / 3;
 }
 
+.price-integration-note,
+.card-reference {
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 14px;
+}
+
+.price-integration-note {
+  background: #f4f6fb;
+  grid-template-columns: 1fr auto;
+}
+
+.price-integration-note strong,
+.price-integration-note span,
+.price-integration-note a,
+.card-reference strong,
+.card-reference span,
+.card-reference small,
+.card-reference a {
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.price-integration-note span {
+  color: var(--muted);
+  grid-column: 1;
+}
+
+.price-integration-note a {
+  color: var(--accent);
+  font-weight: 800;
+  grid-column: 2;
+  grid-row: 1 / 3;
+}
+
+.card-reference {
+  background: var(--accent-soft);
+  border-color: #aebef4;
+  grid-template-columns: 1fr auto;
+}
+
+.card-reference > div {
+  display: grid;
+  gap: 4px;
+}
+
+.card-bonus-confirmation {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.card-bonus-confirmation input {
+  min-height: auto;
+  width: auto;
+}
+
+.card-bonus-confirmation > span {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.card-reference span,
+.card-reference small {
+  color: var(--muted);
+}
+
+.card-reference > small {
+  grid-column: 1 / -1;
+}
+
+.card-reference a {
+  align-self: start;
+  color: var(--accent);
+  font-weight: 800;
+}
+
 .calculation-result {
   align-self: start;
   background: var(--ink);
@@ -915,6 +995,18 @@ footer p {
 
   .rate-reference a,
   .rate-reference span {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .price-integration-note,
+  .card-reference {
+    grid-template-columns: 1fr;
+  }
+
+  .price-integration-note a,
+  .price-integration-note span,
+  .card-reference a {
     grid-column: 1;
     grid-row: auto;
   }

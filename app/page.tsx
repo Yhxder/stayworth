@@ -2,6 +2,12 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import {
+  CARD_RULE_REFERENCE_DATE,
+  NO_CARD_ID,
+  getMarriottCard,
+  marriottCards,
+} from "./lib/cards";
+import {
   EXCHANGE_RATE_REFERENCE_DATE,
   EXCHANGE_RATE_SOURCE_URL,
   convertCurrencyAmount,
@@ -10,6 +16,10 @@ import {
   formatCurrencyAmount,
   getCurrencyConfig,
 } from "./lib/currencies";
+import {
+  CALCULATOR_LIMITS,
+  parseNumericInput,
+} from "./lib/numeric-input";
 import {
   calculateCashValuePerTenThousand,
   calculatePointsPerCurrencyUnit,
@@ -134,18 +144,19 @@ export default function Home() {
   const [comparisonOpen, setComparisonOpen] = useState(false);
 
   const [currencyCode, setCurrencyCode] = useState<CurrencyCode>("CNY");
-  const [cashPrice, setCashPrice] = useState(1235);
-  const [ineligibleSpend, setIneligibleSpend] = useState(235);
-  const [nights, setNights] = useState(1);
-  const [exchangeRate, setExchangeRate] = useState(
-    getCurrencyConfig("CNY").unitsPerUsd,
+  const [cashPriceInput, setCashPriceInput] = useState("1235");
+  const [ineligibleSpendInput, setIneligibleSpendInput] = useState("235");
+  const [nightsInput, setNightsInput] = useState("1");
+  const [exchangeRateInput, setExchangeRateInput] = useState(
+    String(getCurrencyConfig("CNY").unitsPerUsd),
   );
   const [baseRate, setBaseRate] = useState(10);
   const [memberTier, setMemberTier] = useState<MemberTier>("Platinum");
-  const [cardMultiplier, setCardMultiplier] = useState(6);
-  const [welcomePoints, setWelcomePoints] = useState(1000);
-  const [promotionalPoints, setPromotionalPoints] = useState(0);
-  const [pointValuation, setPointValuation] = useState(400);
+  const [cardId, setCardId] = useState("us-amex-brilliant");
+  const [includeCardStayBonus, setIncludeCardStayBonus] = useState(false);
+  const [welcomePointsInput, setWelcomePointsInput] = useState("1000");
+  const [promotionalPointsInput, setPromotionalPointsInput] = useState("0");
+  const [pointValuationInput, setPointValuationInput] = useState("400");
 
   const filteredHotels = useMemo(() => {
     if (tier === "全部等级") return hotels;
@@ -164,27 +175,52 @@ export default function Home() {
         ? "退房日期必须晚于入住日期。"
         : "";
 
+  const cashPrice = parseNumericInput(cashPriceInput);
+  const ineligibleSpend = parseNumericInput(ineligibleSpendInput);
+  const nights = parseNumericInput(nightsInput);
+  const exchangeRate = parseNumericInput(exchangeRateInput);
+  const welcomePoints = parseNumericInput(welcomePointsInput);
+  const promotionalPoints = parseNumericInput(promotionalPointsInput);
+  const pointValuation = parseNumericInput(pointValuationInput);
+  const selectedCard = getMarriottCard(cardId);
+  const cardCurrencyUnitsPerUsd = selectedCard
+    ? getCurrencyConfig(selectedCard.earningCurrency).unitsPerUsd
+    : 1;
+
   const calculatorError =
     !Number.isFinite(cashPrice) || cashPrice <= 0
-      ? "现金总价必须大于 0。"
+      ? "请输入大于 0 的现金总价。"
+      : cashPrice > CALCULATOR_LIMITS.cashPrice.max
+        ? "现金总价不能超过 100,000,000。"
       : !Number.isFinite(ineligibleSpend) || ineligibleSpend < 0
-        ? "不计分金额不能小于 0。"
+        ? "请输入不小于 0 的不计分金额。"
+        : ineligibleSpend > CALCULATOR_LIMITS.ineligibleSpend.max
+          ? "不计分金额不能超过 100,000,000。"
         : ineligibleSpend > cashPrice
           ? "不计分金额不能高于现金总价。"
           : !Number.isInteger(nights) || nights <= 0
-            ? "入住晚数必须是大于 0 的整数。"
+            ? "请输入大于 0 的整数晚数。"
+            : nights > CALCULATOR_LIMITS.nights.max
+              ? "入住晚数不能超过 365 晚。"
             : !Number.isFinite(exchangeRate) || exchangeRate <= 0
-              ? "汇率必须大于 0。"
-              : !Number.isFinite(cardMultiplier) || cardMultiplier < 0
-                ? "信用卡倍率不能小于 0。"
+              ? "请输入大于 0 的汇率。"
+              : exchangeRate > CALCULATOR_LIMITS.exchangeRate.max
+                ? "汇率不能超过 1,000,000。"
                 : !Number.isFinite(welcomePoints) || welcomePoints < 0
-                  ? "欢迎积分不能小于 0。"
+                  ? "请输入不小于 0 的欢迎积分。"
+                  : welcomePoints > CALCULATOR_LIMITS.points.max
+                    ? "欢迎积分不能超过 100,000,000。"
                   : !Number.isFinite(promotionalPoints) ||
                       promotionalPoints < 0
-                    ? "活动积分不能小于 0。"
+                    ? "请输入不小于 0 的活动积分。"
+                    : promotionalPoints > CALCULATOR_LIMITS.points.max
+                      ? "活动积分不能超过 100,000,000。"
                     : !Number.isFinite(pointValuation) ||
                         pointValuation <= 0
-                      ? "每万分价值必须大于 0。"
+                      ? "请输入大于 0 的每万分价值。"
+                      : pointValuation >
+                          CALCULATOR_LIMITS.pointValuation.max
+                        ? "每万分价值不能超过 1,000,000。"
                       : "";
 
   const rebateResult = calculatorError
@@ -196,18 +232,35 @@ export default function Home() {
         exchangeRate,
         baseRate,
         eliteBonusRate: memberTiers[memberTier].bonusRate,
-        cardMultiplier,
+        cardPointsPerCurrencyUnit:
+          selectedCard?.pointsPerCurrencyUnit ?? 0,
+        cardCurrencyUnitsPerUsd,
+        cardStayBonusPoints: includeCardStayBonus
+          ? (selectedCard?.stayBonusPoints ?? 0)
+          : 0,
         welcomePoints,
         promotionalPoints,
         valuePerTenThousand: pointValuation,
       });
 
   function handleCurrencyChange(nextCurrency: CurrencyCode) {
-    setPointValuation((currentValue) =>
-      convertCurrencyAmount(currentValue, currencyCode, nextCurrency),
-    );
+    const currentPointValuation = parseNumericInput(pointValuationInput);
+
+    if (Number.isFinite(currentPointValuation)) {
+      setPointValuationInput(
+        String(
+          convertCurrencyAmount(
+            currentPointValuation,
+            currencyCode,
+            nextCurrency,
+          ),
+        ),
+      );
+    }
     setCurrencyCode(nextCurrency);
-    setExchangeRate(getCurrencyConfig(nextCurrency).unitsPerUsd);
+    setExchangeRateInput(
+      String(getCurrencyConfig(nextCurrency).unitsPerUsd),
+    );
   }
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
@@ -548,46 +601,48 @@ export default function Home() {
                 <label>
                   <span>现金总价（{currencyCode}）</span>
                   <input
-                    min="1"
-                    onChange={(event) =>
-                      setCashPrice(Number(event.target.value))
-                    }
+                    max={CALCULATOR_LIMITS.cashPrice.max}
+                    min={CALCULATOR_LIMITS.cashPrice.min}
+                    onChange={(event) => setCashPriceInput(event.target.value)}
                     type="number"
-                    value={cashPrice}
+                    value={cashPriceInput}
                   />
                 </label>
                 <label>
                   <span>不计分金额（{currencyCode}）</span>
                   <input
-                    min="0"
+                    max={CALCULATOR_LIMITS.ineligibleSpend.max}
+                    min={CALCULATOR_LIMITS.ineligibleSpend.min}
                     onChange={(event) =>
-                      setIneligibleSpend(Number(event.target.value))
+                      setIneligibleSpendInput(event.target.value)
                     }
                     type="number"
-                    value={ineligibleSpend}
+                    value={ineligibleSpendInput}
                   />
                   <small>例如多数税费、服务费和第三方费用</small>
                 </label>
                 <label>
                   <span>入住晚数</span>
                   <input
-                    min="1"
-                    onChange={(event) => setNights(Number(event.target.value))}
+                    max={CALCULATOR_LIMITS.nights.max}
+                    min={CALCULATOR_LIMITS.nights.min}
+                    onChange={(event) => setNightsInput(event.target.value)}
                     step="1"
                     type="number"
-                    value={nights}
+                    value={nightsInput}
                   />
                 </label>
                 <label>
                   <span>1 美元约等于多少 {currencyCode}</span>
                   <input
-                    min="0.0001"
+                    max={CALCULATOR_LIMITS.exchangeRate.max}
+                    min={CALCULATOR_LIMITS.exchangeRate.min}
                     onChange={(event) =>
-                      setExchangeRate(Number(event.target.value))
+                      setExchangeRateInput(event.target.value)
                     }
                     step="0.0001"
                     type="number"
-                    value={exchangeRate}
+                    value={exchangeRateInput}
                   />
                   <small>参考值可以按实际账单汇率修改</small>
                 </label>
@@ -606,7 +661,8 @@ export default function Home() {
               <div className="rate-reference" role="note">
                 <strong>参考汇率日期：{EXCHANGE_RATE_REFERENCE_DATE}</strong>
                 <span>
-                  非实时数据 · 1 USD ≈ {exchangeRate} {currencyCode} · 可手动修改
+                  非实时数据 · 1 USD ≈ {exchangeRateInput || "—"}{" "}
+                  {currencyCode} · 可手动修改
                 </span>
                 <a
                   href={EXCHANGE_RATE_SOURCE_URL}
@@ -614,6 +670,19 @@ export default function Home() {
                   target="_blank"
                 >
                   查看欧洲央行来源
+                </a>
+              </div>
+              <div className="price-integration-note" role="note">
+                <strong>实时房价尚未接入</strong>
+                <span>
+                  未来的正式数据会拆成税前房费、税费及服务费、税后总价和币种，再自动填入计算器。当前仍需手动输入，避免把未经授权的万豪页面抓取伪装成稳定接口。
+                </span>
+                <a
+                  href="https://www.marriott.com/marriott/affiliateprogramfaq.mi"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  查看万豪官方合作渠道
                 </a>
               </div>
             </div>
@@ -640,50 +709,102 @@ export default function Home() {
                   </select>
                 </label>
                 <label>
-                  <span>信用卡倍率（Brilliant 为 6×）</span>
-                  <input
-                    min="0"
-                    onChange={(event) =>
-                      setCardMultiplier(Number(event.target.value))
-                    }
-                    step="0.1"
-                    type="number"
-                    value={cardMultiplier}
-                  />
+                  <span>信用卡选择</span>
+                  <select
+                    onChange={(event) => {
+                      setCardId(event.target.value);
+                      setIncludeCardStayBonus(false);
+                    }}
+                    value={cardId}
+                  >
+                    <option value={NO_CARD_ID}>不使用万豪联名信用卡</option>
+                    {marriottCards.map((card) => (
+                      <option key={card.id} value={card.id}>
+                        {card.optionLabel}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <label>
                   <span>欢迎积分</span>
                   <input
-                    min="0"
+                    max={CALCULATOR_LIMITS.points.max}
+                    min={CALCULATOR_LIMITS.points.min}
                     onChange={(event) =>
-                      setWelcomePoints(Number(event.target.value))
+                      setWelcomePointsInput(event.target.value)
                     }
                     type="number"
-                    value={welcomePoints}
+                    value={welcomePointsInput}
                   />
                 </label>
                 <label>
                   <span>额外活动积分</span>
                   <input
-                    min="0"
+                    max={CALCULATOR_LIMITS.points.max}
+                    min={CALCULATOR_LIMITS.points.min}
                     onChange={(event) =>
-                      setPromotionalPoints(Number(event.target.value))
+                      setPromotionalPointsInput(event.target.value)
                     }
                     type="number"
-                    value={promotionalPoints}
+                    value={promotionalPointsInput}
                   />
                 </label>
                 <label>
                   <span>每万分价值（{currencyCode}）</span>
                   <input
-                    min="1"
+                    max={CALCULATOR_LIMITS.pointValuation.max}
+                    min={CALCULATOR_LIMITS.pointValuation.min}
                     onChange={(event) =>
-                      setPointValuation(Number(event.target.value))
+                      setPointValuationInput(event.target.value)
                     }
                     type="number"
-                    value={pointValuation}
+                    value={pointValuationInput}
                   />
                 </label>
+              </div>
+              <div className="card-reference" role="note">
+                {selectedCard ? (
+                  <>
+                    <div>
+                      <strong>
+                        {selectedCard.segment} · {selectedCard.earningDescription}
+                      </strong>
+                      <span>{selectedCard.note}</span>
+                      <small>
+                        信用卡积分按发卡国家的计分币种换算；跨币种交易仅为参考估算，实际以发卡行入账为准。
+                      </small>
+                      {selectedCard.stayBonusPoints > 0 && (
+                        <label className="card-bonus-confirmation">
+                          <input
+                            checked={includeCardStayBonus}
+                            onChange={(event) =>
+                              setIncludeCardStayBonus(event.target.checked)
+                            }
+                            type="checkbox"
+                          />
+                          <span>
+                            本次符合万豪直接预订的付费入住条件，计入 {formatPoints(
+                              selectedCard.stayBonusPoints,
+                            )} 分
+                          </span>
+                        </label>
+                      )}
+                    </div>
+                    <a
+                      href={selectedCard.sourceUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      查看官方规则
+                    </a>
+                  </>
+                ) : (
+                  <div>
+                    <strong>未计入信用卡积分</strong>
+                    <span>仅计算酒店基础积分、会员等级加成及手动填写的额外积分。</span>
+                  </div>
+                )}
+                <small>卡片规则核对日期：{CARD_RULE_REFERENCE_DATE}</small>
               </div>
             </div>
           </form>

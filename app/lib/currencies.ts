@@ -25,6 +25,13 @@ export const currencyOptions = [
     fractionDigits: 2,
   },
   {
+    code: "CAD",
+    label: "加拿大元",
+    symbol: "CA$",
+    unitsPerUsd: 1.374,
+    fractionDigits: 2,
+  },
+  {
     code: "JPY",
     label: "日元",
     symbol: "JP¥",

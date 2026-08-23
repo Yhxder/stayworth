@@ -10,7 +10,9 @@ const defaultInput = {
   exchangeRate: 7.2,
   baseRate: 10,
   eliteBonusRate: 0.5,
-  cardMultiplier: 6,
+  cardPointsPerCurrencyUnit: 6,
+  cardCurrencyUnitsPerUsd: 1,
+  cardStayBonusPoints: 0,
   welcomePoints: 1000,
   promotionalPoints: 0,
   valuePerTenThousand: 400,
@@ -52,7 +54,9 @@ test("preserves a negative effective cost as an estimated net return", () => {
     exchangeRate: 1,
     baseRate: 10,
     eliteBonusRate: 0,
-    cardMultiplier: 0,
+    cardPointsPerCurrencyUnit: 0,
+    cardCurrencyUnitsPerUsd: 1,
+    cardStayBonusPoints: 0,
     welcomePoints: 0,
     promotionalPoints: 10000,
     valuePerTenThousand: 100,
@@ -96,7 +100,11 @@ test("rejects invalid calculator inputs", () => {
     /cannot be negative/,
   );
   assert.throws(
-    () => calculateRebateEstimate({ ...defaultInput, cardMultiplier: -1 }),
+    () =>
+      calculateRebateEstimate({
+        ...defaultInput,
+        cardPointsPerCurrencyUnit: -1,
+      }),
     /cannot be negative/,
   );
   assert.throws(

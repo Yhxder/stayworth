@@ -14,7 +14,9 @@ export type EarnedPointsInput = {
   exchangeRate: number;
   baseRate: number;
   eliteBonusRate: number;
-  cardMultiplier: number;
+  cardPointsPerCurrencyUnit: number;
+  cardCurrencyUnitsPerUsd: number;
+  cardStayBonusPoints: number;
   welcomePoints: number;
   promotionalPoints: number;
 };
@@ -26,7 +28,9 @@ export type RebateEstimateInput = {
   exchangeRate: number;
   baseRate: number;
   eliteBonusRate: number;
-  cardMultiplier: number;
+  cardPointsPerCurrencyUnit: number;
+  cardCurrencyUnitsPerUsd: number;
+  cardStayBonusPoints: number;
   welcomePoints: number;
   promotionalPoints: number;
   valuePerTenThousand: number;
@@ -82,9 +86,10 @@ export function calculateEarnedPoints(input: EarnedPointsInput) {
   const eliteBonusPoints = Math.round(
     basePoints * Math.max(input.eliteBonusRate, 0),
   );
-  const cardPoints = Math.round(
-    chargedUsd * Math.max(input.cardMultiplier, 0),
-  );
+  const cardSpend = chargedUsd * Math.max(input.cardCurrencyUnitsPerUsd, 0);
+  const cardPoints =
+    Math.round(cardSpend * Math.max(input.cardPointsPerCurrencyUnit, 0)) +
+    Math.max(Math.round(input.cardStayBonusPoints), 0);
 
   return {
     basePoints,
@@ -126,7 +131,15 @@ export function calculateRebateEstimate(input: RebateEstimateInput) {
   assertGreaterThanZero(input.exchangeRate, "Exchange rate");
   assertNonNegative(input.baseRate, "Base rate");
   assertNonNegative(input.eliteBonusRate, "Elite bonus rate");
-  assertNonNegative(input.cardMultiplier, "Card multiplier");
+  assertNonNegative(
+    input.cardPointsPerCurrencyUnit,
+    "Card points per currency unit",
+  );
+  assertGreaterThanZero(
+    input.cardCurrencyUnitsPerUsd,
+    "Card currency exchange rate",
+  );
+  assertNonNegative(input.cardStayBonusPoints, "Card stay bonus points");
   assertNonNegative(input.welcomePoints, "Welcome points");
   assertNonNegative(input.promotionalPoints, "Promotional points");
   assertGreaterThanZero(
@@ -147,7 +160,9 @@ export function calculateRebateEstimate(input: RebateEstimateInput) {
     exchangeRate: input.exchangeRate,
     baseRate: input.baseRate,
     eliteBonusRate: input.eliteBonusRate,
-    cardMultiplier: input.cardMultiplier,
+    cardPointsPerCurrencyUnit: input.cardPointsPerCurrencyUnit,
+    cardCurrencyUnitsPerUsd: input.cardCurrencyUnitsPerUsd,
+    cardStayBonusPoints: input.cardStayBonusPoints,
     welcomePoints: input.welcomePoints,
     promotionalPoints: input.promotionalPoints,
   });

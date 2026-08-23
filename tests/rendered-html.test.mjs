@@ -44,6 +44,12 @@ test("server-renders the StayWorth low-fidelity prototype", async () => {
   assert.match(html, /入住晚数/);
   assert.match(html, /参考汇率日期：/);
   assert.match(html, /2026-08-21/);
+  assert.match(html, /信用卡选择/);
+  assert.match(html, /🇨🇳 中信银行万豪旅享家联名信用卡金卡/);
+  assert.match(html, /🇺🇸 Marriott Bonvoy Brilliant/);
+  assert.match(html, /🇨🇦 Marriott Bonvoy.*American Express/);
+  assert.match(html, /信用卡积分按发卡国家的计分币种换算/);
+  assert.doesNotMatch(html, /信用卡倍率（Brilliant 为 6×）/);
   assert.match(html, /每晚有效成本/);
   assert.match(html, /回血比例/);
   assert.match(html, /积分回血不是现金退款/);
