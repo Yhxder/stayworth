@@ -334,6 +334,78 @@ select:hover {
   color: var(--warning) !important;
 }
 
+.data-notice.is-stale {
+  background: #fff0e8;
+  border-color: #a33a22;
+  color: #8f2d19 !important;
+}
+
+.search-state {
+  align-items: center;
+  background: #f7f7f5;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 16px;
+  min-height: 150px;
+  padding: 28px 4px;
+}
+
+.search-state h3,
+.search-state p {
+  margin: 0;
+}
+
+.search-state h3 {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.search-state p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.search-state.is-error {
+  background: #fff1ef;
+  color: #8f2d19;
+}
+
+.state-code {
+  border: 1px solid currentColor;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 7px 9px;
+}
+
+.state-mark {
+  animation: state-spin 0.8s linear infinite;
+  border: 3px solid #c6c6c6;
+  border-top-color: var(--accent);
+  height: 28px;
+  width: 28px;
+}
+
+.stale-warning {
+  align-items: center;
+  background: #fff0e8;
+  border: 1px solid #d9a08f;
+  color: #8f2d19;
+  display: flex;
+  font-size: 11px;
+  gap: 12px;
+  line-height: 1.55;
+  margin-bottom: 18px;
+  padding: 11px 13px;
+}
+
+@keyframes state-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .hotel-grid {
   display: grid;
   gap: 18px;
@@ -663,7 +735,8 @@ dd {
 }
 
 .price-integration-note,
-.card-reference {
+.card-reference,
+.brand-reference {
   border: 1px solid var(--line);
   display: grid;
   gap: 8px;
@@ -682,7 +755,11 @@ dd {
 .card-reference strong,
 .card-reference span,
 .card-reference small,
-.card-reference a {
+.card-reference a,
+.brand-reference strong,
+.brand-reference span,
+.brand-reference small,
+.brand-reference a {
   font-size: 11px;
   line-height: 1.55;
 }
@@ -703,6 +780,32 @@ dd {
   background: var(--accent-soft);
   border-color: #aebef4;
   grid-template-columns: 1fr auto;
+}
+
+.brand-reference {
+  background: #edf7ef;
+  border-color: #9fc5a7;
+  grid-template-columns: 1fr auto;
+}
+
+.brand-reference > div {
+  display: grid;
+  gap: 4px;
+}
+
+.brand-reference span,
+.brand-reference small {
+  color: var(--muted);
+}
+
+.brand-reference > small {
+  grid-column: 1 / -1;
+}
+
+.brand-reference a {
+  align-self: start;
+  color: var(--accent);
+  font-weight: 800;
 }
 
 .card-reference > div {
@@ -1000,15 +1103,28 @@ footer p {
   }
 
   .price-integration-note,
-  .card-reference {
+  .card-reference,
+  .brand-reference {
     grid-template-columns: 1fr;
   }
 
   .price-integration-note a,
   .price-integration-note span,
-  .card-reference a {
+  .card-reference a,
+  .brand-reference a {
     grid-column: 1;
     grid-row: auto;
+  }
+
+  .stale-warning {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .state-mark {
+    animation: none;
   }
 }
 

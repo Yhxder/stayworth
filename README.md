@@ -5,7 +5,7 @@
 [![Status](https://img.shields.io/badge/status-prototype-6C63FF?style=for-the-badge)](#-project-board)
 [![MVP](https://img.shields.io/badge/MVP-Marriott-1F2937?style=for-the-badge)](#-mvp-features)
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages%20%2B%20D1-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](#%EF%B8%8F-tech-stack)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Planned-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](#%EF%B8%8F-tech-stack)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Active-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](#%EF%B8%8F-tech-stack)
 
 StayWorth is a Marriott-focused decision tool for comparing cash rates, award
 redemptions, and the true net cost of a paid stay. The first public version is
@@ -39,11 +39,15 @@ Net stay cost = Cash price − (Points earned × User's point valuation)
 A future daily reference will estimate the cash value of 10,000 Marriott points
 from a transparent sample of representative cities and hotels.
 
+The current prototype is organized into focused React components with explicit
+loading, empty, error, and stale-data states. Hotel snapshots already carry a
+source, currency, and update time so the UI is ready for a future API.
+
 ## 🛠️ Tech Stack
 
 | Layer | Planned tools |
 | --- | --- |
-| Frontend | React, TypeScript, Vite |
+| Frontend | React, TypeScript, vinext/Vite |
 | Styling | Tailwind CSS |
 | Edge API | Cloudflare Workers |
 | Database | Cloudflare D1 |
@@ -60,8 +64,9 @@ from a transparent sample of representative cities and hotels.
 | Initialize the repository and product README | ✅ |
 | Design the low-fidelity user flows and interface | ✅ |
 | Build the points rebate calculator | ✅ |
+| Refactor the frontend into focused components | ✅ |
 | Build hotel search and value ranking | ⏳ |
-| Add side-by-side hotel comparison | ⏳ |
+| Add side-by-side hotel comparison | ✅ |
 | Research and validate a live-data strategy | ⬜ |
 | Define the daily Marriott point-value methodology | ⬜ |
 | Add automated tests and data-quality checks | ✅ |

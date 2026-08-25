@@ -35,6 +35,10 @@ test("server-renders the StayWorth low-fidelity prototype", async () => {
   assert.match(html, /入住日期/);
   assert.match(html, /退房日期/);
   assert.match(html, /品牌层级/);
+  assert.match(html, /酒店品牌/);
+  assert.match(html, /Le Méridien/);
+  assert.match(html, /系统自动应用[\s\S]{0,40}10(?:<!-- -->)?×/);
+  assert.match(html, /数据已过期/);
   assert.match(html, /香港数码港艾美酒店/);
   assert.match(html, /37,000/);
   assert.match(html, /1,235/);
