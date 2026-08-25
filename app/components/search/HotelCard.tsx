@@ -1,4 +1,5 @@
-import { formatCny, formatPoints } from "../../lib/format";
+import { formatCurrencyAmount } from "../../lib/currencies";
+import { formatPoints } from "../../lib/format";
 import {
   calculateCashValuePerTenThousand,
   calculatePointsPerCurrencyUnit,
@@ -39,7 +40,7 @@ export function HotelCard({ hotel, selected, onToggle }: HotelCardProps) {
       <dl className="price-pair">
         <div>
           <dt>现金总价</dt>
-          <dd>{formatCny(hotel.cashPrice)}</dd>
+          <dd>{formatCurrencyAmount(hotel.cashPrice, hotel.currency)}</dd>
         </div>
         <div>
           <dt>积分总价</dt>
@@ -48,8 +49,12 @@ export function HotelCard({ hotel, selected, onToggle }: HotelCardProps) {
       </dl>
       <div className="value-box">
         <span>每万分兑换价值</span>
-        <strong>{formatCny(valuePerTenThousand)} / 万分</strong>
-        <small>需要 {pointsPerYuan} 分兑换 ¥1 的现金房价</small>
+        <strong>
+          {formatCurrencyAmount(valuePerTenThousand, hotel.currency)} / 万分
+        </strong>
+        <small>
+          需要 {pointsPerYuan} 分兑换 1 {hotel.currency} 的现金房价
+        </small>
       </div>
       <button
         aria-label={`选择${hotel.nameZh}进行比较`}

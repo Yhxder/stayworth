@@ -40,6 +40,7 @@ const databaseRow = {
   id: "cyberport",
   nameZh: "香港数码港艾美酒店",
   nameEn: "Le Méridien Hong Kong, Cyberport",
+  brandId: "le-meridien",
   brand: "Le Méridien",
   tier: "Premium",
   city: "香港",

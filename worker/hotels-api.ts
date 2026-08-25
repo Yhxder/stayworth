@@ -31,6 +31,7 @@ type HotelSnapshotRow = {
   id: string;
   nameZh: string;
   nameEn: string;
+  brandId: string;
   brand: string;
   tier: string;
   city: string;
@@ -94,6 +95,7 @@ export async function queryHotelSnapshots(
         h.slug AS "id",
         h.name_zh AS "nameZh",
         h.name_en AS "nameEn",
+        h.brand_code AS "brandId",
         h.brand_name AS "brand",
         h.portfolio_tier AS "tier",
         c.name_zh AS "city",
@@ -117,6 +119,7 @@ export async function queryHotelSnapshots(
       "id",
       "nameZh",
       "nameEn",
+      "brandId",
       "brand",
       "tier",
       "city",

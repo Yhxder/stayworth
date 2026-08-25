@@ -1,4 +1,5 @@
-import { formatCny, formatPoints } from "../../lib/format";
+import { formatCurrencyAmount } from "../../lib/currencies";
+import { formatPoints } from "../../lib/format";
 import { calculateCashValuePerTenThousand } from "../../lib/points";
 import type { Hotel } from "../../types/hotel";
 
@@ -7,6 +8,7 @@ type ComparisonSectionProps = {
   isOpen: boolean;
   onClose: () => void;
   onOpen: () => void;
+  onUseForRebate: (hotel: Hotel) => void;
 };
 
 export function ComparisonSection({
@@ -14,6 +16,7 @@ export function ComparisonSection({
   isOpen,
   onClose,
   onOpen,
+  onUseForRebate,
 }: ComparisonSectionProps) {
   const canCompare = hotels.length >= 2 && hotels.length <= 4;
 
@@ -70,7 +73,9 @@ export function ComparisonSection({
                   <dl>
                     <div>
                       <dt>现金</dt>
-                      <dd>{formatCny(hotel.cashPrice)}</dd>
+                      <dd>
+                        {formatCurrencyAmount(hotel.cashPrice, hotel.currency)}
+                      </dd>
                     </div>
                     <div>
                       <dt>积分</dt>
@@ -78,13 +83,20 @@ export function ComparisonSection({
                     </div>
                     <div>
                       <dt>每万分价值</dt>
-                      <dd>{formatCny(value)}</dd>
+                      <dd>{formatCurrencyAmount(value, hotel.currency)}</dd>
                     </div>
                   </dl>
                   <small>
-                    公式：{formatCny(hotel.cashPrice)} ÷{" "}
+                    公式：{formatCurrencyAmount(hotel.cashPrice, hotel.currency)} ÷{" "}
                     {formatPoints(hotel.pointsRequired)} × 10,000
                   </small>
+                  <button
+                    className="use-rebate-button"
+                    onClick={() => onUseForRebate(hotel)}
+                    type="button"
+                  >
+                    带入回血计算器
+                  </button>
                 </article>
               );
             })}

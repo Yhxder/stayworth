@@ -1,3 +1,5 @@
+import type { CurrencyCode } from "../lib/currencies";
+
 export type PortfolioTier =
   | "Luxury"
   | "Premium"
@@ -11,15 +13,16 @@ export type Hotel = {
   id: string;
   nameZh: string;
   nameEn: string;
+  brandId: string;
   brand: string;
   tier: PortfolioTier;
   city: string;
-  cityAliases: string[];
   district: string;
   cashPrice: number;
   pointsRequired: number;
-  currency: "CNY";
-  sourceLabel: "你的真实入住" | "原型模拟数据";
+  currency: CurrencyCode;
+  sourceLabel: string;
+  sourceUrl: string | null;
   updatedAt: string;
 };
 
@@ -40,3 +43,12 @@ export type SearchResultsState =
       query: string;
       hotels: Hotel[];
     };
+
+export type RebatePrefill = {
+  revision: number;
+  hotelName: string;
+  cashPrice: number;
+  currency: CurrencyCode;
+  nights: number;
+  brandId: string;
+};

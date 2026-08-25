@@ -39,7 +39,7 @@ export function SearchResults({
         <div>
           <h3>{content.title}</h3>
           <p>
-            “{state.query}”没有可用快照。{content.message}
+            “{state.query}”没有完全匹配该城市、日期和层级的快照。{content.message}
           </p>
         </div>
       </section>
@@ -75,11 +75,11 @@ export function SearchResults({
         <div>
           <p className="step-label">SEARCH RESULTS</p>
           <h3>
-            {state.query} · {state.hotels.length} 家示例酒店
+            {state.query} · {state.hotels.length} 家酒店快照
           </h3>
         </div>
         <p className={`data-notice ${state.status === "stale" ? "is-stale" : ""}`}>
-          {state.status === "stale" ? "数据已过期" : "原型快照"} · 更新于{" "}
+          {state.status === "stale" ? "数据已过期" : "有限快照"} · 更新于{" "}
           {formatSnapshotDate(newestSnapshot)}
         </p>
       </div>

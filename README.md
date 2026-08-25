@@ -19,7 +19,7 @@ school applications.
 Enter a city, travel dates, and preferred Marriott brand tier—Luxury, Premium,
 Select, Longer Stays, or Collections—to discover matching hotels. Select two to
 four hotels to review cash prices, points required, and redemption value side
-by side.
+by side, then send one paid-stay snapshot into the rebate calculator.
 
 ### Points Rebate Calculator
 
@@ -40,8 +40,8 @@ A future daily reference will estimate the cash value of 10,000 Marriott points
 from a transparent sample of representative cities and hotels.
 
 The current prototype is organized into focused React components with explicit
-loading, empty, error, and stale-data states. Hotel snapshots already carry a
-source, currency, and update time so the UI is ready for a future API.
+loading, empty, error, and stale-data states. The search UI now reads hotel
+snapshots from the Worker API instead of a frontend data array.
 
 The finite data layer now uses Cloudflare D1 with three relational tables:
 `cities`, `hotels`, and `price_snapshots`. A Worker endpoint supports exact
@@ -71,6 +71,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Build the points rebate calculator | ✅ |
 | Refactor the frontend into focused components | ✅ |
 | Build the finite D1 data layer and Worker API | ✅ |
+| Connect the hotel UI to the Worker API | ✅ |
 | Build hotel search and value ranking | ⏳ |
 | Add side-by-side hotel comparison | ✅ |
 | Research and validate a live-data strategy | ⬜ |
@@ -105,8 +106,10 @@ GET /api/hotels?city=Hong%20Kong&checkIn=2026-08-15&checkOut=2026-08-16&tier=Pre
 
 Successful records include currency, source, and update time. A valid query
 without an exact snapshot returns `status: "empty"` and `message: "暂无数据"`.
-The current frontend still uses prototype data; connecting it to this endpoint
-is the next implementation step.
+The frontend uses this endpoint for loading, success, empty, error, and stale
+states. Selected paid-stay snapshots can prefill currency, total cash rate,
+stay length, and brand in the points rebate calculator. Taxes and ineligible
+spend are not inferred because the finite snapshots do not contain that split.
 
 ## 🧪 Local Prototype
 

@@ -1,16 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import { ComparisonSection } from "./components/search/ComparisonSection";
 import { SearchForm } from "./components/search/SearchForm";
 import { SearchResults } from "./components/search/SearchResults";
-import { prototypeHotels } from "./data/prototype-hotels";
-import {
-  filterPrototypeHotels,
-  getResultsState,
-} from "./lib/hotel-search";
+import { fetchHotelSnapshots } from "./lib/hotel-api";
+import { getResultsState } from "./lib/hotel-search";
+import { createRebatePrefill } from "./lib/rebate-prefill";
 import type {
+  Hotel,
+  RebatePrefill,
   SearchFilters,
   SearchResultsState,
 } from "./types/hotel";
@@ -24,29 +24,37 @@ const initialFilters: SearchFilters = {
   tier: "全部等级",
 };
 
-function waitForPrototypeSearch() {
-  return new Promise((resolve) => window.setTimeout(resolve, 350));
-}
-
 export default function Home() {
   const [activeModule, setActiveModule] =
     useState<ModuleName>("comparison");
   const [filters, setFilters] = useState<SearchFilters>(initialFilters);
-  const [resultsState, setResultsState] = useState<SearchResultsState>(() =>
-    getResultsState(prototypeHotels, initialFilters.city),
-  );
-  const [selectedHotelIds, setSelectedHotelIds] = useState<string[]>([
-    "cyberport",
-    "jw-hong-kong",
-  ]);
+  const [resultsState, setResultsState] =
+    useState<SearchResultsState>({ status: "idle" });
+  const [selectedHotelIds, setSelectedHotelIds] = useState<string[]>([]);
   const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [rebatePrefill, setRebatePrefill] =
+    useState<RebatePrefill | null>(null);
+  const [resultStayDates, setResultStayDates] = useState<{
+    checkIn: string;
+    checkOut: string;
+  } | null>(null);
+  const requestSequence = useRef(0);
+  const rebatePrefillSequence = useRef(0);
+
+  const availableHotels = useMemo(
+    () =>
+      resultsState.status === "success" || resultsState.status === "stale"
+        ? resultsState.hotels
+        : [],
+    [resultsState],
+  );
 
   const selectedHotels = useMemo(
     () =>
-      prototypeHotels.filter((hotel) =>
+      availableHotels.filter((hotel) =>
         selectedHotelIds.includes(hotel.id),
       ),
-    [selectedHotelIds],
+    [availableHotels, selectedHotelIds],
   );
 
   const searchError =
@@ -60,33 +68,38 @@ export default function Home() {
     if (searchError || resultsState.status === "loading") return;
 
     const submittedFilters = { ...filters };
+    const requestId = requestSequence.current + 1;
+    requestSequence.current = requestId;
     setResultsState({
       status: "loading",
       query: submittedFilters.city,
     });
+    setSelectedHotelIds([]);
+    setResultStayDates(null);
     setComparisonOpen(false);
 
     try {
-      await waitForPrototypeSearch();
-      const matchedHotels = filterPrototypeHotels(
-        prototypeHotels,
-        submittedFilters,
-      );
+      const payload = await fetchHotelSnapshots(submittedFilters);
+      if (requestId !== requestSequence.current) return;
 
-      setSelectedHotelIds((current) =>
-        current.filter((hotelId) =>
-          matchedHotels.some((hotel) => hotel.id === hotelId),
-        ),
-      );
-      setResultsState(
-        getResultsState(matchedHotels, submittedFilters.city),
-      );
-    } catch {
-      setSelectedHotelIds([]);
+      if (payload.status === "empty") {
+        setResultsState({ status: "empty", query: submittedFilters.city });
+      } else {
+        setResultStayDates({
+          checkIn: submittedFilters.checkIn,
+          checkOut: submittedFilters.checkOut,
+        });
+        setResultsState(getResultsState(payload.hotels, submittedFilters.city));
+      }
+    } catch (error) {
+      if (requestId !== requestSequence.current) return;
       setResultsState({
         status: "error",
         query: submittedFilters.city,
-        message: "原型数据读取失败，请重新查询。",
+        message:
+          error instanceof Error
+            ? error.message
+            : "酒店数据查询失败，请重新查询。",
       });
     }
   }
@@ -100,6 +113,22 @@ export default function Home() {
       if (current.length >= 4) return current;
       return [...current, hotelId];
     });
+  }
+
+  function useHotelForRebate(hotel: Hotel) {
+    if (!resultStayDates) return;
+
+    const nextRevision = rebatePrefillSequence.current + 1;
+    rebatePrefillSequence.current = nextRevision;
+    setRebatePrefill(
+      createRebatePrefill(
+        hotel,
+        resultStayDates.checkIn,
+        resultStayDates.checkOut,
+        nextRevision,
+      ),
+    );
+    setActiveModule("rebate");
   }
 
   return (
@@ -119,8 +148,8 @@ export default function Home() {
         <p className="eyebrow">先做正确的决定，再谈精美的界面</p>
         <h1>这次入住，现金和积分哪个更值？</h1>
         <p className="intro-copy">
-          使用模拟数据验证搜索、比较和回血计算流程。低保真原型只关注信息和操作，
-          不代表最终视觉设计。
+          使用香港和上海的有限价格快照验证搜索、比较和回血计算流程。
+          当前价格不是实时库存，也不代表最终视觉设计。
         </p>
       </section>
 
@@ -180,14 +209,19 @@ export default function Home() {
           isOpen={comparisonOpen}
           onClose={() => setComparisonOpen(false)}
           onOpen={() => setComparisonOpen(true)}
+          onUseForRebate={useHotelForRebate}
         />
       </section>
 
-      <RebateCalculator hidden={activeModule !== "rebate"} />
+      <RebateCalculator
+        hidden={activeModule !== "rebate"}
+        key={rebatePrefill?.revision ?? "manual"}
+        prefill={rebatePrefill}
+      />
 
       <footer>
         <p>
-          StayWorth 低保真原型 · 数据仅用于验证产品流程，不构成预订或兑换建议。
+          StayWorth 低保真原型 · 有限数据快照不构成预订或兑换建议。
         </p>
         <p>Independent project · Not affiliated with Marriott International.</p>
       </footer>

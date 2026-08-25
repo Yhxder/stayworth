@@ -43,7 +43,7 @@ export function SearchForm({
           placeholder="例如：香港 / Hong Kong"
           value={filters.city}
         />
-        <small>当前原型支持香港、Hong Kong 和 HK</small>
+        <small>当前支持香港 / Hong Kong / HK 与上海 / Shanghai / SHA</small>
       </label>
       <label>
         <span>入住日期</span>

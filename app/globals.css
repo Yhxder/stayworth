@@ -652,6 +652,22 @@ dd {
   margin-top: 12px;
 }
 
+.use-rebate-button {
+  background: var(--accent-soft);
+  border: 1.5px solid var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+  margin-top: 14px;
+  min-height: 40px;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+.use-rebate-button:hover {
+  background: var(--accent);
+  color: white;
+}
+
 .calculator-layout {
   display: grid;
   gap: 28px;
@@ -662,6 +678,24 @@ dd {
 .calculator-form {
   display: grid;
   gap: 20px;
+}
+
+.prefill-notice {
+  background: #edf7ef;
+  border: 1.5px solid #6a9b74;
+  display: grid;
+  gap: 5px;
+  padding: 14px 16px;
+}
+
+.prefill-notice strong,
+.prefill-notice span {
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.prefill-notice span {
+  color: var(--muted);
 }
 
 .form-section {

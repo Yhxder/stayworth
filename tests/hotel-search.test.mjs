@@ -1,40 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { prototypeHotels } from "../app/data/prototype-hotels.ts";
 import {
-  filterPrototypeHotels,
   getSearchStateContent,
   isHotelDataStale,
 } from "../app/lib/hotel-search.ts";
-
-test("keeps prototype hotel data outside the page with provenance fields", () => {
-  assert.equal(prototypeHotels.length, 4);
-  assert.ok(
-    prototypeHotels.every(
-      (hotel) => hotel.city && hotel.sourceLabel && hotel.updatedAt,
-    ),
-  );
-});
-
-test("filters the prototype data by supported city alias and portfolio tier", () => {
-  const results = filterPrototypeHotels(prototypeHotels, {
-    city: "Hong Kong",
-    tier: "Premium",
-  });
-
-  assert.deepEqual(
-    results.map((hotel) => hotel.id),
-    ["cyberport", "sheraton-hong-kong"],
-  );
-  assert.deepEqual(
-    filterPrototypeHotels(prototypeHotels, {
-      city: "上海",
-      tier: "全部等级",
-    }),
-    [],
-  );
-});
 
 test("provides visible copy for loading, empty, error, and stale states", () => {
   assert.match(getSearchStateContent("loading").title, /正在查询/);

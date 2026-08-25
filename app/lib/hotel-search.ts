@@ -1,8 +1,4 @@
-import type {
-  Hotel,
-  SearchFilters,
-  SearchResultsState,
-} from "../types/hotel";
+import type { Hotel, SearchResultsState } from "../types/hotel";
 
 const STALE_AFTER_DAYS = 7;
 
@@ -13,7 +9,7 @@ const stateContent = {
   },
   empty: {
     title: "暂无数据",
-    message: "当前原型仅覆盖香港；未覆盖的城市和日期不会返回伪造价格。",
+    message: "当前只覆盖香港、上海和有限日期；未覆盖范围不会返回伪造价格。",
   },
   error: {
     title: "查询失败",
@@ -26,27 +22,6 @@ const stateContent = {
 } as const;
 
 export type VisibleSearchState = keyof typeof stateContent;
-
-function normalizeSearchText(value: string) {
-  return value.trim().toLocaleLowerCase().replaceAll(/\s+/g, " ");
-}
-
-export function filterPrototypeHotels(
-  hotels: Hotel[],
-  filters: Pick<SearchFilters, "city" | "tier">,
-) {
-  const normalizedCity = normalizeSearchText(filters.city);
-
-  return hotels.filter((hotel) => {
-    const matchesCity = hotel.cityAliases.some(
-      (alias) => normalizeSearchText(alias) === normalizedCity,
-    );
-    const matchesTier =
-      filters.tier === "全部等级" || hotel.tier === filters.tier;
-
-    return matchesCity && matchesTier;
-  });
-}
 
 export function getSearchStateContent(status: VisibleSearchState) {
   return stateContent[status];

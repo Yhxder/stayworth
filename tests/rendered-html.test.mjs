@@ -38,11 +38,10 @@ test("server-renders the StayWorth low-fidelity prototype", async () => {
   assert.match(html, /酒店品牌/);
   assert.match(html, /Le Méridien/);
   assert.match(html, /系统自动应用[\s\S]{0,40}10(?:<!-- -->)?×/);
-  assert.match(html, /数据已过期/);
-  assert.match(html, /香港数码港艾美酒店/);
-  assert.match(html, /37,000/);
   assert.match(html, /1,235/);
-  assert.match(html, /333\.78/);
+  assert.match(html, /当前支持香港/);
+  assert.match(html, /上海/);
+  assert.match(html, /当前价格不是实时库存/);
   assert.match(html, /结算币种/);
   assert.match(html, /不计分金额/);
   assert.match(html, /入住晚数/);
@@ -70,5 +69,5 @@ test("prototype includes accessible controls for the two main workflows", async 
   assert.match(html, /aria-label="切换到酒店对比模块"/);
   assert.match(html, /aria-label="切换到积分回血模块"/);
   assert.match(html, /aria-label="搜索匹配酒店"/);
-  assert.match(html, /aria-label="选择香港数码港艾美酒店进行比较"/);
+  assert.match(html, /aria-label="搜索匹配酒店"/);
 });

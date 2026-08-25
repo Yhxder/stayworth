@@ -28,6 +28,7 @@ import {
   parseNumericInput,
 } from "../../lib/numeric-input";
 import { calculateRebateEstimate } from "../../lib/points";
+import type { RebatePrefill } from "../../types/hotel";
 
 const memberTiers = {
   Member: { label: "普通会员", bonusRate: 0 },
@@ -42,23 +43,41 @@ type MemberTier = keyof typeof memberTiers;
 
 type RebateCalculatorProps = {
   hidden?: boolean;
+  prefill?: RebatePrefill | null;
 };
 
-export function RebateCalculator({ hidden = false }: RebateCalculatorProps) {
-  const [currencyCode, setCurrencyCode] = useState<CurrencyCode>("CNY");
-  const [cashPriceInput, setCashPriceInput] = useState("1235");
-  const [ineligibleSpendInput, setIneligibleSpendInput] = useState("235");
-  const [nightsInput, setNightsInput] = useState("1");
-  const [exchangeRateInput, setExchangeRateInput] = useState(
-    String(getCurrencyConfig("CNY").unitsPerUsd),
+export function RebateCalculator({
+  hidden = false,
+  prefill = null,
+}: RebateCalculatorProps) {
+  const initialCurrency = prefill?.currency ?? "CNY";
+  const initialBrandId =
+    prefill && marriottBrandRules.some((brand) => brand.id === prefill.brandId)
+      ? prefill.brandId
+      : "le-meridien";
+  const [currencyCode, setCurrencyCode] =
+    useState<CurrencyCode>(initialCurrency);
+  const [cashPriceInput, setCashPriceInput] = useState(
+    String(prefill?.cashPrice ?? 1235),
   );
-  const [brandId, setBrandId] = useState("le-meridien");
+  const [ineligibleSpendInput, setIneligibleSpendInput] = useState(
+    prefill ? "" : "235",
+  );
+  const [nightsInput, setNightsInput] = useState(
+    String(prefill?.nights ?? 1),
+  );
+  const [exchangeRateInput, setExchangeRateInput] = useState(
+    String(getCurrencyConfig(initialCurrency).unitsPerUsd),
+  );
+  const [brandId, setBrandId] = useState(initialBrandId);
   const [memberTier, setMemberTier] = useState<MemberTier>("Platinum");
   const [cardId, setCardId] = useState("us-amex-brilliant");
   const [includeCardStayBonus, setIncludeCardStayBonus] = useState(false);
   const [welcomePointsInput, setWelcomePointsInput] = useState("1000");
   const [promotionalPointsInput, setPromotionalPointsInput] = useState("0");
-  const [pointValuationInput, setPointValuationInput] = useState("400");
+  const [pointValuationInput, setPointValuationInput] = useState(() =>
+    String(convertCurrencyAmount(400, "CNY", initialCurrency)),
+  );
 
   const cashPrice = parseNumericInput(cashPriceInput);
   const ineligibleSpend = parseNumericInput(ineligibleSpendInput);
@@ -167,6 +186,14 @@ export function RebateCalculator({ hidden = false }: RebateCalculatorProps) {
 
       <div className="calculator-layout">
         <form className="calculator-form">
+          {prefill && (
+            <div className="prefill-notice" role="status">
+              <strong>已带入：{prefill.hotelName}</strong>
+              <span>
+                已填写快照总价、币种、{prefill.nights} 晚和酒店品牌。当前数据没有拆分税费，请核对并填写“不计分金额”后再查看结果。
+              </span>
+            </div>
+          )}
           <div className="form-section">
             <div className="form-section-title">
               <span>1</span>
@@ -280,9 +307,9 @@ export function RebateCalculator({ hidden = false }: RebateCalculatorProps) {
               </a>
             </div>
             <div className="price-integration-note" role="note">
-              <strong>实时房价尚未接入</strong>
+              <strong>已连接有限价格快照</strong>
               <span>
-                未来的正式数据会拆成税前房费、税费及服务费、税后总价和币种，再自动填入计算器。当前仍需手动输入，避免把未经授权的万豪页面抓取伪装成稳定接口。
+                从酒店比较带入的只是数据库中的现金总价和币种。税费、服务费与税前合资格消费尚未拆分，因此仍需用户核对“不计分金额”；当前数据不是实时库存。
               </span>
               <a
                 href="https://www.marriott.com/marriott/affiliateprogramfaq.mi"

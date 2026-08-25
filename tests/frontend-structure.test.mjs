@@ -8,7 +8,8 @@ const projectFiles = [
   "app/components/search/SearchResults.tsx",
   "app/components/search/ComparisonSection.tsx",
   "app/components/rebate/RebateCalculator.tsx",
-  "app/data/prototype-hotels.ts",
+  "app/lib/hotel-api.ts",
+  "app/lib/rebate-prefill.ts",
   "app/types/hotel.ts",
 ];
 
@@ -23,4 +24,8 @@ test("splits the four main UI responsibilities into focused files", () => {
   assert.match(pageSource, /<SearchResults/);
   assert.match(pageSource, /<ComparisonSection/);
   assert.match(pageSource, /<RebateCalculator/);
+  assert.match(pageSource, /fetchHotelSnapshots/);
+  assert.doesNotMatch(pageSource, /prototypeHotels|filterPrototypeHotels/);
+  assert.match(pageSource, /resultStayDates\.checkIn/);
+  assert.match(pageSource, /resultStayDates\.checkOut/);
 });
