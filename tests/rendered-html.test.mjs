@@ -56,6 +56,8 @@ test("server-renders the StayWorth low-fidelity prototype", async () => {
   assert.match(html, /每晚有效成本/);
   assert.match(html, /回血比例/);
   assert.match(html, /积分回血不是现金退款/);
+  assert.match(html, /aria-label="积分回血计算结果"/);
+  assert.match(html, /aria-label="预计有效入住成本金额：¥1,061\.60"/);
   assert.match(html, /property="og:title"/);
   assert.match(html, /name="twitter:card" content="summary_large_image"/);
   assert.match(html, /raw\.githubusercontent\.com\/Yhxder\/stayworth\/main\/public\/og\.png/);

@@ -438,7 +438,11 @@ export function RebateCalculator({
           </div>
         </form>
 
-        <aside className="calculation-result" aria-live="polite">
+        <aside
+          aria-label="积分回血计算结果"
+          aria-live="polite"
+          className="calculation-result"
+        >
           <p className="step-label">ESTIMATED RESULT</p>
           <h3>
             {rebateResult?.isNetReturn ? "预计净回报" : "预计有效入住成本"}
@@ -450,7 +454,19 @@ export function RebateCalculator({
             </div>
           ) : (
             <>
-              <strong>
+              <strong
+                aria-label={
+                  rebateResult.isNetReturn
+                    ? `预计净回报金额：${formatCurrencyAmount(
+                        Math.abs(rebateResult.netStayCost),
+                        currencyCode,
+                      )}`
+                    : `预计有效入住成本金额：${formatCurrencyAmount(
+                        Math.abs(rebateResult.netStayCost),
+                        currencyCode,
+                      )}`
+                }
+              >
                 {formatCurrencyAmount(
                   Math.abs(rebateResult.netStayCost),
                   currencyCode,

@@ -57,7 +57,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Edge API | Cloudflare Workers — finite query endpoint active |
 | Database | Cloudflare D1 — schema and APAC database active |
 | Hosting | Cloudflare Pages |
-| Testing | Vitest, Playwright |
+| Testing | Node.js test runner, Playwright |
 | Delivery | GitHub Actions, Cloudflare |
 | Development | VS Code, Git |
 
@@ -77,6 +77,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Research and validate a live-data strategy | ⬜ |
 | Define the daily Marriott point-value methodology | ⬜ |
 | Add automated tests and data-quality checks | ✅ |
+| Add end-to-end tests for both core user flows | ✅ |
 | Deploy the summer MVP to Cloudflare | ⬜ |
 
 **Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
@@ -120,6 +121,18 @@ npm run dev
 
 Open `http://localhost:3000` to use the low-fidelity prototype. Run `npm test`
 to verify the calculation rules and server-rendered interface.
+
+Install Playwright's browser once, then run the two core user flows in a real
+Chromium browser. The command applies local D1 migrations and starts the site
+automatically:
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+Failure screenshots, traces, videos, and the HTML report are written to ignored
+local test folders and are not committed to GitHub.
 
 ---
 
