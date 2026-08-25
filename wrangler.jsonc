@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "stayworth",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-08-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "stayworth-mvp",
+      "database_id": "1a00af70-d19c-4ec8-99e1-9165a398ca67",
+      "migrations_dir": "drizzle"
+    }
+  ]
+}

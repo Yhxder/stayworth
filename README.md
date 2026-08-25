@@ -43,14 +43,19 @@ The current prototype is organized into focused React components with explicit
 loading, empty, error, and stale-data states. Hotel snapshots already carry a
 source, currency, and update time so the UI is ready for a future API.
 
+The finite data layer now uses Cloudflare D1 with three relational tables:
+`cities`, `hotels`, and `price_snapshots`. A Worker endpoint supports exact
+city and date queries for Hong Kong and Shanghai. It returns an explicit empty
+result when a date has no snapshot instead of substituting another date's rate.
+
 ## 🛠️ Tech Stack
 
 | Layer | Planned tools |
 | --- | --- |
 | Frontend | React, TypeScript, vinext/Vite |
 | Styling | Tailwind CSS |
-| Edge API | Cloudflare Workers |
-| Database | Cloudflare D1 |
+| Edge API | Cloudflare Workers — finite query endpoint active |
+| Database | Cloudflare D1 — schema and APAC database active |
 | Hosting | Cloudflare Pages |
 | Testing | Vitest, Playwright |
 | Delivery | GitHub Actions, Cloudflare |
@@ -65,6 +70,7 @@ source, currency, and update time so the UI is ready for a future API.
 | Design the low-fidelity user flows and interface | ✅ |
 | Build the points rebate calculator | ✅ |
 | Refactor the frontend into focused components | ✅ |
+| Build the finite D1 data layer and Worker API | ✅ |
 | Build hotel search and value ranking | ⏳ |
 | Add side-by-side hotel comparison | ✅ |
 | Research and validate a live-data strategy | ⬜ |
@@ -88,6 +94,19 @@ after the calculation model, data pipeline, and user experience are validated.
 Live availability and pricing require an authorized source. The current plan is
 to validate Marriott's official Affiliate/Partnerize data feeds before adding
 automated pre-tax rates, taxes and fees, total rates, and award availability.
+Current Hong Kong and Shanghai fixture prices are deliberately limited to
+specific dates and are not live rates.
+
+## 🗄️ Finite Data API
+
+```text
+GET /api/hotels?city=Hong%20Kong&checkIn=2026-08-15&checkOut=2026-08-16&tier=Premium
+```
+
+Successful records include currency, source, and update time. A valid query
+without an exact snapshot returns `status: "empty"` and `message: "暂无数据"`.
+The current frontend still uses prototype data; connecting it to this endpoint
+is the next implementation step.
 
 ## 🧪 Local Prototype
 
