@@ -1,9 +1,11 @@
+import type { RefObject } from "react";
 import { formatSnapshotDate } from "../../lib/format";
 import { getSearchStateContent } from "../../lib/hotel-search";
 import type { SearchResultsState } from "../../types/hotel";
 import { HotelCard } from "./HotelCard";
 
 type SearchResultsProps = {
+  focusTargetRef: RefObject<HTMLHeadingElement | null>;
   state: SearchResultsState;
   selectedHotelIds: string[];
   onRetry: () => void;
@@ -11,6 +13,7 @@ type SearchResultsProps = {
 };
 
 export function SearchResults({
+  focusTargetRef,
   state,
   selectedHotelIds,
   onRetry,
@@ -24,7 +27,9 @@ export function SearchResults({
       <section className="search-state is-loading" role="status">
         <span className="state-mark" aria-hidden="true" />
         <div>
-          <h3>{content.title}</h3>
+          <h3 ref={focusTargetRef} tabIndex={-1}>
+            {content.title}
+          </h3>
           <p>{content.message}</p>
         </div>
       </section>
@@ -37,7 +42,9 @@ export function SearchResults({
       <section className="search-state" role="status">
         <span className="state-code">EMPTY</span>
         <div>
-          <h3>{content.title}</h3>
+          <h3 ref={focusTargetRef} tabIndex={-1}>
+            {content.title}
+          </h3>
           <p>
             “{state.query}”没有完全匹配该城市、日期和层级的快照。{content.message}
           </p>
@@ -52,7 +59,9 @@ export function SearchResults({
       <section className="search-state is-error" role="alert">
         <span className="state-code">ERROR</span>
         <div>
-          <h3>{content.title}</h3>
+          <h3 ref={focusTargetRef} tabIndex={-1}>
+            {content.title}
+          </h3>
           <p>{state.message || content.message}</p>
           <button className="text-button" onClick={onRetry} type="button">
             重新查询
@@ -74,7 +83,7 @@ export function SearchResults({
       <div className="results-toolbar">
         <div>
           <p className="step-label">SEARCH RESULTS</p>
-          <h3>
+          <h3 ref={focusTargetRef} tabIndex={-1}>
             {state.query} · {state.hotels.length} 家酒店快照
           </h3>
         </div>

@@ -15,6 +15,7 @@ const tierOptions: TierFilter[] = [
 type SearchFormProps = {
   filters: SearchFilters;
   validationError: string;
+  invalidField: "city" | "checkIn" | "checkOut" | null;
   isLoading: boolean;
   onChange: (filters: SearchFilters) => void;
   onSearch: () => void;
@@ -23,6 +24,7 @@ type SearchFormProps = {
 export function SearchForm({
   filters,
   validationError,
+  invalidField,
   isLoading,
   onChange,
   onSearch,
@@ -37,17 +39,29 @@ export function SearchForm({
       <label>
         <span>城市或目的地</span>
         <input
+          aria-describedby={
+            invalidField === "city"
+              ? "city-search-hint search-validation-error"
+              : "city-search-hint"
+          }
+          aria-invalid={invalidField === "city" || undefined}
           onChange={(event) =>
             onChange({ ...filters, city: event.target.value })
           }
           placeholder="例如：香港 / Hong Kong"
           value={filters.city}
         />
-        <small>当前支持香港 / Hong Kong / HK 与上海 / Shanghai / SHA</small>
+        <small id="city-search-hint">
+          当前支持香港 / Hong Kong / HK 与上海 / Shanghai / SHA
+        </small>
       </label>
       <label>
         <span>入住日期</span>
         <input
+          aria-describedby={
+            invalidField === "checkIn" ? "search-validation-error" : undefined
+          }
+          aria-invalid={invalidField === "checkIn" || undefined}
           onChange={(event) =>
             onChange({ ...filters, checkIn: event.target.value })
           }
@@ -58,6 +72,10 @@ export function SearchForm({
       <label>
         <span>退房日期</span>
         <input
+          aria-describedby={
+            invalidField === "checkOut" ? "search-validation-error" : undefined
+          }
+          aria-invalid={invalidField === "checkOut" || undefined}
           onChange={(event) =>
             onChange({ ...filters, checkOut: event.target.value })
           }
@@ -90,7 +108,11 @@ export function SearchForm({
         {isLoading ? "正在查询…" : "搜索匹配酒店"}
       </button>
       {validationError && (
-        <p className="validation-message" role="alert">
+        <p
+          className="validation-message"
+          id="search-validation-error"
+          role="alert"
+        >
           {validationError}
         </p>
       )}

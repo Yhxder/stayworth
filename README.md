@@ -43,6 +43,10 @@ The current prototype is organized into focused React components with explicit
 loading, empty, error, and stale-data states. The search UI now reads hotel
 snapshots from the Worker API instead of a frontend data array.
 
+The two core journeys are covered by real-browser tests. Mobile and tablet
+layouts, keyboard-only search and hotel selection, visible focus, and
+field-specific accessible error messages are also checked automatically.
+
 The finite data layer now uses Cloudflare D1 with three relational tables:
 `cities`, `hotels`, and `price_snapshots`. A Worker endpoint supports exact
 city and date queries for Hong Kong and Shanghai. It returns an explicit empty
@@ -78,6 +82,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Define the daily Marriott point-value methodology | ⬜ |
 | Add automated tests and data-quality checks | ✅ |
 | Add end-to-end tests for both core user flows | ✅ |
+| Validate mobile, tablet, keyboard, and form accessibility | ✅ |
 | Deploy the summer MVP to Cloudflare | ⬜ |
 
 **Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
@@ -122,9 +127,9 @@ npm run dev
 Open `http://localhost:3000` to use the low-fidelity prototype. Run `npm test`
 to verify the calculation rules and server-rendered interface.
 
-Install Playwright's browser once, then run the two core user flows in a real
-Chromium browser. The command applies local D1 migrations and starts the site
-automatically:
+Install Playwright's browser once, then run the core flows plus responsive,
+keyboard, focus, and form-error checks in a real Chromium browser. The command
+applies local D1 migrations and starts the site automatically:
 
 ```bash
 npx playwright install chromium

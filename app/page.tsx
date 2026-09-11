@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import { ComparisonSection } from "./components/search/ComparisonSection";
 import { SearchForm } from "./components/search/SearchForm";
@@ -40,6 +40,19 @@ export default function Home() {
   } | null>(null);
   const requestSequence = useRef(0);
   const rebatePrefillSequence = useRef(0);
+  const resultsFocusTarget = useRef<HTMLHeadingElement>(null);
+  const shouldFocusResults = useRef(false);
+
+  useEffect(() => {
+    if (
+      shouldFocusResults.current &&
+      resultsState.status !== "idle" &&
+      resultsState.status !== "loading"
+    ) {
+      resultsFocusTarget.current?.focus();
+      shouldFocusResults.current = false;
+    }
+  }, [resultsState]);
 
   const availableHotels = useMemo(
     () =>
@@ -57,12 +70,20 @@ export default function Home() {
     [availableHotels, selectedHotelIds],
   );
 
-  const searchError =
+  const searchValidation =
     filters.city.trim().length === 0
-      ? "请输入城市或目的地。"
-      : filters.checkOut <= filters.checkIn
-        ? "退房日期必须晚于入住日期。"
-        : "";
+      ? { field: "city" as const, message: "请输入城市或目的地。" }
+      : !filters.checkIn
+        ? { field: "checkIn" as const, message: "请选择入住日期。" }
+        : !filters.checkOut
+          ? { field: "checkOut" as const, message: "请选择退房日期。" }
+          : filters.checkOut <= filters.checkIn
+            ? {
+                field: "checkOut" as const,
+                message: "退房日期必须晚于入住日期。",
+              }
+            : null;
+  const searchError = searchValidation?.message ?? "";
 
   async function handleSearch() {
     if (searchError || resultsState.status === "loading") return;
@@ -70,6 +91,7 @@ export default function Home() {
     const submittedFilters = { ...filters };
     const requestId = requestSequence.current + 1;
     requestSequence.current = requestId;
+    shouldFocusResults.current = true;
     setResultsState({
       status: "loading",
       query: submittedFilters.city,
@@ -196,9 +218,11 @@ export default function Home() {
           isLoading={resultsState.status === "loading"}
           onChange={setFilters}
           onSearch={handleSearch}
+          invalidField={searchValidation?.field ?? null}
           validationError={searchError}
         />
         <SearchResults
+          focusTargetRef={resultsFocusTarget}
           onRetry={handleSearch}
           onToggleHotel={toggleHotel}
           selectedHotelIds={selectedHotelIds}

@@ -41,6 +41,15 @@ const memberTiers = {
 
 type MemberTier = keyof typeof memberTiers;
 
+type CalculatorField =
+  | "cashPrice"
+  | "ineligibleSpend"
+  | "nights"
+  | "exchangeRate"
+  | "welcomePoints"
+  | "promotionalPoints"
+  | "pointValuation";
+
 type RebateCalculatorProps = {
   hidden?: boolean;
   prefill?: RebatePrefill | null;
@@ -92,41 +101,95 @@ export function RebateCalculator({
     ? getCurrencyConfig(selectedCard.earningCurrency).unitsPerUsd
     : 1;
 
-  const calculatorError =
+  const calculatorValidation: {
+    field: CalculatorField;
+    message: string;
+  } | null =
     !Number.isFinite(cashPrice) || cashPrice <= 0
-      ? "请输入大于 0 的现金总价。"
+      ? { field: "cashPrice", message: "请输入大于 0 的现金总价。" }
       : cashPrice > CALCULATOR_LIMITS.cashPrice.max
-        ? "现金总价不能超过 100,000,000。"
+        ? {
+            field: "cashPrice",
+            message: "现金总价不能超过 100,000,000。",
+          }
         : !Number.isFinite(ineligibleSpend) || ineligibleSpend < 0
-          ? "请输入不小于 0 的不计分金额。"
+          ? {
+              field: "ineligibleSpend",
+              message: "请输入不小于 0 的不计分金额。",
+            }
           : ineligibleSpend > CALCULATOR_LIMITS.ineligibleSpend.max
-            ? "不计分金额不能超过 100,000,000。"
+            ? {
+                field: "ineligibleSpend",
+                message: "不计分金额不能超过 100,000,000。",
+              }
             : ineligibleSpend > cashPrice
-              ? "不计分金额不能高于现金总价。"
+              ? {
+                  field: "ineligibleSpend",
+                  message: "不计分金额不能高于现金总价。",
+                }
               : !Number.isInteger(nights) || nights <= 0
-                ? "请输入大于 0 的整数晚数。"
+                ? { field: "nights", message: "请输入大于 0 的整数晚数。" }
                 : nights > CALCULATOR_LIMITS.nights.max
-                  ? "入住晚数不能超过 365 晚。"
+                  ? {
+                      field: "nights",
+                      message: "入住晚数不能超过 365 晚。",
+                    }
                   : !Number.isFinite(exchangeRate) || exchangeRate <= 0
-                    ? "请输入大于 0 的汇率。"
+                    ? {
+                        field: "exchangeRate",
+                        message: "请输入大于 0 的汇率。",
+                      }
                     : exchangeRate > CALCULATOR_LIMITS.exchangeRate.max
-                      ? "汇率不能超过 1,000,000。"
+                      ? {
+                          field: "exchangeRate",
+                          message: "汇率不能超过 1,000,000。",
+                        }
                       : !Number.isFinite(welcomePoints) || welcomePoints < 0
-                        ? "请输入不小于 0 的欢迎积分。"
+                        ? {
+                            field: "welcomePoints",
+                            message: "请输入不小于 0 的欢迎积分。",
+                          }
                         : welcomePoints > CALCULATOR_LIMITS.points.max
-                          ? "欢迎积分不能超过 100,000,000。"
+                          ? {
+                              field: "welcomePoints",
+                              message: "欢迎积分不能超过 100,000,000。",
+                            }
                           : !Number.isFinite(promotionalPoints) ||
                               promotionalPoints < 0
-                            ? "请输入不小于 0 的活动积分。"
+                            ? {
+                                field: "promotionalPoints",
+                                message: "请输入不小于 0 的活动积分。",
+                              }
                             : promotionalPoints > CALCULATOR_LIMITS.points.max
-                              ? "活动积分不能超过 100,000,000。"
+                              ? {
+                                  field: "promotionalPoints",
+                                  message: "活动积分不能超过 100,000,000。",
+                                }
                               : !Number.isFinite(pointValuation) ||
                                   pointValuation <= 0
-                                ? "请输入大于 0 的每万分价值。"
+                                ? {
+                                    field: "pointValuation",
+                                    message: "请输入大于 0 的每万分价值。",
+                                  }
                                 : pointValuation >
                                     CALCULATOR_LIMITS.pointValuation.max
-                                  ? "每万分价值不能超过 1,000,000。"
-                                  : "";
+                                  ? {
+                                      field: "pointValuation",
+                                      message: "每万分价值不能超过 1,000,000。",
+                                    }
+                                  : null;
+  const calculatorError = calculatorValidation?.message ?? "";
+
+  function getValidationProps(field: CalculatorField) {
+    const isInvalid = calculatorValidation?.field === field;
+
+    return {
+      "aria-describedby": isInvalid
+        ? "calculator-validation-error"
+        : undefined,
+      "aria-invalid": isInvalid || undefined,
+    };
+  }
 
   const rebateResult = calculatorError
     ? null
@@ -219,6 +282,7 @@ export function RebateCalculator({
               <label>
                 <span>现金总价（{currencyCode}）</span>
                 <input
+                  {...getValidationProps("cashPrice")}
                   max={CALCULATOR_LIMITS.cashPrice.max}
                   min={CALCULATOR_LIMITS.cashPrice.min}
                   onChange={(event) => setCashPriceInput(event.target.value)}
@@ -229,6 +293,7 @@ export function RebateCalculator({
               <label>
                 <span>不计分金额（{currencyCode}）</span>
                 <input
+                  {...getValidationProps("ineligibleSpend")}
                   max={CALCULATOR_LIMITS.ineligibleSpend.max}
                   min={CALCULATOR_LIMITS.ineligibleSpend.min}
                   onChange={(event) =>
@@ -242,6 +307,7 @@ export function RebateCalculator({
               <label>
                 <span>入住晚数</span>
                 <input
+                  {...getValidationProps("nights")}
                   max={CALCULATOR_LIMITS.nights.max}
                   min={CALCULATOR_LIMITS.nights.min}
                   onChange={(event) => setNightsInput(event.target.value)}
@@ -253,6 +319,7 @@ export function RebateCalculator({
               <label>
                 <span>1 美元约等于多少 {currencyCode}</span>
                 <input
+                  {...getValidationProps("exchangeRate")}
                   max={CALCULATOR_LIMITS.exchangeRate.max}
                   min={CALCULATOR_LIMITS.exchangeRate.min}
                   onChange={(event) =>
@@ -362,6 +429,7 @@ export function RebateCalculator({
               <label>
                 <span>欢迎积分</span>
                 <input
+                  {...getValidationProps("welcomePoints")}
                   max={CALCULATOR_LIMITS.points.max}
                   min={CALCULATOR_LIMITS.points.min}
                   onChange={(event) =>
@@ -374,6 +442,7 @@ export function RebateCalculator({
               <label>
                 <span>额外活动积分</span>
                 <input
+                  {...getValidationProps("promotionalPoints")}
                   max={CALCULATOR_LIMITS.points.max}
                   min={CALCULATOR_LIMITS.points.min}
                   onChange={(event) =>
@@ -386,6 +455,7 @@ export function RebateCalculator({
               <label>
                 <span>每万分价值（{currencyCode}）</span>
                 <input
+                  {...getValidationProps("pointValuation")}
                   max={CALCULATOR_LIMITS.pointValuation.max}
                   min={CALCULATOR_LIMITS.pointValuation.min}
                   onChange={(event) =>
@@ -448,7 +518,11 @@ export function RebateCalculator({
             {rebateResult?.isNetReturn ? "预计净回报" : "预计有效入住成本"}
           </h3>
           {calculatorError || !rebateResult ? (
-            <div className="calculator-error" role="alert">
+            <div
+              className="calculator-error"
+              id="calculator-validation-error"
+              role="alert"
+            >
               <strong>暂时无法计算</strong>
               <p>{calculatorError || "请输入有效的计算数据。"}</p>
             </div>
