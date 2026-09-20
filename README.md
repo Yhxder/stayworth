@@ -46,6 +46,8 @@ snapshots from the Worker API instead of a frontend data array.
 The two core journeys are covered by real-browser tests. Mobile and tablet
 layouts, keyboard-only search and hotel selection, visible focus, and
 field-specific accessible error messages are also checked automatically.
+Empty results, recoverable API failures, and stale-price warnings are covered
+as explicit browser flows rather than inferred from static page content.
 
 The finite data layer now uses Cloudflare D1 with three relational tables:
 `cities`, `hotels`, and `price_snapshots`. A Worker endpoint supports exact
@@ -83,6 +85,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Add automated tests and data-quality checks | ✅ |
 | Add end-to-end tests for both core user flows | ✅ |
 | Validate mobile, tablet, keyboard, and form accessibility | ✅ |
+| Validate empty, API-error, and stale-data recovery flows | ✅ |
 | Deploy the summer MVP to Cloudflare | ⬜ |
 
 **Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
@@ -128,8 +131,9 @@ Open `http://localhost:3000` to use the low-fidelity prototype. Run `npm test`
 to verify the calculation rules and server-rendered interface.
 
 Install Playwright's browser once, then run the core flows plus responsive,
-keyboard, focus, and form-error checks in a real Chromium browser. The command
-applies local D1 migrations and starts the site automatically:
+keyboard, focus, form-error, empty-result, API-failure, and stale-data checks
+in a real Chromium browser. The command applies local D1 migrations and starts
+the site automatically:
 
 ```bash
 npx playwright install chromium
