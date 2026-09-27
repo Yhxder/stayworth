@@ -62,7 +62,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Styling | Tailwind CSS |
 | Edge API | Cloudflare Workers — finite query endpoint active |
 | Database | Cloudflare D1 — schema and APAC database active |
-| Hosting | Cloudflare Pages |
+| Hosting | Cloudflare Workers — `workers.dev` preview active |
 | Testing | Node.js test runner, Playwright |
 | Delivery | GitHub Actions — lint, logic tests, and browser tests on every push |
 | Development | VS Code, Git |
@@ -186,6 +186,40 @@ npm run test:e2e
 
 Failure screenshots, traces, videos, and the HTML report are written to ignored
 local test folders and are not committed to GitHub.
+
+## ☁️ Cloudflare Deployment
+
+The prototype deploys to Cloudflare Workers with the existing `stayworth-mvp`
+D1 database. The Worker serves the vinext App Router build together with the
+static assets, and reads hotel snapshots from D1:
+
+```bash
+npx wrangler login          # once per machine
+npm run cf:deploy           # build, then deploy with wrangler.deploy.jsonc
+```
+
+Useful companions:
+
+```bash
+npm run cf:deploy:dry-run   # package and validate without deploying
+npm run cf:migrate:remote   # apply D1 migrations to the remote database
+npm run cf:rows             # count cities, hotels, and price snapshots remotely
+```
+
+`wrangler.deploy.jsonc` points `main` at the built Worker
+(`dist/server/index.js`), serves `dist/client` as Workers static assets, and
+binds `DB` to the production D1 database. It is separate from
+`wrangler.local.jsonc` (local development) and `wrangler.jsonc` (remote D1
+migrations), so the local and Sites flows keep working unchanged.
+
+The deploy job in `.github/workflows/ci.yml` runs only on `main` and stays
+dormant until the repository has a `CLOUDFLARE_API_TOKEN` secret with the
+**Workers Scripts: Edit** and **D1: Edit** permissions. Without that secret the
+job logs a notice and skips, while lint, logic tests, and browser tests still
+run on every push and pull request.
+
+The current preview address is public unless Cloudflare Access is configured in
+front of the Worker.
 
 ---
 

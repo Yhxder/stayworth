@@ -48,3 +48,42 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+  deploy:
+    name: Deploy to Cloudflare Workers
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: b4ef3cf92b57730865a951249eb03c36
+    steps:
+      # Stays dormant until the repository adds a CLOUDFLARE_API_TOKEN secret
+      # with the Workers Scripts: Edit and D1: Edit permissions.
+      - name: Check for the Cloudflare token
+        id: token
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::CLOUDFLARE_API_TOKEN is not set, skipping the deploy job."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.token.outputs.available == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.token.outputs.available == 'true'
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.token.outputs.available == 'true'
+        run: npm ci
+
+      - name: Build and deploy
+        if: steps.token.outputs.available == 'true'
+        run: npm run cf:deploy

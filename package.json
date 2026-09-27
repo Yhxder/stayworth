@@ -17,7 +17,11 @@
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
     "db:migrate:local": "WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler d1 migrations apply stayworth-mvp --local --config wrangler.local.jsonc",
-    "db:migrate:remote": "WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler d1 migrations apply stayworth-mvp --remote --config wrangler.jsonc"
+    "db:migrate:remote": "WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler d1 migrations apply stayworth-mvp --remote --config wrangler.jsonc",
+    "cf:deploy": "npm run build && WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler deploy --config wrangler.deploy.jsonc",
+    "cf:deploy:dry-run": "WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler deploy --config wrangler.deploy.jsonc --dry-run",
+    "cf:migrate:remote": "WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler d1 migrations apply stayworth-mvp --remote --config wrangler.deploy.jsonc",
+    "cf:rows": "WRANGLER_LOG_PATH=.wrangler/wrangler.log wrangler d1 execute stayworth-mvp --remote --config wrangler.deploy.jsonc --command \"SELECT (SELECT COUNT(*) FROM cities) AS cities, (SELECT COUNT(*) FROM hotels) AS hotels, (SELECT COUNT(*) FROM price_snapshots) AS snapshots\""
   },
   "dependencies": {
     "next": "16.3.3",

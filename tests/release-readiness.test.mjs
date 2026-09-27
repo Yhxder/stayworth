@@ -52,6 +52,9 @@ test("runs lint, unit tests, and browser tests in GitHub Actions", () => {
   assert.match(workflow, /npm test/);
   assert.match(workflow, /npm run test:e2e/);
   assert.match(workflow, /actions\/upload-artifact@v4/);
+  assert.match(workflow, /npm run cf:deploy/);
+  assert.match(workflow, /secrets\.CLOUDFLARE_API_TOKEN/);
+  assert.match(workflow, /needs: verify/);
 });
 
 test("describes the shipped scope without overstating the roadmap", () => {
