@@ -33,10 +33,15 @@ export const unitsPerEur: Record<string, number> = {
   INR: 109.2605,
   AUD: 1.622,
   CAD: 1.6127,
+  BRL: 5.9091,
 };
 
-/** 面板中存在、但当前汇率来源未覆盖的币种。 */
-export const currenciesWithoutRate = ["TWD", "VND", "AED"] as const;
+/**
+ * 当前汇率来源未覆盖的币种。
+ * 面板 v3 仍在用的是 TWD（台北）与 AED（迪拜）；这两个市场只提供当地货币口径，
+ * 不参与统一货币视图。VND 同样不在 ECB 清单里，但面板已不再采越南城市，仅作记录。
+ */
+export const currenciesWithoutRate = ["TWD", "AED", "VND"] as const;
 
 export function hasRate(currencyCode: string): boolean {
   return Object.prototype.hasOwnProperty.call(unitsPerEur, currencyCode);

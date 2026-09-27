@@ -4,6 +4,10 @@
  * 这是样本框的唯一事实来源：文档与实现的描述都必须与本文件一致。
  * 规格见 docs/DATA_SAMPLING_SPEC.md 第三节。
  *
+ * v3（2026-09-28 生效）：在 v2 基础上补两个市场——东亚加上海（国内品牌覆盖最全的市场），
+ * 南美加里约热内卢（补上此前完全缺失的南美）。BRL 已在汇率来源覆盖范围内。
+ * 本次只加城市、不再删减；单日请求量预计从约 25 次升到约 30 次，仍在 100 次预算内。
+ *
  * v2 的取舍（2026-09-27）：
  * Index 只需要给用户一个「当前参考值」，不需要穷举城市。因此每个国家/地区只保留
  * 一个有代表性的城市，并且优先选**品牌覆盖够全**且**抓取成本适中**的：
@@ -19,8 +23,8 @@
  *    两者含义不同，不要互相赋值。
  */
 
-export const CITY_PANEL_VERSION = "v2";
-export const CITY_PANEL_EFFECTIVE_DATE = "2026-09-27";
+export const CITY_PANEL_VERSION = "v3";
+export const CITY_PANEL_EFFECTIVE_DATE = "2026-09-28";
 
 export type PanelCity = {
   /** StayWorth 内部标识 */
@@ -44,6 +48,7 @@ export const cityPanel: PanelCity[] = [
   { slug: "tokyo", nameZh: "东京", nameEn: "Tokyo", countryCode: "JP", countryNameZh: "日本", region: "Asia", area: "东亚", currencyCode: "JPY", timezone: "Asia/Tokyo" },
   { slug: "seoul", nameZh: "首尔", nameEn: "Seoul", countryCode: "KR", countryNameZh: "韩国", region: "Asia", area: "东亚", currencyCode: "KRW", timezone: "Asia/Seoul" },
   { slug: "beijing", nameZh: "北京", nameEn: "Beijing", countryCode: "CN", countryNameZh: "中国", region: "Asia", area: "东亚", currencyCode: "CNY", timezone: "Asia/Shanghai" },
+  { slug: "shanghai", nameZh: "上海", nameEn: "Shanghai", countryCode: "CN", countryNameZh: "中国", region: "Asia", area: "东亚", currencyCode: "CNY", timezone: "Asia/Shanghai" },
   { slug: "hong-kong", nameZh: "香港", nameEn: "Hong Kong", countryCode: "HK", countryNameZh: "中国香港", region: "Asia", area: "东亚", currencyCode: "HKD", timezone: "Asia/Hong_Kong" },
   { slug: "taipei", nameZh: "台北", nameEn: "Taipei", countryCode: "TW", countryNameZh: "中国台湾", region: "Asia", area: "东亚", currencyCode: "TWD", timezone: "Asia/Taipei" },
 
@@ -68,6 +73,7 @@ export const cityPanel: PanelCity[] = [
   { slug: "minneapolis", nameZh: "明尼阿波利斯", nameEn: "Minneapolis", countryCode: "US", countryNameZh: "美国", region: "Americas", area: "美国中部", currencyCode: "USD", timezone: "America/Chicago" },
   { slug: "seattle", nameZh: "西雅图", nameEn: "Seattle", countryCode: "US", countryNameZh: "美国", region: "Americas", area: "美国西部", currencyCode: "USD", timezone: "America/Los_Angeles" },
   { slug: "toronto", nameZh: "多伦多", nameEn: "Toronto", countryCode: "CA", countryNameZh: "加拿大", region: "Americas", area: "加拿大", currencyCode: "CAD", timezone: "America/Toronto" },
+  { slug: "rio-de-janeiro", nameZh: "里约热内卢", nameEn: "Rio de Janeiro", countryCode: "BR", countryNameZh: "巴西", region: "Americas", area: "南美", currencyCode: "BRL", timezone: "America/Sao_Paulo" },
 ];
 
 export const cityBySlug = (slug: string): PanelCity | null =>
@@ -75,8 +81,8 @@ export const cityBySlug = (slug: string): PanelCity | null =>
 
 /**
  * 统一货币换算的注意事项：
- * 面板涉及 JPY、KRW、CNY、HKD、TWD、SGD、THB、INR、AUD、GBP、EUR、AED、USD、CAD
- * 共 14 种当地币种。现有汇率来源（欧洲央行）覆盖其中 11 种，
+ * 面板涉及 JPY、KRW、CNY、HKD、TWD、SGD、THB、INR、AUD、GBP、EUR、AED、USD、CAD、BRL
+ * 共 15 种当地币种。现有汇率来源（欧洲央行）覆盖其中 12 种，
  * **TWD、AED 以及其它未覆盖币种不会参与统一货币视图**——这是刻意选择，不猜汇率。
  * 详见 app/data/index-fx.ts 与规格第八节。
  */
