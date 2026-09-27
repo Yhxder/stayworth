@@ -5,6 +5,7 @@ import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import { ComparisonSection } from "./components/search/ComparisonSection";
 import { SearchForm } from "./components/search/SearchForm";
 import { SearchResults } from "./components/search/SearchResults";
+import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
 import { getResultsState } from "./lib/hotel-search";
 import { createRebatePrefill } from "./lib/rebate-prefill";
@@ -242,6 +243,8 @@ export default function Home() {
         key={rebatePrefill?.revision ?? "manual"}
         prefill={rebatePrefill}
       />
+
+      <TrustAndSources />
 
       <footer>
         <p>

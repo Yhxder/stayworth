@@ -1064,6 +1064,65 @@ dd {
   padding: 8px 12px;
 }
 
+.trust-section {
+  border-top: 2px solid var(--ink);
+  margin-top: 42px;
+  padding-top: 26px;
+}
+
+.trust-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.trust-grid article {
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.trust-grid h3 {
+  font-size: 15px;
+  margin: 0 0 12px;
+}
+
+.trust-grid ul {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.trust-grid li + li {
+  margin-top: 6px;
+}
+
+.trust-grid p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 0 0 10px;
+}
+
+.trust-grid p:last-child {
+  margin-bottom: 0;
+}
+
+.trust-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.trust-links a {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 footer {
   border-top: 2px solid var(--ink);
   color: var(--muted);

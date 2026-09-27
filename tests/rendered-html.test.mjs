@@ -73,3 +73,18 @@ test("prototype includes accessible controls for the two main workflows", async 
   assert.match(html, /aria-label="搜索匹配酒店"/);
   assert.match(html, /aria-label="搜索匹配酒店"/);
 });
+
+test("server-renders the data-source, privacy, and independence notices", async () => {
+  const response = await render();
+  const html = await response.text();
+
+  assert.match(html, /数据来源、隐私与独立声明/);
+  assert.match(html, /数据来源与时效/);
+  assert.match(html, /不是实时库存/);
+  assert.match(html, /隐私/);
+  assert.match(html, /不会上传或保存到服务器/);
+  assert.match(html, /独立项目声明/);
+  assert.match(html, /没有隶属、赞助或背书关系/);
+  assert.match(html, /不构成预订、兑换、税务或财务建议/);
+  assert.match(html, /ecb\.europa\.eu/);
+});

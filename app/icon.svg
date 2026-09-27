@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="StayWorth">
+  <rect width="64" height="64" fill="#151515" />
+  <text
+    x="32"
+    y="41"
+    fill="#ffffff"
+    font-family="Inter, ui-sans-serif, -apple-system, 'Segoe UI', 'PingFang SC', sans-serif"
+    font-size="24"
+    font-weight="800"
+    letter-spacing="1"
+    text-anchor="middle"
+  >SW</text>
+</svg>

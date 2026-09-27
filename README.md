@@ -58,13 +58,13 @@ result when a date has no snapshot instead of substituting another date's rate.
 
 | Layer | Planned tools |
 | --- | --- |
-| Frontend | React, TypeScript, vinext/Vite |
+| Frontend | Next.js App Router, React, TypeScript, vinext/Vite |
 | Styling | Tailwind CSS |
 | Edge API | Cloudflare Workers — finite query endpoint active |
 | Database | Cloudflare D1 — schema and APAC database active |
 | Hosting | Cloudflare Pages |
 | Testing | Node.js test runner, Playwright |
-| Delivery | GitHub Actions, Cloudflare |
+| Delivery | GitHub Actions — lint, logic tests, and browser tests on every push |
 | Development | VS Code, Git |
 
 ## 📊 Project Board
@@ -78,17 +78,22 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Refactor the frontend into focused components | ✅ |
 | Build the finite D1 data layer and Worker API | ✅ |
 | Connect the hotel UI to the Worker API | ✅ |
-| Build hotel search and value ranking | ⏳ |
+| Build hotel search against the D1 snapshot API | ✅ |
 | Add side-by-side hotel comparison | ✅ |
+| Rank hotels by redemption value | ⬜ |
 | Research and validate a live-data strategy | ⬜ |
 | Define the daily Marriott point-value methodology | ⬜ |
 | Add automated tests and data-quality checks | ✅ |
 | Add end-to-end tests for both core user flows | ✅ |
 | Validate mobile, tablet, keyboard, and form accessibility | ✅ |
 | Validate empty, API-error, and stale-data recovery flows | ✅ |
-| Deploy the summer MVP to Cloudflare | ⬜ |
+| Publish the MVP on a public domain | ⬜ |
 
 **Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
+
+Search results are currently ordered by cash price. Ranking hotels by
+redemption value is not implemented yet, so the interface never claims to
+recommend a "best" hotel.
 
 ## 🎯 Product Principles
 
@@ -120,6 +125,36 @@ states. Selected paid-stay snapshots can prefill currency, total cash rate,
 stay length, and brand in the points rebate calculator. Taxes and ineligible
 spend are not inferred because the finite snapshots do not contain that split.
 
+## 🔐 Data Sources, Privacy, and Independence
+
+The prototype states its limits in the **数据来源、隐私与独立声明** section
+rendered below the two modules:
+
+- **Data sources and freshness.** Hong Kong and Shanghai prices are manually
+  maintained snapshots, not live inventory. Every hotel card shows its source
+  label and update date, and an uncovered city or date returns
+  `status: "empty"` instead of substituting another date's rate. The interface
+  also lists the reference dates for the Marriott brand earning rules, the
+  credit-card rules, and the ECB reference exchange rates, each linked to its
+  official source.
+- **Privacy.** There is no sign-up, and no Marriott account, card, or booking
+  details are collected. The prototype loads no analytics, advertising, or
+  cross-site tracking scripts. Cash price, points, exchange-rate, and
+  membership inputs are calculated in the browser and are not uploaded or
+  stored on the server. If analytics are added later, that notice is updated
+  first.
+- **Independence.** StayWorth is an independent personal project and is not
+  affiliated with, endorsed by, or sponsored by Marriott International.
+  Marriott and Marriott Bonvoy names and marks belong to their respective
+  owners. The tool produces estimates only and is not booking, redemption,
+  tax, or financial advice.
+
+Production dependencies currently report no known advisories. The remaining
+advisory reports come from the local build and test toolchain (`vite`,
+`esbuild`, `wrangler`, and their transitive packages), which would need
+breaking major upgrades; they are tracked as separate follow-up work instead
+of being forced through `npm audit fix --force`.
+
 ## 🧪 Local Prototype
 
 ```bash
@@ -129,6 +164,11 @@ npm run dev
 
 Open `http://localhost:3000` to use the low-fidelity prototype. Run `npm test`
 to verify the calculation rules and server-rendered interface.
+
+Every push to `main` and every pull request runs the same checks in GitHub
+Actions (`.github/workflows/ci.yml`): lint, `npm test`, and `npm run test:e2e`.
+Failure screenshots, traces, and the HTML report are uploaded as a workflow
+artifact when the browser tests fail.
 
 Install Playwright's browser once, then run the core flows plus responsive,
 keyboard, focus, form-error, empty-result, API-failure, and stale-data checks
