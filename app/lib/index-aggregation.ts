@@ -14,6 +14,18 @@ import { median, quantile, type IndexSample } from "./index-sampling.ts";
 /** 城市有效样本下限（规格 6.3）。 */
 export const MIN_CITY_SAMPLES = 8;
 
+/**
+ * 档位单元格下限：某个城市在某个档位上的样本数。
+ *
+ * 比城市下限低得多，原因见规格附录 E：面板收敛到「每个国家一个代表城市」后，
+ * 单个城市的高端酒店本来就少（华盛顿 2 家、西雅图 2 家、明尼阿波利斯 3 家）。
+ * 如果继续套用 8 家，整个 Luxury 档会被剔空、页面直接无数字。
+ *
+ * 这不放弃城市级下限：城市仍须先用全部品牌合计达到 MIN_CITY_SAMPLES 家，
+ * 才有资格进入任何分组；这里只放宽「城市 × 档位」这一格。
+ */
+export const MIN_TIER_CELL_SAMPLES = 2;
+
 export const PORTFOLIO_TIER_ORDER: PortfolioTier[] = [
   "Luxury",
   "Premium",
@@ -80,6 +92,7 @@ export function cityMedians(
   target: string | null,
   convert: ConvertCurrency,
   groupKey: (sample: IndexSample) => string,
+  minSamples: number = MIN_CITY_SAMPLES,
 ): { buckets: CityBucket[]; skippedCities: number; exclusions: Map<string, number> } {
   const byCity = new Map<string, IndexSample[]>();
   for (const sample of samples) {
@@ -115,7 +128,7 @@ export function cityMedians(
       values.push(converted);
     }
 
-    if (values.length < MIN_CITY_SAMPLES) {
+    if (values.length < minSamples) {
       skippedCities += 1;
       continue;
     }
@@ -140,6 +153,20 @@ function exclusionsToRows(exclusions: Map<string, number>): IndexViewExclusion[]
   return [...exclusions.entries()]
     .map(([currencyCode, sampleCount]) => ({ currencyCode, sampleCount }))
     .sort((a, b) => b.sampleCount - a.sampleCount);
+}
+
+/**
+ * 先用全部品牌合计筛出合格城市（≥ MIN_CITY_SAMPLES 家），
+ * 再让这些城市进入各个分组。这样「城市」始终是第一层抽样单位，
+ * 分组内再按城市取中位数，不会因为某档酒店少就整档消失。
+ */
+function qualifyingCityKeys(
+  samples: IndexSample[],
+  target: string,
+  convert: ConvertCurrency,
+): Set<string> {
+  const { buckets } = cityMedians(samples, target, convert, (sample) => sample.citySlug);
+  return new Set(buckets.map((bucket) => bucket.citySlug));
 }
 
 /** 视图一：全球参考值（不区分档位与国家），统一货币口径。 */
@@ -188,7 +215,12 @@ export function tierView(
   const rows: IndexViewRow[] = [];
   const exclusions = new Map<string, number>();
   let sampleCount = 0;
-  let cityCount = 0;
+  // 同一城市可能同时出现在多个档位里，城市数必须去重后再报，否则会被重复计数。
+  const contributingCities = new Set<string>();
+
+  // 第一层：城市是否合格，只看该城市全部品牌的合计样本量。
+  const cityKeys = qualifyingCityKeys(samples, targetCurrency, convert);
+  const eligible = samples.filter((sample) => cityKeys.has(sample.citySlug));
 
   const groups: Array<{ key: string; label: string; tier: PortfolioTier | null }> = [
     ...PORTFOLIO_TIER_ORDER.map((tier) => ({ key: tier, label: tier, tier })),
@@ -196,7 +228,7 @@ export function tierView(
   ];
 
   for (const group of groups) {
-    const groupSamples = samples.filter((sample) =>
+    const groupSamples = eligible.filter((sample) =>
       group.tier === null
         ? sample.portfolioTier === null
         : sample.portfolioTier === group.tier,
@@ -206,6 +238,7 @@ export function tierView(
       targetCurrency,
       convert,
       (sample) => sample.citySlug,
+      MIN_TIER_CELL_SAMPLES,
     );
     for (const [currencyCode, count] of groupExclusions) {
       exclusions.set(currencyCode, (exclusions.get(currencyCode) ?? 0) + count);
@@ -216,7 +249,7 @@ export function tierView(
       0,
     );
     sampleCount += groupSampleCount;
-    cityCount += buckets.length;
+    for (const bucket of buckets) contributingCities.add(bucket.citySlug);
     rows.push({
       key: group.key,
       label: group.label,
@@ -234,7 +267,7 @@ export function tierView(
     currencyCode: targetCurrency,
     rows,
     sampleCount,
-    cityCount,
+    cityCount: contributingCities.size,
     exclusions: exclusionsToRows(exclusions),
   };
 }
@@ -258,9 +291,22 @@ export function countryView(
 
   const rows: IndexViewRow[] = [];
   for (const [code, entry] of byCountry) {
-    const currency = entry.samples[0]?.currencyCode ?? "";
+    // 防卫：同一国家在面板里只有一种当地货币。若仍有别的币种混入（例如半径搜索带进来的邻国酒店），
+    // 按多数派取币种、其余剔除，绝不做跨币种混合的中位数。
+    const currencyCounts = new Map<string, number>();
+    for (const sample of entry.samples) {
+      currencyCounts.set(
+        sample.currencyCode,
+        (currencyCounts.get(sample.currencyCode) ?? 0) + 1,
+      );
+    }
+    const currency =
+      [...currencyCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+    const currencySamples = entry.samples.filter(
+      (sample) => sample.currencyCode === currency,
+    );
     const { buckets } = cityMedians(
-      entry.samples,
+      currencySamples,
       null,
       () => null,
       (sample) => sample.citySlug,

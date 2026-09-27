@@ -162,3 +162,39 @@ test("admits which currencies cannot be converted yet", () => {
   assert.equal(convertCurrency(100, "TWD", "CNY"), null);
   assert.equal(convertCurrency(100, "CNY", "CNY"), 100);
 });
+
+test("lets a thin tier contribute once its city qualifies overall", () => {
+  // 面板收敛成「一个国家一个代表城市」后，单城高端酒店本来就少。
+  // 城市只要合计达到下限，它在某个档位上的少量样本仍应参与，否则整个 Luxury 会消失。
+  const samples = [
+    ...repeat(8, (i) => sample({ city: "washington", value: 400, tier: "Select", hotelCode: `dc-sel-${i}` })),
+    ...repeat(2, (i) => sample({ city: "washington", value: 900, tier: "Luxury", brandCode: "RZ", brandSlug: "ritz-carlton", hotelCode: `dc-lux-${i}` })),
+    // 这个城市合计只有 3 家，达不到城市下限，任何档位都不该出现。
+    ...repeat(3, (i) => sample({ city: "thin-city", value: 5000, tier: "Luxury", brandCode: "RZ", brandSlug: "ritz-carlton", hotelCode: `thin-${i}` })),
+  ];
+
+  const view = tierView(samples, "CNY", noConversion);
+  const luxury = view.rows.find((row) => row.key === "Luxury");
+  const select = view.rows.find((row) => row.key === "Select");
+
+  assert.equal(luxury.value, 900);
+  assert.equal(luxury.cityCount, 1);
+  assert.equal(luxury.sampleCount, 2);
+  assert.equal(select.value, 400);
+  // 不合格城市不得出现在任何档位里
+  assert.equal(view.sampleCount, 10);
+  assert.equal(view.cityCount, 1);
+});
+
+test("never mixes currencies inside one country row", () => {
+  const samples = [
+    ...repeat(9, (i) => sample({ city: "toronto", value: 90, currency: "CAD", hotelCode: `tor-cad-${i}` })),
+    ...repeat(3, (i) => sample({ city: "toronto", value: 60, currency: "USD", hotelCode: `tor-usd-${i}` })),
+  ];
+
+  const view = countryView(samples, () => ({ code: "CA", label: "加拿大" }));
+  const canada = view.rows.find((row) => row.key === "CA");
+  assert.equal(canada.currencyCode, "CAD");
+  assert.equal(canada.value, 90);
+  assert.equal(canada.sampleCount, 9);
+});

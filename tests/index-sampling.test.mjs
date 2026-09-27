@@ -234,6 +234,7 @@ test("drops records missing points, missing cash, or an unmapped brand", () => {
       capturedAt: "2026-09-27T06:30:00.000Z",
       brandSlug: "jw-marriott",
       portfolioTier: "Luxury",
+      expectedCurrency: "CNY",
     },
     {
       hotel: { ...parseSearchResponse(payloadFor([shanghaiJw]))[0], hotelCode: "NO_POINTS", pointsPerNight: null },
@@ -243,6 +244,7 @@ test("drops records missing points, missing cash, or an unmapped brand", () => {
       capturedAt: "2026-09-27T06:30:00.000Z",
       brandSlug: "jw-marriott",
       portfolioTier: "Luxury",
+      expectedCurrency: "CNY",
     },
     {
       hotel: { ...parseSearchResponse(payloadFor([shanghaiJw]))[0], hotelCode: "NO_CASH", cash: null },
@@ -252,6 +254,7 @@ test("drops records missing points, missing cash, or an unmapped brand", () => {
       capturedAt: "2026-09-27T06:30:00.000Z",
       brandSlug: "jw-marriott",
       portfolioTier: "Luxury",
+      expectedCurrency: "CNY",
     },
     {
       hotel: { ...parseSearchResponse(payloadFor([shanghaiJw]))[0], hotelCode: "NEW_BRAND" },
@@ -261,6 +264,7 @@ test("drops records missing points, missing cash, or an unmapped brand", () => {
       capturedAt: "2026-09-27T06:30:00.000Z",
       brandSlug: null,
       portfolioTier: null,
+      expectedCurrency: "CNY",
     },
   ];
 
@@ -287,6 +291,7 @@ function makeInput(hotel, overrides = {}) {
     capturedAt: "2026-09-27T06:30:00.000Z",
     brandSlug: "jw-marriott",
     portfolioTier: "Luxury",
+    expectedCurrency: "CNY",
     ...overrides,
   };
 }
@@ -364,6 +369,7 @@ test("drops a sample that sits more than five times away from the city median", 
     capturedAt: "2026-09-27T06:30:00.000Z",
     brandSlug: "jw-marriott",
     portfolioTier: "Luxury",
+    expectedCurrency: "CNY",
   }));
 
   const { kept, dropped } = cleanCitySamples(inputs);
@@ -422,4 +428,17 @@ test("summarises a sample set with quartiles", () => {
   assert.equal(stats.max, 402.09);
   // (402.09 + 300) / 2 = 351.045，用容差比较避免二进制浮点误差
   assert.ok(Math.abs(stats.median - 351.045) < 0.001);
+});
+test("drops a hotel priced in a different currency than the city's local one", () => {
+  // 实测：多伦多的搜索结果里混进了 2 家美元报价的美国酒店（半径搜索的副作用）。
+  const base = parseSearchResponse(payloadFor([shanghaiJw]))[0];
+  const foreign = { ...base, hotelCode: "US_IN_TORONTO", currencyCode: "USD" };
+  const { kept, dropped } = cleanCitySamples([
+    makeInput(foreign, { expectedCurrency: "CAD" }),
+  ]);
+  assert.equal(kept.length, 0);
+  assert.deepEqual(
+    dropped.map((entry) => `${entry.hotelCode}:${entry.reason}`),
+    ["US_IN_TORONTO:currency_mismatch"],
+  );
 });

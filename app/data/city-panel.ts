@@ -4,6 +4,13 @@
  * 这是样本框的唯一事实来源：文档与实现的描述都必须与本文件一致。
  * 规格见 docs/DATA_SAMPLING_SPEC.md 第三节。
  *
+ * v2 的取舍（2026-09-27）：
+ * Index 只需要给用户一个「当前参考值」，不需要穷举城市。因此每个国家/地区只保留
+ * 一个有代表性的城市，并且优先选**品牌覆盖够全**且**抓取成本适中**的：
+ * - 可用样本少于 8 家会被城市样本下限整城剔除（悉尼 6 家、马尼拉 6 家、河内 3 家都被淘汰）；
+ * - 返回超过 80 家需要翻 3 页，上游超时风险明显更高（洛杉矶、芝加哥实测出现过 HTTP 500）。
+ * 每个城市的实测数据见规格附录 E。
+ *
  * 规则：
  * 1. 面板一旦生效即冻结，不随临时判断增删城市。
  * 2. 增删城市必须提高面板版本并注明生效日期（见 CITY_PANEL_VERSION）。
@@ -12,10 +19,8 @@
  *    两者含义不同，不要互相赋值。
  */
 
-export const CITY_PANEL_VERSION = "v1";
+export const CITY_PANEL_VERSION = "v2";
 export const CITY_PANEL_EFFECTIVE_DATE = "2026-09-27";
-
-export type CityRank = "primary" | "secondary";
 
 export type PanelCity = {
   /** StayWorth 内部标识 */
@@ -26,7 +31,8 @@ export type PanelCity = {
   countryCode: string;
   countryNameZh: string;
   region: "Asia" | "Europe" | "Americas" | "Middle East" | "Oceania";
-  rank: CityRank;
+  /** 更细的分区，用于说明为什么选它 */
+  area: string;
   /** 数据源返回的当地计价币种 */
   currencyCode: string;
   /** 用于确定「T+30」当地日期 */
@@ -34,59 +40,45 @@ export type PanelCity = {
 };
 
 export const cityPanel: PanelCity[] = [
-  // ── 一级城市（12）──────────────────────────────────────────
-  { slug: "tokyo", nameZh: "东京", nameEn: "Tokyo", countryCode: "JP", countryNameZh: "日本", region: "Asia", rank: "primary", currencyCode: "JPY", timezone: "Asia/Tokyo" },
-  { slug: "osaka", nameZh: "大阪", nameEn: "Osaka", countryCode: "JP", countryNameZh: "日本", region: "Asia", rank: "primary", currencyCode: "JPY", timezone: "Asia/Tokyo" },
-  { slug: "seoul", nameZh: "首尔", nameEn: "Seoul", countryCode: "KR", countryNameZh: "韩国", region: "Asia", rank: "primary", currencyCode: "KRW", timezone: "Asia/Seoul" },
-  { slug: "singapore", nameZh: "新加坡", nameEn: "Singapore", countryCode: "SG", countryNameZh: "新加坡", region: "Asia", rank: "primary", currencyCode: "SGD", timezone: "Asia/Singapore" },
-  { slug: "bangkok", nameZh: "曼谷", nameEn: "Bangkok", countryCode: "TH", countryNameZh: "泰国", region: "Asia", rank: "primary", currencyCode: "THB", timezone: "Asia/Bangkok" },
-  { slug: "hong-kong", nameZh: "香港", nameEn: "Hong Kong", countryCode: "HK", countryNameZh: "中国香港", region: "Asia", rank: "primary", currencyCode: "HKD", timezone: "Asia/Hong_Kong" },
-  { slug: "shanghai", nameZh: "上海", nameEn: "Shanghai", countryCode: "CN", countryNameZh: "中国", region: "Asia", rank: "primary", currencyCode: "CNY", timezone: "Asia/Shanghai" },
-  { slug: "beijing", nameZh: "北京", nameEn: "Beijing", countryCode: "CN", countryNameZh: "中国", region: "Asia", rank: "primary", currencyCode: "CNY", timezone: "Asia/Shanghai" },
-  { slug: "london", nameZh: "伦敦", nameEn: "London", countryCode: "GB", countryNameZh: "英国", region: "Europe", rank: "primary", currencyCode: "GBP", timezone: "Europe/London" },
-  { slug: "paris", nameZh: "巴黎", nameEn: "Paris", countryCode: "FR", countryNameZh: "法国", region: "Europe", rank: "primary", currencyCode: "EUR", timezone: "Europe/Paris" },
-  { slug: "new-york", nameZh: "纽约", nameEn: "New York", countryCode: "US", countryNameZh: "美国", region: "Americas", rank: "primary", currencyCode: "USD", timezone: "America/New_York" },
-  { slug: "los-angeles", nameZh: "洛杉矶", nameEn: "Los Angeles", countryCode: "US", countryNameZh: "美国", region: "Americas", rank: "primary", currencyCode: "USD", timezone: "America/Los_Angeles" },
+  // ── 东亚 ────────────────────────────────────────────────────
+  { slug: "tokyo", nameZh: "东京", nameEn: "Tokyo", countryCode: "JP", countryNameZh: "日本", region: "Asia", area: "东亚", currencyCode: "JPY", timezone: "Asia/Tokyo" },
+  { slug: "seoul", nameZh: "首尔", nameEn: "Seoul", countryCode: "KR", countryNameZh: "韩国", region: "Asia", area: "东亚", currencyCode: "KRW", timezone: "Asia/Seoul" },
+  { slug: "beijing", nameZh: "北京", nameEn: "Beijing", countryCode: "CN", countryNameZh: "中国", region: "Asia", area: "东亚", currencyCode: "CNY", timezone: "Asia/Shanghai" },
+  { slug: "hong-kong", nameZh: "香港", nameEn: "Hong Kong", countryCode: "HK", countryNameZh: "中国香港", region: "Asia", area: "东亚", currencyCode: "HKD", timezone: "Asia/Hong_Kong" },
+  { slug: "taipei", nameZh: "台北", nameEn: "Taipei", countryCode: "TW", countryNameZh: "中国台湾", region: "Asia", area: "东亚", currencyCode: "TWD", timezone: "Asia/Taipei" },
 
-  // ── 二级城市（18）──────────────────────────────────────────
-  { slug: "kyoto", nameZh: "京都", nameEn: "Kyoto", countryCode: "JP", countryNameZh: "日本", region: "Asia", rank: "secondary", currencyCode: "JPY", timezone: "Asia/Tokyo" },
-  { slug: "taipei", nameZh: "台北", nameEn: "Taipei", countryCode: "TW", countryNameZh: "中国台湾", region: "Asia", rank: "secondary", currencyCode: "TWD", timezone: "Asia/Taipei" },
-  { slug: "kuala-lumpur", nameZh: "吉隆坡", nameEn: "Kuala Lumpur", countryCode: "MY", countryNameZh: "马来西亚", region: "Asia", rank: "secondary", currencyCode: "MYR", timezone: "Asia/Kuala_Lumpur" },
-  { slug: "jakarta", nameZh: "雅加达", nameEn: "Jakarta", countryCode: "ID", countryNameZh: "印度尼西亚", region: "Asia", rank: "secondary", currencyCode: "IDR", timezone: "Asia/Jakarta" },
-  { slug: "manila", nameZh: "马尼拉", nameEn: "Manila", countryCode: "PH", countryNameZh: "菲律宾", region: "Asia", rank: "secondary", currencyCode: "PHP", timezone: "Asia/Manila" },
-  { slug: "hanoi", nameZh: "河内", nameEn: "Hanoi", countryCode: "VN", countryNameZh: "越南", region: "Asia", rank: "secondary", currencyCode: "VND", timezone: "Asia/Ho_Chi_Minh" },
-  { slug: "ho-chi-minh-city", nameZh: "胡志明市", nameEn: "Ho Chi Minh City", countryCode: "VN", countryNameZh: "越南", region: "Asia", rank: "secondary", currencyCode: "VND", timezone: "Asia/Ho_Chi_Minh" },
-  { slug: "mumbai", nameZh: "孟买", nameEn: "Mumbai", countryCode: "IN", countryNameZh: "印度", region: "Asia", rank: "secondary", currencyCode: "INR", timezone: "Asia/Kolkata" },
-  { slug: "dubai", nameZh: "迪拜", nameEn: "Dubai", countryCode: "AE", countryNameZh: "阿联酋", region: "Middle East", rank: "secondary", currencyCode: "AED", timezone: "Asia/Dubai" },
-  { slug: "sydney", nameZh: "悉尼", nameEn: "Sydney", countryCode: "AU", countryNameZh: "澳大利亚", region: "Oceania", rank: "secondary", currencyCode: "AUD", timezone: "Australia/Sydney" },
-  { slug: "melbourne", nameZh: "墨尔本", nameEn: "Melbourne", countryCode: "AU", countryNameZh: "澳大利亚", region: "Oceania", rank: "secondary", currencyCode: "AUD", timezone: "Australia/Melbourne" },
-  { slug: "milan", nameZh: "米兰", nameEn: "Milan", countryCode: "IT", countryNameZh: "意大利", region: "Europe", rank: "secondary", currencyCode: "EUR", timezone: "Europe/Rome" },
-  { slug: "rome", nameZh: "罗马", nameEn: "Rome", countryCode: "IT", countryNameZh: "意大利", region: "Europe", rank: "secondary", currencyCode: "EUR", timezone: "Europe/Rome" },
-  { slug: "frankfurt", nameZh: "法兰克福", nameEn: "Frankfurt", countryCode: "DE", countryNameZh: "德国", region: "Europe", rank: "secondary", currencyCode: "EUR", timezone: "Europe/Berlin" },
-  { slug: "amsterdam", nameZh: "阿姆斯特丹", nameEn: "Amsterdam", countryCode: "NL", countryNameZh: "荷兰", region: "Europe", rank: "secondary", currencyCode: "EUR", timezone: "Europe/Amsterdam" },
-  { slug: "chicago", nameZh: "芝加哥", nameEn: "Chicago", countryCode: "US", countryNameZh: "美国", region: "Americas", rank: "secondary", currencyCode: "USD", timezone: "America/Chicago" },
-  { slug: "san-francisco", nameZh: "旧金山", nameEn: "San Francisco", countryCode: "US", countryNameZh: "美国", region: "Americas", rank: "secondary", currencyCode: "USD", timezone: "America/Los_Angeles" },
-  { slug: "toronto", nameZh: "多伦多", nameEn: "Toronto", countryCode: "CA", countryNameZh: "加拿大", region: "Americas", rank: "secondary", currencyCode: "CAD", timezone: "America/Toronto" },
+  // ── 东南亚与南亚 ────────────────────────────────────────────
+  { slug: "singapore", nameZh: "新加坡", nameEn: "Singapore", countryCode: "SG", countryNameZh: "新加坡", region: "Asia", area: "东南亚", currencyCode: "SGD", timezone: "Asia/Singapore" },
+  { slug: "bangkok", nameZh: "曼谷", nameEn: "Bangkok", countryCode: "TH", countryNameZh: "泰国", region: "Asia", area: "东南亚", currencyCode: "THB", timezone: "Asia/Bangkok" },
+  { slug: "mumbai", nameZh: "孟买", nameEn: "Mumbai", countryCode: "IN", countryNameZh: "印度", region: "Asia", area: "南亚", currencyCode: "INR", timezone: "Asia/Kolkata" },
+
+  // ── 大洋洲 ──────────────────────────────────────────────────
+  { slug: "melbourne", nameZh: "墨尔本", nameEn: "Melbourne", countryCode: "AU", countryNameZh: "澳大利亚", region: "Oceania", area: "大洋洲", currencyCode: "AUD", timezone: "Australia/Melbourne" },
+
+  // ── 欧洲 ────────────────────────────────────────────────────
+  { slug: "london", nameZh: "伦敦", nameEn: "London", countryCode: "GB", countryNameZh: "英国", region: "Europe", area: "西欧", currencyCode: "GBP", timezone: "Europe/London" },
+  { slug: "paris", nameZh: "巴黎", nameEn: "Paris", countryCode: "FR", countryNameZh: "法国", region: "Europe", area: "西欧", currencyCode: "EUR", timezone: "Europe/Paris" },
+  { slug: "frankfurt", nameZh: "法兰克福", nameEn: "Frankfurt", countryCode: "DE", countryNameZh: "德国", region: "Europe", area: "中欧", currencyCode: "EUR", timezone: "Europe/Berlin" },
+
+  // ── 中东 ────────────────────────────────────────────────────
+  { slug: "dubai", nameZh: "迪拜", nameEn: "Dubai", countryCode: "AE", countryNameZh: "阿联酋", region: "Middle East", area: "中东", currencyCode: "AED", timezone: "Asia/Dubai" },
+
+  // ── 北美（美国按东部 / 中部 / 西部各取一个代表城市）─────────
+  { slug: "washington", nameZh: "华盛顿", nameEn: "Washington", countryCode: "US", countryNameZh: "美国", region: "Americas", area: "美国东部", currencyCode: "USD", timezone: "America/New_York" },
+  { slug: "minneapolis", nameZh: "明尼阿波利斯", nameEn: "Minneapolis", countryCode: "US", countryNameZh: "美国", region: "Americas", area: "美国中部", currencyCode: "USD", timezone: "America/Chicago" },
+  { slug: "seattle", nameZh: "西雅图", nameEn: "Seattle", countryCode: "US", countryNameZh: "美国", region: "Americas", area: "美国西部", currencyCode: "USD", timezone: "America/Los_Angeles" },
+  { slug: "toronto", nameZh: "多伦多", nameEn: "Toronto", countryCode: "CA", countryNameZh: "加拿大", region: "Americas", area: "加拿大", currencyCode: "CAD", timezone: "America/Toronto" },
 ];
 
-export const primaryCities = cityPanel.filter((city) => city.rank === "primary");
-export const secondaryCities = cityPanel.filter((city) => city.rank === "secondary");
-
-const bySlug = new Map<string, PanelCity>(
-  cityPanel.map((city) => [city.slug, city]),
-);
-
-export function cityBySlug(slug: string): PanelCity | null {
-  return bySlug.get(slug) ?? null;
-}
+export const cityBySlug = (slug: string): PanelCity | null =>
+  cityPanel.find((city) => city.slug === slug) ?? null;
 
 /**
  * 统一货币换算的注意事项：
- * 面板涉及 JPY、KRW、SGD、THB、HKD、CNY、GBP、EUR、USD、TWD、MYR、IDR、PHP、
- * VND、INR、AED、AUD、CAD 共 18 种当地币种。
- * 现有 app/lib/currencies.ts 只覆盖其中 10 种，且在编汇率参考日期为 2026-08-21。
- * 落地统一货币视图前必须：补齐币种，并确认所选汇率来源覆盖全部面板币种
- * （AED、VND 是否在来源清单内需要核对）。
+ * 面板涉及 JPY、KRW、CNY、HKD、TWD、SGD、THB、INR、AUD、GBP、EUR、AED、USD、CAD
+ * 共 14 种当地币种。现有汇率来源（欧洲央行）覆盖其中 11 种，
+ * **TWD、AED 以及其它未覆盖币种不会参与统一货币视图**——这是刻意选择，不猜汇率。
+ * 详见 app/data/index-fx.ts 与规格第八节。
  */
 export const CITY_PANEL_CURRENCIES = Array.from(
   new Set(cityPanel.map((city) => city.currencyCode)),

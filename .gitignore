@@ -36,6 +36,7 @@ yarn-error.log*
 
 # typescript
 next-env.d.ts
+*.tsbuildinfo
 /dist/
 /.wrangler/
 /outputs/
@@ -57,3 +58,5 @@ TODO.md
 # StayWorth Index sampling (local only — scraping logic stays off the public repo)
 /scraper/
 /.data/
+# 该测试依赖 scraper/，只能在本地跑，不能进公开仓库
+/tests/scraper-guards.test.mjs

@@ -62,7 +62,8 @@ export type DroppedSample = {
     | "missing_cash"
     | "non_positive"
     | "outlier"
-    | "unmapped_brand";
+    | "unmapped_brand"
+    | "currency_mismatch";
   valuePerTenThousand?: number;
 };
 
@@ -308,6 +309,12 @@ export type CleanInput = {
   brandSlug: string | null;
   portfolioTier: PortfolioTier | null;
   /**
+   * 该城市在面板里登记的当地币种。
+   * 搜索是「中心点 + 半径」，会把邻国酒店一并返回（实测多伦多的结果里混进了美国酒店），
+   * 币种不一致的记录必须剔除，否则会把别国价格算进这个国家的参考值。
+   */
+  expectedCurrency: string;
+  /**
    * 已识别、但明确不归入五档的独立品牌（如 Series by Marriott、Marriott Vacation Club）。
    * 这类样本照常保留，只把 portfolioTier 留空，供聚合层单独成行。
    */
@@ -325,6 +332,10 @@ export type CleanResult = {
  */
 function toSample(input: CleanInput, dropped: DroppedSample[]): IndexSample | null {
   const { hotel } = input;
+  if (hotel.currencyCode !== input.expectedCurrency) {
+    dropped.push({ hotelCode: hotel.hotelCode, reason: "currency_mismatch" });
+    return null;
+  }
   if (hotel.pointsPerNight === null || hotel.pointsPerNight <= 0) {
     dropped.push({ hotelCode: hotel.hotelCode, reason: "missing_points" });
     return null;

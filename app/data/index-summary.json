@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-09-27T14:50:46.518Z",
-  "runKey": "2026-09-27T22:44",
+  "generatedAt": "2026-09-27T15:17:59.652Z",
+  "runKey": "2026-09-27T23:14",
   "window": {
     "daysAhead": 30,
     "nights": 1
   },
-  "panelVersion": "v1",
-  "sampleCount": 890,
-  "cityCount": 28,
+  "panelVersion": "v2",
+  "sampleCount": 623,
+  "cityCount": 17,
   "currency": {
     "display": "CNY",
     "options": [
@@ -30,15 +30,15 @@
               "key": "global",
               "label": "全部品牌",
               "currencyCode": "CNY",
-              "value": 380.0271875685114,
-              "p25": 335.34942828034457,
-              "p75": 444.5663144884511,
-              "sampleCount": 798,
-              "cityCount": 22
+              "value": 395.9758739476453,
+              "p25": 337.453460327922,
+              "p75": 441.45967640817696,
+              "sampleCount": 550,
+              "cityCount": 15
             }
           ],
-          "sampleCount": 798,
-          "cityCount": 22,
+          "sampleCount": 550,
+          "cityCount": 15,
           "exclusions": [
             {
               "currencyCode": "AED",
@@ -47,10 +47,6 @@
             {
               "currencyCode": "TWD",
               "sampleCount": 17
-            },
-            {
-              "currencyCode": "VND",
-              "sampleCount": 7
             }
           ]
         },
@@ -62,79 +58,66 @@
               "key": "Luxury",
               "label": "Luxury",
               "currencyCode": "CNY",
-              "value": 548.3243212271485,
-              "p25": 458.6579674317561,
-              "p75": 637.9906750225409,
-              "sampleCount": 17,
-              "cityCount": 2
+              "value": 458.7311936421165,
+              "p25": 388.6695561750593,
+              "p75": 507.80663457707004,
+              "sampleCount": 51,
+              "cityCount": 14
             },
             {
               "key": "Premium",
               "label": "Premium",
               "currencyCode": "CNY",
-              "value": 374.9340643479111,
-              "p25": 326.6956958282408,
-              "p75": 453.69339211842725,
-              "sampleCount": 138,
-              "cityCount": 9
+              "value": 400.16534707846415,
+              "p25": 330.4983565454397,
+              "p75": 465.2461241772499,
+              "sampleCount": 124,
+              "cityCount": 15
             },
             {
               "key": "Select",
               "label": "Select",
               "currencyCode": "CNY",
-              "value": 349.82746002079,
-              "p25": 299.8325229770903,
-              "p75": 410.2327346585389,
-              "sampleCount": 263,
-              "cityCount": 11
+              "value": 391.2874312680874,
+              "p25": 344.4122744138699,
+              "p75": 414.5721143608366,
+              "sampleCount": 210,
+              "cityCount": 15
             },
             {
               "key": "Longer Stays",
               "label": "Longer Stays",
               "currencyCode": "CNY",
-              "value": 498.0545280592735,
-              "p25": 466.5535039339072,
-              "p75": 501.0252612672058,
-              "sampleCount": 61,
-              "cityCount": 3
+              "value": 393.46691422808306,
+              "p25": 390.33003379816984,
+              "p75": 425.28332834331707,
+              "sampleCount": 82,
+              "cityCount": 6
             },
             {
               "key": "Collections",
               "label": "Collections",
               "currencyCode": "CNY",
-              "value": 355.86460896424023,
-              "p25": 323.6523159993021,
-              "p75": 438.6215685354639,
-              "sampleCount": 52,
-              "cityCount": 4
+              "value": 356.71093752621505,
+              "p25": 324.2529674680692,
+              "p75": 387.4506082053532,
+              "sampleCount": 69,
+              "cityCount": 10
             },
             {
               "key": "separate",
               "label": "单独列出",
               "currencyCode": "CNY",
-              "value": null,
-              "p25": null,
-              "p75": null,
-              "sampleCount": 0,
-              "cityCount": 0
+              "value": 307.50576740908195,
+              "p25": 307.50576740908195,
+              "p75": 307.50576740908195,
+              "sampleCount": 6,
+              "cityCount": 1
             }
           ],
-          "sampleCount": 531,
-          "cityCount": 29,
-          "exclusions": [
-            {
-              "currencyCode": "AED",
-              "sampleCount": 56
-            },
-            {
-              "currencyCode": "TWD",
-              "sampleCount": 17
-            },
-            {
-              "currencyCode": "VND",
-              "sampleCount": 7
-            }
-          ]
+          "sampleCount": 542,
+          "cityCount": 15,
+          "exclusions": []
         }
       },
       "USD": {
@@ -146,15 +129,15 @@
               "key": "global",
               "label": "全部品牌",
               "currencyCode": "USD",
-              "value": 56.60866637723525,
-              "p25": 49.953488924779165,
-              "p75": 66.2223835627465,
-              "sampleCount": 798,
-              "cityCount": 22
+              "value": 58.984375,
+              "p25": 50.26690452272727,
+              "p75": 65.75962025424151,
+              "sampleCount": 550,
+              "cityCount": 15
             }
           ],
-          "sampleCount": 798,
-          "cityCount": 22,
+          "sampleCount": 550,
+          "cityCount": 15,
           "exclusions": [
             {
               "currencyCode": "AED",
@@ -163,10 +146,6 @@
             {
               "currencyCode": "TWD",
               "sampleCount": 17
-            },
-            {
-              "currencyCode": "VND",
-              "sampleCount": 7
             }
           ]
         },
@@ -178,79 +157,66 @@
               "key": "Luxury",
               "label": "Luxury",
               "currencyCode": "USD",
-              "value": 81.67812615058165,
-              "p25": 68.32146938151449,
-              "p75": 95.03478291964879,
-              "sampleCount": 17,
-              "cityCount": 2
+              "value": 68.33237712245503,
+              "p25": 57.89602943219816,
+              "p75": 75.64263110974814,
+              "sampleCount": 51,
+              "cityCount": 14
             },
             {
               "key": "Premium",
               "label": "Premium",
               "currencyCode": "USD",
-              "value": 55.84999720133284,
-              "p25": 48.66443311686889,
-              "p75": 67.58194863981433,
-              "sampleCount": 138,
-              "cityCount": 9
+              "value": 59.60843689482472,
+              "p25": 49.23087562131977,
+              "p75": 69.30283802945985,
+              "sampleCount": 124,
+              "cityCount": 15
             },
             {
               "key": "Select",
               "label": "Select",
               "currencyCode": "USD",
-              "value": 52.110129542619546,
-              "p25": 44.66290785891446,
-              "p75": 61.108070088063116,
-              "sampleCount": 263,
-              "cityCount": 11
+              "value": 58.28598684210527,
+              "p25": 51.30348610914761,
+              "p75": 61.754461993398124,
+              "sampleCount": 210,
+              "cityCount": 15
             },
             {
               "key": "Longer Stays",
               "label": "Longer Stays",
               "currencyCode": "USD",
-              "value": 74.18996203132416,
-              "p25": 69.49758468678849,
-              "p75": 74.63248101566208,
-              "sampleCount": 61,
-              "cityCount": 3
+              "value": 58.61064157153834,
+              "p25": 58.14337337723258,
+              "p75": 63.3499992566896,
+              "sampleCount": 82,
+              "cityCount": 6
             },
             {
               "key": "Collections",
               "label": "Collections",
               "currencyCode": "USD",
-              "value": 53.009420334407544,
-              "p25": 48.21109272694077,
-              "p75": 65.3368570758043,
-              "sampleCount": 52,
-              "cityCount": 4
+              "value": 53.13548902837887,
+              "p25": 48.30056547972454,
+              "p75": 57.71445553115757,
+              "sampleCount": 69,
+              "cityCount": 10
             },
             {
               "key": "separate",
               "label": "单独列出",
               "currencyCode": "USD",
-              "value": null,
-              "p25": null,
-              "p75": null,
-              "sampleCount": 0,
-              "cityCount": 0
+              "value": 45.805910644743534,
+              "p25": 45.805910644743534,
+              "p75": 45.805910644743534,
+              "sampleCount": 6,
+              "cityCount": 1
             }
           ],
-          "sampleCount": 531,
-          "cityCount": 29,
-          "exclusions": [
-            {
-              "currencyCode": "AED",
-              "sampleCount": 56
-            },
-            {
-              "currencyCode": "TWD",
-              "sampleCount": 17
-            },
-            {
-              "currencyCode": "VND",
-              "sampleCount": 7
-            }
-          ]
+          "sampleCount": 542,
+          "cityCount": 15,
+          "exclusions": []
         }
       }
     },
@@ -262,30 +228,10 @@
           "key": "US",
           "label": "美国",
           "currencyCode": "USD",
-          "value": 75.74563673262303,
-          "p25": 72.58763318112634,
-          "p75": 78.90364028411972,
-          "sampleCount": 212,
-          "cityCount": 2
-        },
-        {
-          "key": "CN",
-          "label": "中国",
-          "currencyCode": "CNY",
-          "value": 350.90222424845274,
-          "p25": 340.5972659703802,
-          "p75": 361.20718252652523,
-          "sampleCount": 105,
-          "cityCount": 2
-        },
-        {
-          "key": "JP",
-          "label": "日本",
-          "currencyCode": "JPY",
-          "value": 7160.473684210527,
-          "p25": 7113.496411483254,
-          "p75": 9050.605639494648,
-          "sampleCount": 90,
+          "value": 59.58947368421053,
+          "p25": 59.286924342105266,
+          "p75": 63.108839406207835,
+          "sampleCount": 205,
           "cityCount": 3
         },
         {
@@ -299,22 +245,22 @@
           "cityCount": 1
         },
         {
-          "key": "CA",
-          "label": "加拿大",
-          "currencyCode": "USD",
-          "value": 91.52953555878085,
-          "p25": 91.52953555878085,
-          "p75": 91.52953555878085,
-          "sampleCount": 58,
-          "cityCount": 1
-        },
-        {
           "key": "AE",
           "label": "阿联酋",
           "currencyCode": "AED",
           "value": 212.9525,
           "p25": 212.9525,
           "p75": 212.9525,
+          "sampleCount": 56,
+          "cityCount": 1
+        },
+        {
+          "key": "CA",
+          "label": "加拿大",
+          "currencyCode": "CAD",
+          "value": 91.7738952536825,
+          "p25": 91.7738952536825,
+          "p75": 91.7738952536825,
           "sampleCount": 56,
           "cityCount": 1
         },
@@ -329,23 +275,23 @@
           "cityCount": 1
         },
         {
-          "key": "IT",
-          "label": "意大利",
-          "currencyCode": "EUR",
-          "value": 56.258307495835254,
-          "p25": 55.130353534622216,
-          "p75": 57.3862614570483,
-          "sampleCount": 34,
-          "cityCount": 2
+          "key": "CN",
+          "label": "中国",
+          "currencyCode": "CNY",
+          "value": 330.2923076923077,
+          "p25": 330.2923076923077,
+          "p75": 330.2923076923077,
+          "sampleCount": 29,
+          "cityCount": 1
         },
         {
           "key": "TH",
           "label": "泰国",
           "currencyCode": "THB",
-          "value": 1815.5331501831502,
-          "p25": 1815.5331501831502,
-          "p75": 1815.5331501831502,
-          "sampleCount": 26,
+          "value": 1810.338095238095,
+          "p25": 1810.338095238095,
+          "p75": 1810.338095238095,
+          "sampleCount": 25,
           "cityCount": 1
         },
         {
@@ -359,26 +305,6 @@
           "cityCount": 1
         },
         {
-          "key": "NL",
-          "label": "荷兰",
-          "currencyCode": "EUR",
-          "value": 43.86123481781377,
-          "p25": 43.86123481781377,
-          "p75": 43.86123481781377,
-          "sampleCount": 20,
-          "cityCount": 1
-        },
-        {
-          "key": "KR",
-          "label": "韩国",
-          "currencyCode": "KRW",
-          "value": 124902.38095238095,
-          "p25": 124902.38095238095,
-          "p75": 124902.38095238095,
-          "sampleCount": 20,
-          "cityCount": 1
-        },
-        {
           "key": "SG",
           "label": "新加坡",
           "currencyCode": "SGD",
@@ -389,12 +315,22 @@
           "cityCount": 1
         },
         {
-          "key": "MY",
-          "label": "马来西亚",
-          "currencyCode": "MYR",
-          "value": 251.0068965517241,
-          "p25": 251.0068965517241,
-          "p75": 251.0068965517241,
+          "key": "KR",
+          "label": "韩国",
+          "currencyCode": "KRW",
+          "value": 124691.52542372882,
+          "p25": 124691.52542372882,
+          "p75": 124691.52542372882,
+          "sampleCount": 19,
+          "cityCount": 1
+        },
+        {
+          "key": "JP",
+          "label": "日本",
+          "currencyCode": "JPY",
+          "value": 11190.869565217392,
+          "p25": 11190.869565217392,
+          "p75": 11190.869565217392,
           "sampleCount": 19,
           "cityCount": 1
         },
@@ -406,16 +342,6 @@
           "p25": 6424.192307692308,
           "p75": 6424.192307692308,
           "sampleCount": 18,
-          "cityCount": 1
-        },
-        {
-          "key": "ID",
-          "label": "印度尼西亚",
-          "currencyCode": "IDR",
-          "value": 1036803.9215686275,
-          "p25": 1036803.9215686275,
-          "p75": 1036803.9215686275,
-          "sampleCount": 17,
           "cityCount": 1
         },
         {
@@ -447,30 +373,10 @@
           "p75": 74.375,
           "sampleCount": 11,
           "cityCount": 1
-        },
-        {
-          "key": "VN",
-          "label": "越南",
-          "currencyCode": "VND",
-          "value": null,
-          "p25": null,
-          "p75": null,
-          "sampleCount": 0,
-          "cityCount": 0
-        },
-        {
-          "key": "PH",
-          "label": "菲律宾",
-          "currencyCode": "PHP",
-          "value": null,
-          "p25": null,
-          "p75": null,
-          "sampleCount": 0,
-          "cityCount": 0
         }
       ],
-      "sampleCount": 871,
-      "cityCount": 24,
+      "sampleCount": 623,
+      "cityCount": 17,
       "exclusions": []
     }
   },
@@ -480,11 +386,11 @@
       "nameEn": "Series by Marriott",
       "brandSlug": "series-by-marriott",
       "reason": "横跨多个档位的转换品牌（见 brand-points.ts 的大中华区与其它地区分支），归入单一档位会失真。",
-      "sampleCount": 8,
-      "cityCount": 3,
+      "sampleCount": 7,
+      "cityCount": 2,
       "currencies": [
         "INR",
-        "JPY"
+        "USD"
       ]
     },
     {
