@@ -142,6 +142,41 @@ export async function queryHotelSnapshots(
   }));
 }
 
+type CoverageRow = {
+  checkIn: string;
+  checkOut: string;
+};
+
+/**
+ * Reports the earliest stay window that has snapshots for a city, so an empty
+ * result can point the user at dates the data actually covers instead of
+ * leaving them to guess.
+ */
+export async function queryCityCoverage(
+  database: HotelDatabase,
+  city: string,
+) {
+  const statement = database.prepare(`
+    SELECT
+      ps.check_in AS "checkIn",
+      ps.check_out AS "checkOut"
+    FROM cities c
+    INNER JOIN hotels h ON h.city_id = c.id
+    INNER JOIN price_snapshots ps ON ps.hotel_id = h.id
+    WHERE c.active = 1
+      AND h.active = 1
+      AND instr(c.search_terms, '|' || ? || '|') > 0
+    ORDER BY ps.check_in ASC, ps.check_out ASC, h.id ASC
+    LIMIT 1
+  `);
+  const result = await statement
+    .bind(normalizeSearchText(city))
+    .all<CoverageRow>();
+  const row = result.results?.[0];
+
+  return row ? { checkIn: row.checkIn, checkOut: row.checkOut } : null;
+}
+
 export async function handleHotelSearchRequest(
   request: Request,
   database: HotelDatabase,
@@ -195,7 +230,14 @@ export async function handleHotelSearchRequest(
     });
 
     if (hotels.length === 0) {
-      return jsonResponse({ status: "empty", message: "暂无数据", hotels: [] });
+      const coverage = await queryCityCoverage(database, city);
+
+      return jsonResponse({
+        status: "empty",
+        message: "暂无数据",
+        hotels: [],
+        coverage,
+      });
     }
 
     return jsonResponse({

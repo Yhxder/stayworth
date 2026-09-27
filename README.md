@@ -116,6 +116,11 @@ automated pre-tax rates, taxes and fees, total rates, and award availability.
 Current Hong Kong and Shanghai fixture prices are deliberately limited to
 specific dates and are not live rates.
 
+The search form defaults to a stay one month in the future instead of a fixed
+calendar date, so the first thing a new user sees is never a date that has
+already passed. When a query has no snapshots, the empty state reports the
+window the data does cover and offers a one-click search using those dates.
+
 ## 🗄️ Finite Data API
 
 ```text
@@ -124,6 +129,18 @@ GET /api/hotels?city=Hong%20Kong&checkIn=2026-08-15&checkOut=2026-08-16&tier=Pre
 
 Successful records include currency, source, and update time. A valid query
 without an exact snapshot returns `status: "empty"` and `message: "暂无数据"`.
+Empty responses also carry `coverage` — the earliest stay window with snapshots
+for that city, or `null` when the city itself has no data:
+
+```json
+{
+  "status": "empty",
+  "message": "暂无数据",
+  "hotels": [],
+  "coverage": { "checkIn": "2026-08-15", "checkOut": "2026-08-16" }
+}
+```
+
 The frontend uses this endpoint for loading, success, empty, error, and stale
 states. Selected paid-stay snapshots can prefill currency, total cash rate,
 stay length, and brand in the points rebate calculator. Taxes and ineligible

@@ -1064,6 +1064,13 @@ dd {
   padding: 8px 12px;
 }
 
+.coverage-hint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 10px 0 0;
+}
+
 .ranking-toolbar {
   background: var(--surface);
   border: 1.5px solid var(--ink);

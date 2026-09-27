@@ -1,16 +1,8 @@
-import { expect, test, type Page } from "@playwright/test";
-
-async function searchHongKong(page: Page) {
-  await page.goto("/");
-  await page.waitForLoadState("networkidle");
-  await page.getByRole("button", { name: "搜索匹配酒店" }).click();
-  await expect(
-    page.getByRole("heading", { name: "香港 · 4 家酒店快照" }),
-  ).toBeVisible();
-}
+import { expect, test } from "@playwright/test";
+import { searchCoveredHongKong } from "./support/stay";
 
 test("默认按兑换价值排名并标出同批最高的一家", async ({ page }) => {
-  await searchHongKong(page);
+  await searchCoveredHongKong(page);
 
   const group = page.getByRole("group", { name: "排序口径" });
   await expect(group.getByRole("radio", { name: "兑换价值最高" })).toBeChecked();
@@ -33,7 +25,7 @@ test("默认按兑换价值排名并标出同批最高的一家", async ({ page 
 });
 
 test("切换排序口径会更新名次，但不清空已选酒店", async ({ page }) => {
-  await searchHongKong(page);
+  await searchCoveredHongKong(page);
 
   const group = page.getByRole("group", { name: "排序口径" });
   const cards = page.locator(".hotel-grid article");
@@ -59,7 +51,7 @@ test("切换排序口径会更新名次，但不清空已选酒店", async ({ pa
 
 test("手机宽度下排名控件可键盘切换且页面不溢出", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await searchHongKong(page);
+  await searchCoveredHongKong(page);
 
   const group = page.getByRole("group", { name: "排序口径" });
   await group.getByRole("radio", { name: "兑换价值最高" }).focus();

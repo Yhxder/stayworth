@@ -1,4 +1,9 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import {
+  COVERED_CHECK_IN,
+  COVERED_CHECK_OUT,
+  fillCoveredStayDates,
+} from "./support/stay";
 
 async function expectNoPageOverflow(page: Page) {
   const dimensions = await page.evaluate(() => ({
@@ -38,6 +43,7 @@ test("手机宽度保持单列，比较表只在自身内部横向滚动", async
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await fillCoveredStayDates(page);
 
   await expectSingleColumn(page.locator(".search-form"));
   await expectNoPageOverflow(page);
@@ -91,6 +97,7 @@ test("平板宽度使用两列并且页面没有横向溢出", async ({ page }) 
   await page.setViewportSize({ width: 820, height: 1180 });
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await fillCoveredStayDates(page);
 
   const searchColumnCount = await page.locator(".search-form").evaluate((element) =>
     getComputedStyle(element).gridTemplateColumns.split(" ").length,
@@ -126,7 +133,9 @@ test("纯键盘可以按阅读顺序搜索并选择酒店", async ({ page }) => 
   const checkOutInput = page.getByLabel("退房日期");
   const tierSelect = page.getByLabel("品牌层级");
   const searchButton = page.getByRole("button", { name: "搜索匹配酒店" });
+  await checkInInput.fill(COVERED_CHECK_IN);
   await tabAcrossNativeDateSegments(page, checkInInput, checkOutInput);
+  await checkOutInput.fill(COVERED_CHECK_OUT);
   await tabAcrossNativeDateSegments(page, checkOutInput, tierSelect);
   await page.keyboard.press("Tab");
   await expect(searchButton).toBeFocused();

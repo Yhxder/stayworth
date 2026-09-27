@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { fillCoveredStayDates } from "./support/stay";
 
 test("搜索、比较酒店并把现金入住方案带入回血计算器", async ({ page }) => {
   await page.goto("/");
   await page.waitForLoadState("networkidle");
 
+  await fillCoveredStayDates(page);
   await page.getByRole("button", { name: "搜索匹配酒店" }).click();
   await expect(
     page.getByRole("heading", { name: "香港 · 4 家酒店快照" }),

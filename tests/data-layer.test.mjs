@@ -13,7 +13,7 @@ const requiredFiles = [
   "worker/hotels-api.ts",
 ];
 
-function createFakeDatabase(rows = [], error = null) {
+function createFakeDatabase(rows = [], error = null, coverageRows = []) {
   const calls = [];
 
   return {
@@ -29,7 +29,11 @@ function createFakeDatabase(rows = [], error = null) {
         },
         async all() {
           if (error) throw error;
-          return { results: rows, success: true };
+          const isCoverageQuery = /AS "checkIn"/.test(call.sql);
+          return {
+            results: isCoverageQuery ? coverageRows : rows,
+            success: true,
+          };
         },
       };
     },
@@ -114,6 +118,26 @@ test("returns an explicit empty response for an uncovered date", async () => {
   assert.equal(body.status, "empty");
   assert.equal(body.message, "暂无数据");
   assert.deepEqual(body.hotels, []);
+  assert.equal(body.coverage, null);
+});
+
+test("points an uncovered date at the covered stay window", async () => {
+  const response = await handleHotelSearchRequest(
+    new Request(
+      "https://stayworth.test/api/hotels?city=香港&checkIn=2099-01-01&checkOut=2099-01-02",
+    ),
+    createFakeDatabase([], null, [
+      { checkIn: "2026-08-15", checkOut: "2026-08-16" },
+    ]),
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.status, "empty");
+  assert.deepEqual(body.coverage, {
+    checkIn: "2026-08-15",
+    checkOut: "2026-08-16",
+  });
 });
 
 test("rejects missing or invalid date parameters", async () => {

@@ -9,6 +9,7 @@ import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
 import type { RankingCriterion } from "./lib/hotel-ranking";
 import { getResultsState } from "./lib/hotel-search";
+import { getDefaultStayDates } from "./lib/stay-dates";
 import { createRebatePrefill } from "./lib/rebate-prefill";
 import type {
   Hotel,
@@ -19,17 +20,48 @@ import type {
 
 type ModuleName = "comparison" | "rebate";
 
-const initialFilters: SearchFilters = {
-  city: "香港",
-  checkIn: "2026-08-15",
-  checkOut: "2026-08-16",
-  tier: "全部等级",
-};
+type SearchValidation = {
+  field: "city" | "checkIn" | "checkOut";
+  message: string;
+} | null;
+
+function createInitialFilters(now?: Date): SearchFilters {
+  const stayDates = getDefaultStayDates(now);
+
+  return {
+    city: "香港",
+    checkIn: stayDates.checkIn,
+    checkOut: stayDates.checkOut,
+    tier: "全部等级",
+  };
+}
+
+function validateSearchFilters(filters: SearchFilters): SearchValidation {
+  if (filters.city.trim().length === 0) {
+    return { field: "city", message: "请输入城市或目的地。" };
+  }
+
+  if (!filters.checkIn) {
+    return { field: "checkIn", message: "请选择入住日期。" };
+  }
+
+  if (!filters.checkOut) {
+    return { field: "checkOut", message: "请选择退房日期。" };
+  }
+
+  if (filters.checkOut <= filters.checkIn) {
+    return { field: "checkOut", message: "退房日期必须晚于入住日期。" };
+  }
+
+  return null;
+}
 
 export default function Home() {
   const [activeModule, setActiveModule] =
     useState<ModuleName>("comparison");
-  const [filters, setFilters] = useState<SearchFilters>(initialFilters);
+  const [filters, setFilters] = useState<SearchFilters>(() =>
+    createInitialFilters(),
+  );
   const [resultsState, setResultsState] =
     useState<SearchResultsState>({ status: "idle" });
   const [selectedHotelIds, setSelectedHotelIds] = useState<string[]>([]);
@@ -74,25 +106,18 @@ export default function Home() {
     [availableHotels, selectedHotelIds],
   );
 
-  const searchValidation =
-    filters.city.trim().length === 0
-      ? { field: "city" as const, message: "请输入城市或目的地。" }
-      : !filters.checkIn
-        ? { field: "checkIn" as const, message: "请选择入住日期。" }
-        : !filters.checkOut
-          ? { field: "checkOut" as const, message: "请选择退房日期。" }
-          : filters.checkOut <= filters.checkIn
-            ? {
-                field: "checkOut" as const,
-                message: "退房日期必须晚于入住日期。",
-              }
-            : null;
+  const searchValidation = validateSearchFilters(filters);
   const searchError = searchValidation?.message ?? "";
 
-  async function handleSearch() {
-    if (searchError || resultsState.status === "loading") return;
+  async function handleSearch(nextFilters: SearchFilters = filters) {
+    if (
+      validateSearchFilters(nextFilters) ||
+      resultsState.status === "loading"
+    ) {
+      return;
+    }
 
-    const submittedFilters = { ...filters };
+    const submittedFilters = { ...nextFilters };
     const requestId = requestSequence.current + 1;
     requestSequence.current = requestId;
     shouldFocusResults.current = true;
@@ -109,7 +134,11 @@ export default function Home() {
       if (requestId !== requestSequence.current) return;
 
       if (payload.status === "empty") {
-        setResultsState({ status: "empty", query: submittedFilters.city });
+        setResultsState({
+          status: "empty",
+          query: submittedFilters.city,
+          coverage: payload.coverage,
+        });
       } else {
         setResultStayDates({
           checkIn: submittedFilters.checkIn,
@@ -139,6 +168,17 @@ export default function Home() {
       if (current.length >= 4) return current;
       return [...current, hotelId];
     });
+  }
+
+  function applyCoverage(coverage: { checkIn: string; checkOut: string }) {
+    const nextFilters: SearchFilters = {
+      ...filters,
+      checkIn: coverage.checkIn,
+      checkOut: coverage.checkOut,
+    };
+
+    setFilters(nextFilters);
+    void handleSearch(nextFilters);
   }
 
   function useHotelForRebate(hotel: Hotel) {
@@ -227,8 +267,11 @@ export default function Home() {
         />
         <SearchResults
           focusTargetRef={resultsFocusTarget}
+          onApplyCoverage={applyCoverage}
           onRankingCriterionChange={setRankingCriterion}
-          onRetry={handleSearch}
+          onRetry={() => {
+            void handleSearch();
+          }}
           onToggleHotel={toggleHotel}
           rankingCriterion={rankingCriterion}
           selectedHotelIds={selectedHotelIds}

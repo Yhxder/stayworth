@@ -14,9 +14,19 @@ type FetchHotelOptions = {
   signal?: AbortSignal;
 };
 
+export type CityCoverage = {
+  checkIn: string;
+  checkOut: string;
+};
+
 export type HotelSearchPayload =
   | { status: "ok"; hotels: Hotel[] }
-  | { status: "empty"; message: string; hotels: [] };
+  | {
+      status: "empty";
+      message: string;
+      hotels: [];
+      coverage: CityCoverage | null;
+    };
 
 const portfolioTiers = new Set<PortfolioTier>([
   "Luxury",
@@ -45,6 +55,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isNullableString(value: unknown): value is string | null {
   return typeof value === "string" || value === null;
+}
+
+function isCityCoverage(value: unknown): value is CityCoverage {
+  return (
+    isRecord(value) &&
+    typeof value.checkIn === "string" &&
+    typeof value.checkOut === "string"
+  );
 }
 
 function isHotel(value: unknown): value is Hotel {
@@ -124,10 +142,23 @@ export async function fetchHotelSnapshots(
     if (!Array.isArray(body.hotels) || body.hotels.length !== 0) {
       throw new Error("酒店数据格式无效，请稍后重试。");
     }
+
+    const coverage =
+      body.coverage == null
+        ? null
+        : isCityCoverage(body.coverage)
+          ? body.coverage
+          : undefined;
+
+    if (coverage === undefined) {
+      throw new Error("酒店数据格式无效，请稍后重试。");
+    }
+
     return {
       status: "empty",
       message: responseMessage(body, "暂无数据"),
       hotels: [],
+      coverage,
     };
   }
 

@@ -1,4 +1,5 @@
 import type { CurrencyCode } from "../lib/currencies";
+import type { CityCoverage } from "../lib/hotel-api";
 
 export type PortfolioTier =
   | "Luxury"
@@ -36,7 +37,7 @@ export type SearchFilters = {
 export type SearchResultsState =
   | { status: "idle" }
   | { status: "loading"; query: string }
-  | { status: "empty"; query: string }
+  | { status: "empty"; query: string; coverage: CityCoverage | null }
   | { status: "error"; query: string; message: string }
   | {
       status: "success" | "stale";

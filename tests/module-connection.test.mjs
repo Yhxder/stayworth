@@ -66,7 +66,36 @@ test("keeps explicit empty responses and surfaces API failures", async () => {
     status: "empty",
     message: "暂无数据",
     hotels: [],
+    coverage: null,
   });
+
+  const emptyWithCoverage = await fetchHotelSnapshots(filters, {
+    fetcher: async () =>
+      Response.json({
+        status: "empty",
+        message: "暂无数据",
+        hotels: [],
+        coverage: { checkIn: "2026-08-15", checkOut: "2026-08-16" },
+      }),
+  });
+
+  assert.deepEqual(emptyWithCoverage.coverage, {
+    checkIn: "2026-08-15",
+    checkOut: "2026-08-16",
+  });
+
+  await assert.rejects(
+    fetchHotelSnapshots(filters, {
+      fetcher: async () =>
+        Response.json({
+          status: "empty",
+          message: "暂无数据",
+          hotels: [],
+          coverage: { checkIn: 20260815 },
+        }),
+    }),
+    /酒店数据格式无效/,
+  );
 
   await assert.rejects(
     fetchHotelSnapshots(filters, {

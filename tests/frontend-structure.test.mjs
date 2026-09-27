@@ -10,6 +10,7 @@ const projectFiles = [
   "app/components/rebate/RebateCalculator.tsx",
   "app/lib/hotel-api.ts",
   "app/lib/hotel-ranking.ts",
+  "app/lib/stay-dates.ts",
   "app/lib/rebate-prefill.ts",
   "app/types/hotel.ts",
 ];

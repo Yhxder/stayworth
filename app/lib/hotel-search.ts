@@ -44,7 +44,8 @@ export function getResultsState(
   query: string,
   now = new Date(),
 ): SearchResultsState {
-  if (hotels.length === 0) return { status: "empty", query };
+  if (hotels.length === 0)
+    return { status: "empty", query, coverage: null };
 
   return {
     status: hotels.some((hotel) => isHotelDataStale(hotel.updatedAt, now))

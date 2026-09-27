@@ -16,6 +16,7 @@ type SearchResultsProps = {
   state: SearchResultsState;
   rankingCriterion: RankingCriterion;
   selectedHotelIds: string[];
+  onApplyCoverage: (coverage: { checkIn: string; checkOut: string }) => void;
   onRankingCriterionChange: (criterion: RankingCriterion) => void;
   onRetry: () => void;
   onToggleHotel: (hotelId: string) => void;
@@ -26,6 +27,7 @@ export function SearchResults({
   state,
   rankingCriterion,
   selectedHotelIds,
+  onApplyCoverage,
   onRankingCriterionChange,
   onRetry,
   onToggleHotel,
@@ -49,6 +51,7 @@ export function SearchResults({
 
   if (state.status === "empty") {
     const content = getSearchStateContent("empty");
+    const coverage = state.coverage;
     return (
       <section className="search-state" role="status">
         <span className="state-code">EMPTY</span>
@@ -59,6 +62,21 @@ export function SearchResults({
           <p>
             “{state.query}”没有完全匹配该城市、日期和层级的快照。{content.message}
           </p>
+          {coverage && (
+            <>
+              <p className="coverage-hint">
+                “{state.query}”目前只有 {coverage.checkIn} 至 {coverage.checkOut}{" "}
+                的示例快照。
+              </p>
+              <button
+                className="text-button"
+                onClick={() => onApplyCoverage(coverage)}
+                type="button"
+              >
+                用这段日期重新搜索
+              </button>
+            </>
+          )}
         </div>
       </section>
     );
