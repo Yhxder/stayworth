@@ -7,6 +7,7 @@ import { SearchForm } from "./components/search/SearchForm";
 import { SearchResults } from "./components/search/SearchResults";
 import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
+import type { RankingCriterion } from "./lib/hotel-ranking";
 import { getResultsState } from "./lib/hotel-search";
 import { createRebatePrefill } from "./lib/rebate-prefill";
 import type {
@@ -32,6 +33,8 @@ export default function Home() {
   const [resultsState, setResultsState] =
     useState<SearchResultsState>({ status: "idle" });
   const [selectedHotelIds, setSelectedHotelIds] = useState<string[]>([]);
+  const [rankingCriterion, setRankingCriterion] =
+    useState<RankingCriterion>("value");
   const [comparisonOpen, setComparisonOpen] = useState(false);
   const [rebatePrefill, setRebatePrefill] =
     useState<RebatePrefill | null>(null);
@@ -224,8 +227,10 @@ export default function Home() {
         />
         <SearchResults
           focusTargetRef={resultsFocusTarget}
+          onRankingCriterionChange={setRankingCriterion}
           onRetry={handleSearch}
           onToggleHotel={toggleHotel}
+          rankingCriterion={rankingCriterion}
           selectedHotelIds={selectedHotelIds}
           state={resultsState}
         />

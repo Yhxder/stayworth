@@ -1,5 +1,12 @@
 import type { RefObject } from "react";
 import { formatSnapshotDate } from "../../lib/format";
+import {
+  RANKING_OPTIONS,
+  RANKING_SCOPE_NOTE,
+  getRankingOption,
+  rankHotels,
+  type RankingCriterion,
+} from "../../lib/hotel-ranking";
 import { getSearchStateContent } from "../../lib/hotel-search";
 import type { SearchResultsState } from "../../types/hotel";
 import { HotelCard } from "./HotelCard";
@@ -7,7 +14,9 @@ import { HotelCard } from "./HotelCard";
 type SearchResultsProps = {
   focusTargetRef: RefObject<HTMLHeadingElement | null>;
   state: SearchResultsState;
+  rankingCriterion: RankingCriterion;
   selectedHotelIds: string[];
+  onRankingCriterionChange: (criterion: RankingCriterion) => void;
   onRetry: () => void;
   onToggleHotel: (hotelId: string) => void;
 };
@@ -15,7 +24,9 @@ type SearchResultsProps = {
 export function SearchResults({
   focusTargetRef,
   state,
+  rankingCriterion,
   selectedHotelIds,
+  onRankingCriterionChange,
   onRetry,
   onToggleHotel,
 }: SearchResultsProps) {
@@ -77,6 +88,8 @@ export function SearchResults({
     state.hotels[0].updatedAt,
   );
   const staleContent = getSearchStateContent("stale");
+  const rankedHotels = rankHotels(state.hotels, rankingCriterion);
+  const rankingOption = getRankingOption(rankingCriterion);
 
   return (
     <div className="results-block">
@@ -100,12 +113,39 @@ export function SearchResults({
         </div>
       )}
 
+      <fieldset className="ranking-toolbar">
+        <legend>排序口径</legend>
+        <div className="ranking-options">
+          {RANKING_OPTIONS.map((option) => (
+            <label
+              className={rankingCriterion === option.id ? "is-active" : ""}
+              key={option.id}
+            >
+              <input
+                checked={rankingCriterion === option.id}
+                name="ranking-criterion"
+                onChange={() => onRankingCriterionChange(option.id)}
+                type="radio"
+                value={option.id}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
+        <p className="ranking-hint">{rankingOption.hint}</p>
+      </fieldset>
+      <p className="ranking-scope">
+        {RANKING_SCOPE_NOTE} 当前共比较 {state.hotels.length} 家。
+      </p>
+
       <div className="hotel-grid">
-        {state.hotels.map((hotel) => (
+        {rankedHotels.map(({ hotel, rank }) => (
           <HotelCard
             hotel={hotel}
             key={hotel.id}
             onToggle={onToggleHotel}
+            rank={rank}
+            rankingCriterion={rankingCriterion}
             selected={selectedHotelIds.includes(hotel.id)}
           />
         ))}

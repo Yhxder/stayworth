@@ -150,6 +150,11 @@ test("纯键盘可以按阅读顺序搜索并选择酒店", async ({ page }) => 
   expect(Number.parseFloat(resultsHeadingOutline)).toBeGreaterThanOrEqual(3);
 
   await page.keyboard.press("Tab");
+  const rankingOption = page.getByRole("radio", { name: "兑换价值最高" });
+  await expect(rankingOption).toBeFocused();
+  await expect(rankingOption).toBeChecked();
+
+  await page.keyboard.press("Tab");
   const firstHotelButton = page
     .getByRole("button", { name: /^选择.+进行比较$/ })
     .first();

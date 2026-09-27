@@ -1,6 +1,10 @@
 import { formatCurrencyAmount } from "../../lib/currencies";
 import { formatPoints } from "../../lib/format";
 import {
+  getRankingOption,
+  type RankingCriterion,
+} from "../../lib/hotel-ranking";
+import {
   calculateCashValuePerTenThousand,
   calculatePointsPerCurrencyUnit,
 } from "../../lib/points";
@@ -8,11 +12,19 @@ import type { Hotel } from "../../types/hotel";
 
 type HotelCardProps = {
   hotel: Hotel;
+  rank: number;
+  rankingCriterion: RankingCriterion;
   selected: boolean;
   onToggle: (hotelId: string) => void;
 };
 
-export function HotelCard({ hotel, selected, onToggle }: HotelCardProps) {
+export function HotelCard({
+  hotel,
+  rank,
+  rankingCriterion,
+  selected,
+  onToggle,
+}: HotelCardProps) {
   const valuePerTenThousand = calculateCashValuePerTenThousand(
     hotel.cashPrice,
     hotel.pointsRequired,
@@ -21,13 +33,22 @@ export function HotelCard({ hotel, selected, onToggle }: HotelCardProps) {
     hotel.cashPrice,
     hotel.pointsRequired,
   );
+  const rankingOption = getRankingOption(rankingCriterion);
 
   return (
-    <article className={`hotel-card ${selected ? "is-selected" : ""}`}>
+    <article
+      className={`hotel-card ${selected ? "is-selected" : ""} ${
+        rank === 1 ? "is-top-ranked" : ""
+      }`}
+    >
       <div className="card-topline">
         <span>{hotel.sourceLabel}</span>
         <span>{hotel.tier}</span>
       </div>
+      <p className="rank-chip">
+        <span className="rank-number">#{rank}</span>
+        {rankingOption.label}
+      </p>
       <div className="hotel-placeholder" aria-hidden="true">
         <span>HOTEL</span>
       </div>

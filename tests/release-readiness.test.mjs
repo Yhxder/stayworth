@@ -58,7 +58,7 @@ test("describes the shipped scope without overstating the roadmap", () => {
   const readme = read("README.md");
 
   assert.match(readme, /Data Sources, Privacy, and Independence/);
-  assert.match(readme, /Rank hotels by redemption value \| ⬜/);
+  assert.match(readme, /Rank hotels by redemption value \| ✅/);
   assert.match(readme, /GitHub Actions/);
   assert.match(readme, /not affiliated with/i);
 });

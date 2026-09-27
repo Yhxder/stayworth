@@ -80,7 +80,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Connect the hotel UI to the Worker API | ✅ |
 | Build hotel search against the D1 snapshot API | ✅ |
 | Add side-by-side hotel comparison | ✅ |
-| Rank hotels by redemption value | ⬜ |
+| Rank hotels by redemption value | ✅ |
 | Research and validate a live-data strategy | ⬜ |
 | Define the daily Marriott point-value methodology | ⬜ |
 | Add automated tests and data-quality checks | ✅ |
@@ -91,9 +91,13 @@ result when a date has no snapshot instead of substituting another date's rate.
 
 **Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
 
-Search results are currently ordered by cash price. Ranking hotels by
-redemption value is not implemented yet, so the interface never claims to
-recommend a "best" hotel.
+Search results are ranked inside the current result set. You can order them by
+redemption value (cash value per 10,000 points, highest first), by cash price,
+or by points required. Hotels with an identical primary metric share a rank, and
+deterministic tie-breakers keep the same snapshot rendering the same order. The
+interface states that the ranking covers only the snapshots returned for the
+query and ignores taxes, availability, and member offers, so it never claims to
+recommend a hotel.
 
 ## 🎯 Product Principles
 

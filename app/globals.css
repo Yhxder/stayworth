@@ -1064,6 +1064,94 @@ dd {
   padding: 8px 12px;
 }
 
+.ranking-toolbar {
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin: 0 0 12px;
+  padding: 12px 16px 14px;
+}
+
+.ranking-toolbar legend {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 0 6px;
+  text-transform: uppercase;
+}
+
+.ranking-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ranking-options label {
+  align-items: center;
+  border: 1.5px solid var(--line-strong);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+.ranking-options label.is-active {
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.ranking-options input {
+  accent-color: currentColor;
+  margin: 0;
+}
+
+.ranking-options label span {
+  white-space: nowrap;
+}
+
+.ranking-hint {
+  color: var(--muted);
+  flex-basis: 100%;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ranking-scope {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.rank-chip {
+  align-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--ink);
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 4px 10px 4px 4px;
+}
+
+.rank-number {
+  background: var(--ink);
+  color: #ffffff;
+  padding: 3px 7px;
+}
+
+.hotel-card.is-top-ranked {
+  border-color: var(--accent);
+  box-shadow: 6px 6px 0 var(--accent);
+}
+
 .trust-section {
   border-top: 2px solid var(--ink);
   margin-top: 42px;
