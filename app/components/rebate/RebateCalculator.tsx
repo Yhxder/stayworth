@@ -53,11 +53,14 @@ type CalculatorField =
 type RebateCalculatorProps = {
   hidden?: boolean;
   prefill?: RebatePrefill | null;
+  /** 跳转到 StayWorth Index 模块；不传时不显示入口按钮。 */
+  onOpenIndex?: () => void;
 };
 
 export function RebateCalculator({
   hidden = false,
   prefill = null,
+  onOpenIndex,
 }: RebateCalculatorProps) {
   const initialCurrency = prefill?.currency ?? "CNY";
   const initialBrandId =
@@ -631,13 +634,18 @@ export function RebateCalculator({
 
       <section className="index-placeholder">
         <div>
-          <p className="step-label">FUTURE DATA MODULE</p>
+          <p className="step-label">RELATED DATA MODULE</p>
           <h3>StayWorth Index · 每万分参考价</h3>
           <p>
-            未来将基于多个代表城市与酒店，展示每日中位数、波动区间、样本量和更新时间。
+            已经上线：基于 30 个代表城市的每日抽样，展示每万分参考价值的中位数、区间、样本量与更新时间。
+            可以拿它对照上面自己填的估值，判断这次兑换是高还是低。
           </p>
         </div>
-        <span>研究中</span>
+        {onOpenIndex ? (
+          <button onClick={onOpenIndex} type="button">
+            查看参考价值
+          </button>
+        ) : null}
       </section>
     </section>
   );

@@ -120,6 +120,7 @@ test("纯键盘可以按阅读顺序搜索并选择酒店", async ({ page }) => 
     page.getByRole("link", { name: "StayWorth 首页" }),
     page.getByRole("button", { name: "切换到酒店对比模块" }),
     page.getByRole("button", { name: "切换到积分回血模块" }),
+    page.getByRole("button", { name: "切换到每万分参考价值模块" }),
     page.getByLabel("城市或目的地"),
     page.getByLabel("入住日期"),
   ];

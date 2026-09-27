@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RebateCalculator } from "./components/rebate/RebateCalculator";
+import { IndexSection } from "./components/index/IndexSection";
 import { ComparisonSection } from "./components/search/ComparisonSection";
 import { SearchForm } from "./components/search/SearchForm";
 import { SearchResults } from "./components/search/SearchResults";
@@ -18,7 +19,7 @@ import type {
   SearchResultsState,
 } from "./types/hotel";
 
-type ModuleName = "comparison" | "rebate";
+type ModuleName = "comparison" | "rebate" | "index";
 
 type SearchValidation = {
   field: "city" | "checkIn" | "checkOut";
@@ -242,6 +243,17 @@ export default function Home() {
           积分回血
           <small>计算真实入住成本</small>
         </button>
+        <button
+          aria-label="切换到每万分参考价值模块"
+          aria-pressed={activeModule === "index"}
+          className={activeModule === "index" ? "is-active" : ""}
+          onClick={() => setActiveModule("index")}
+          type="button"
+        >
+          <span>03</span>
+          每万分参考价值
+          <small>StayWorth Index</small>
+        </button>
       </nav>
 
       <section
@@ -289,8 +301,11 @@ export default function Home() {
       <RebateCalculator
         hidden={activeModule !== "rebate"}
         key={rebatePrefill?.revision ?? "manual"}
+        onOpenIndex={() => setActiveModule("index")}
         prefill={rebatePrefill}
       />
+
+      <IndexSection hidden={activeModule !== "index"} />
 
       <TrustAndSources />
 

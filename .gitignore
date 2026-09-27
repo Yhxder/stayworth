@@ -49,4 +49,11 @@ next-env.d.ts
 # Personal learning notes (local only)
 DEVELOPMENT_NOTES.md
 PROTOTYPE_ACCEPTANCE.md
+MVP_ACCEPTANCE.md
+TODO.md
+/docs/DATA_SAMPLING_SPEC.md
 /local-notes/
+
+# StayWorth Index sampling (local only — scraping logic stays off the public repo)
+/scraper/
+/.data/
