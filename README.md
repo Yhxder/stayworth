@@ -87,7 +87,8 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Add end-to-end tests for both core user flows | ✅ |
 | Validate mobile, tablet, keyboard, and form accessibility | ✅ |
 | Validate empty, API-error, and stale-data recovery flows | ✅ |
-| Publish the MVP on a public domain | ⬜ |
+| Deploy the MVP to Cloudflare Workers | ✅ |
+| Publish the MVP on a custom domain | ⬜ |
 
 **Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
 
