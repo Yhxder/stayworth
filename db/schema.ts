@@ -186,6 +186,11 @@ export const indexSamples = sqliteTable(
     /** 数据源给的小数位，1 表示货币最小单位 */
     cashTotalMinor: integer("cash_total_minor").notNull(),
     cashTotalDecimalPoint: integer("cash_total_decimal_point").notNull(),
+    /** 税前金额、服务费、税费，与本地库保持一致，便于以后展示明细 */
+    cashAmountMinor: integer("cash_amount_minor").notNull().default(0),
+    cashAmountDecimalPoint: integer("cash_amount_decimal_point").notNull().default(2),
+    feesMinor: integer("fees_minor").notNull().default(0),
+    taxesMinor: integer("taxes_minor").notNull().default(0),
     points: integer("points").notNull(),
     membersOnly: integer("members_only", { mode: "boolean" }).notNull().default(false),
     valuePer10k: real("value_per_10k").notNull(),

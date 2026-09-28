@@ -1,81 +1,57 @@
-export const EXCHANGE_RATE_REFERENCE_DATE = "2026-08-21";
-export const EXCHANGE_RATE_SOURCE_URL =
-  "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html";
+/**
+ * 回血计算器使用的币种与参考汇率。
+ *
+ * 汇率不再是手抄表：数值来自 `app/data/fx-snapshot.json`，
+ * 而那份快照由每日抓取写入（源头是 D1 的 `fx_rates` 表，见 scraper/fx-rates.ts）。
+ * 因此计算器与 StayWorth Index 用的是同一套汇率，不会出现两个日期、两个来源。
+ *
+ * 快照随构建打进前端，所以它反映「最后一次发布时的汇率」；
+ * 页面照例显示参考日期与来源，并提示可以手动修改。
+ */
 
-export const currencyOptions = [
-  {
-    code: "CNY",
-    label: "人民币",
-    symbol: "¥",
-    unitsPerUsd: 6.7206,
-    fractionDigits: 2,
-  },
-  {
-    code: "HKD",
-    label: "港币",
-    symbol: "HK$",
-    unitsPerUsd: 7.8405,
-    fractionDigits: 2,
-  },
-  {
-    code: "USD",
-    label: "美元",
-    symbol: "US$",
-    unitsPerUsd: 1,
-    fractionDigits: 2,
-  },
-  {
-    code: "CAD",
-    label: "加拿大元",
-    symbol: "CA$",
-    unitsPerUsd: 1.374,
-    fractionDigits: 2,
-  },
-  {
-    code: "JPY",
-    label: "日元",
-    symbol: "JP¥",
-    unitsPerUsd: 158.7,
-    fractionDigits: 0,
-  },
-  {
-    code: "KRW",
-    label: "韩元",
-    symbol: "₩",
-    unitsPerUsd: 1384.23,
-    fractionDigits: 0,
-  },
-  {
-    code: "SGD",
-    label: "新加坡元",
-    symbol: "S$",
-    unitsPerUsd: 1.2683,
-    fractionDigits: 2,
-  },
-  {
-    code: "THB",
-    label: "泰铢",
-    symbol: "฿",
-    unitsPerUsd: 32.6746,
-    fractionDigits: 2,
-  },
-  {
-    code: "EUR",
-    label: "欧元",
-    symbol: "€",
-    unitsPerUsd: 0.8548,
-    fractionDigits: 2,
-  },
-  {
-    code: "GBP",
-    label: "英镑",
-    symbol: "£",
-    unitsPerUsd: 0.7323,
-    fractionDigits: 2,
-  },
+// 运行时要被 Node 直接执行，必须带扩展名（见 DEVELOPMENT_NOTES 的既有约定）。
+import { FX_SNAPSHOT as fxSnapshot } from "../data/fx-snapshot.ts";
+
+const rates = fxSnapshot.rates as Record<string, number>;
+
+export const EXCHANGE_RATE_REFERENCE_DATE = fxSnapshot.referenceDate;
+export const EXCHANGE_RATE_SOURCE_URL = fxSnapshot.sourceUrl;
+export const EXCHANGE_RATE_SOURCE_NAME = fxSnapshot.sourceName;
+
+/** 币种展示信息；汇率在下面统一从快照推导，避免两处数据不一致。 */
+const currencyMeta = [
+  { code: "CNY", label: "人民币", symbol: "¥", fractionDigits: 2 },
+  { code: "HKD", label: "港币", symbol: "HK$", fractionDigits: 2 },
+  { code: "USD", label: "美元", symbol: "US$", fractionDigits: 2 },
+  { code: "CAD", label: "加拿大元", symbol: "CA$", fractionDigits: 2 },
+  { code: "JPY", label: "日元", symbol: "JP¥", fractionDigits: 0 },
+  { code: "KRW", label: "韩元", symbol: "₩", fractionDigits: 0 },
+  { code: "SGD", label: "新加坡元", symbol: "S$", fractionDigits: 2 },
+  { code: "THB", label: "泰铢", symbol: "฿", fractionDigits: 2 },
+  { code: "EUR", label: "欧元", symbol: "€", fractionDigits: 2 },
+  { code: "GBP", label: "英镑", symbol: "£", fractionDigits: 2 },
+  // 下面几个是为了让 Index 的国家参考值（当地货币）能换算到用户选的币种而补的
+  { code: "TWD", label: "新台币", symbol: "NT$", fractionDigits: 0 },
+  { code: "INR", label: "印度卢比", symbol: "₹", fractionDigits: 0 },
+  { code: "AED", label: "阿联酋迪拉姆", symbol: "AED ", fractionDigits: 2 },
+  { code: "AUD", label: "澳大利亚元", symbol: "A$", fractionDigits: 2 },
+  { code: "BRL", label: "巴西雷亚尔", symbol: "R$", fractionDigits: 2 },
+  { code: "COP", label: "哥伦比亚比索", symbol: "COL$ ", fractionDigits: 0 },
 ] as const;
 
-export type CurrencyCode = (typeof currencyOptions)[number]["code"];
+export type CurrencyCode = (typeof currencyMeta)[number]["code"];
+
+/**
+ * 快照以 CNY 为基准，所以 1 USD = rates.USD 个 CNY，
+ * 而 unitsPerUsd 表示「1 美元等于多少该币种」，即 rates[code] / rates.USD。
+ */
+const unitsPerBase = rates.CNY ?? 1;
+const unitsPerUsdRate = rates.USD ?? 1;
+
+export const currencyOptions = currencyMeta.map((meta) => ({
+  ...meta,
+  unitsPerUsd: (rates[meta.code] ?? unitsPerBase) / unitsPerUsdRate,
+}));
 
 export function getCurrencyConfig(code: string) {
   const currency = currencyOptions.find((option) => option.code === code);

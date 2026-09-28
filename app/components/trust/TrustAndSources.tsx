@@ -5,6 +5,7 @@ import {
 import { CARD_RULE_REFERENCE_DATE } from "../../lib/cards";
 import {
   EXCHANGE_RATE_REFERENCE_DATE,
+  EXCHANGE_RATE_SOURCE_NAME,
   EXCHANGE_RATE_SOURCE_URL,
 } from "../../lib/currencies";
 
@@ -45,7 +46,7 @@ export function TrustAndSources() {
               Marriott 官方积分规则
             </a>
             <a href={EXCHANGE_RATE_SOURCE_URL} rel="noreferrer" target="_blank">
-              欧洲央行参考汇率
+              {EXCHANGE_RATE_SOURCE_NAME}
             </a>
           </p>
         </article>

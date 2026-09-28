@@ -58,14 +58,14 @@ test("切换统一货币会同时改变全球与档位视图的币种", async ({
   await expect(section).toContainText("统一货币 USD");
 });
 
-test("说明汇率来源与无法换算的市场", async ({ page }) => {
+test("说明汇率来源，并确认没有市场被排除在统一口径外", async ({ page }) => {
   await openIndexModule(page);
   const section = page.locator("#index");
 
-  await expect(section).toContainText("欧洲央行参考汇率");
+  await expect(section).toContainText("open.er-api.com");
   await expect(section).toContainText("非实时");
-  await expect(section).toContainText(/因缺少汇率未计入/);
-  await expect(section).toContainText(/TWD/);
+  await expect(section).not.toContainText("因缺少汇率未计入");
+  await expect(section).not.toContainText("兜底汇率表");
 
   const sourceLink = section.getByRole("link", { name: "来源" });
   await expect(sourceLink).toHaveAttribute("target", "_blank");

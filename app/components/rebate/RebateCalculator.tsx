@@ -373,7 +373,7 @@ export function RebateCalculator({
                 · 可手动修改
               </span>
               <a href={EXCHANGE_RATE_SOURCE_URL} rel="noreferrer" target="_blank">
-                查看欧洲央行来源
+                查看汇率来源
               </a>
             </div>
             <div className="price-integration-note" role="note">

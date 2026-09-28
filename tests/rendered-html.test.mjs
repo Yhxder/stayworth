@@ -46,7 +46,8 @@ test("server-renders the StayWorth low-fidelity prototype", async () => {
   assert.match(html, /不计分金额/);
   assert.match(html, /入住晚数/);
   assert.match(html, /参考汇率日期：/);
-  assert.match(html, /2026-08-21/);
+  // 汇率来自每日抓取的快照，日期会随发布变化，这里只要求出现一个合法日期
+  assert.match(html, /参考汇率日期：<!-- -->\d{4}-\d{2}-\d{2}/);
   assert.match(html, /信用卡选择/);
   assert.match(html, /🇨🇳 中信银行万豪旅享家联名信用卡金卡/);
   assert.match(html, /🇺🇸 Marriott Bonvoy Brilliant/);
@@ -86,5 +87,5 @@ test("server-renders the data-source, privacy, and independence notices", async 
   assert.match(html, /独立项目声明/);
   assert.match(html, /没有隶属、赞助或背书关系/);
   assert.match(html, /不构成预订、兑换、税务或财务建议/);
-  assert.match(html, /ecb\.europa\.eu/);
+  assert.match(html, /open\.er-api\.com/);
 });
