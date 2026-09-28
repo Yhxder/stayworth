@@ -4,6 +4,10 @@
  * 这是样本框的唯一事实来源：文档与实现的描述都必须与本文件一致。
  * 规格见 docs/DATA_SAMPLING_SPEC.md 第三节。
  *
+ * v4（2026-09-29 生效）：南美加波哥大。实测里约热内卢只有 4 家酒店（可用 2 家），
+ * 达不到 8 家城市下限、对 Index 没有任何贡献；波哥大 14 家（可用 12、11 个品牌），
+ * 是南美唯一能真正产出参考值的市场。里约保留在面板里（用户指定），但标注为展示用。
+ *
  * v3（2026-09-28 生效）：在 v2 基础上补两个市场——东亚加上海（国内品牌覆盖最全的市场），
  * 南美加里约热内卢（补上此前完全缺失的南美）。BRL 已在汇率来源覆盖范围内。
  * 本次只加城市、不再删减；单日请求量预计从约 25 次升到约 30 次，仍在 100 次预算内。
@@ -23,8 +27,8 @@
  *    两者含义不同，不要互相赋值。
  */
 
-export const CITY_PANEL_VERSION = "v3";
-export const CITY_PANEL_EFFECTIVE_DATE = "2026-09-28";
+export const CITY_PANEL_VERSION = "v4";
+export const CITY_PANEL_EFFECTIVE_DATE = "2026-09-29";
 
 export type PanelCity = {
   /** StayWorth 内部标识 */
@@ -41,6 +45,11 @@ export type PanelCity = {
   currencyCode: string;
   /** 用于确定「T+30」当地日期 */
   timezone: string;
+  /**
+   * 实测可用样本不足以进入聚合、仅作市场展示的城市。
+   * 保留是为了让用户看得到该市场，但页面上不得给它任何参考值。
+   */
+  displayOnly?: boolean;
 };
 
 export const cityPanel: PanelCity[] = [
@@ -73,11 +82,20 @@ export const cityPanel: PanelCity[] = [
   { slug: "minneapolis", nameZh: "明尼阿波利斯", nameEn: "Minneapolis", countryCode: "US", countryNameZh: "美国", region: "Americas", area: "美国中部", currencyCode: "USD", timezone: "America/Chicago" },
   { slug: "seattle", nameZh: "西雅图", nameEn: "Seattle", countryCode: "US", countryNameZh: "美国", region: "Americas", area: "美国西部", currencyCode: "USD", timezone: "America/Los_Angeles" },
   { slug: "toronto", nameZh: "多伦多", nameEn: "Toronto", countryCode: "CA", countryNameZh: "加拿大", region: "Americas", area: "加拿大", currencyCode: "CAD", timezone: "America/Toronto" },
-  { slug: "rio-de-janeiro", nameZh: "里约热内卢", nameEn: "Rio de Janeiro", countryCode: "BR", countryNameZh: "巴西", region: "Americas", area: "南美", currencyCode: "BRL", timezone: "America/Sao_Paulo" },
+  { slug: "rio-de-janeiro", nameZh: "里约热内卢", nameEn: "Rio de Janeiro", countryCode: "BR", countryNameZh: "巴西", region: "Americas", area: "南美", currencyCode: "BRL", timezone: "America/Sao_Paulo", displayOnly: true },
+  { slug: "bogota", nameZh: "波哥大", nameEn: "Bogota", countryCode: "CO", countryNameZh: "哥伦比亚", region: "Americas", area: "南美", currencyCode: "COP", timezone: "America/Bogota" },
 ];
 
 export const cityBySlug = (slug: string): PanelCity | null =>
   cityPanel.find((city) => city.slug === slug) ?? null;
+
+/**
+ * 仅作展示、不得产出参考值的城市（实测可用样本远低于 8 家下限）。
+ * 聚合前会把这些城市的样本剔除，避免它们悄悄影响任何一层数字。
+ */
+export const displayOnlyCitySlugs = cityPanel
+  .filter((city) => city.displayOnly === true)
+  .map((city) => city.slug);
 
 /**
  * 统一货币换算的注意事项：

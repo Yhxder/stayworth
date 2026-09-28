@@ -38,10 +38,13 @@ export const unitsPerEur: Record<string, number> = {
 
 /**
  * 当前汇率来源未覆盖的币种。
- * 面板 v3 仍在用的是 TWD（台北）与 AED（迪拜）；这两个市场只提供当地货币口径，
+ * 面板 v4 仍在用的是 TWD（台北）、AED（迪拜）、COP（波哥大）；这几个市场只提供当地货币口径，
  * 不参与统一货币视图。VND 同样不在 ECB 清单里，但面板已不再采越南城市，仅作记录。
+ *
+ * 结果是：**南美目前无法进入统一货币视图**——里约（BRL，有汇率）样本太薄，
+ * 波哥大（样本充足）却没有可用汇率。需要南美进统一口径时，得先补 COP 的汇率来源。
  */
-export const currenciesWithoutRate = ["TWD", "AED", "VND"] as const;
+export const currenciesWithoutRate = ["TWD", "AED", "COP", "VND"] as const;
 
 export function hasRate(currencyCode: string): boolean {
   return Object.prototype.hasOwnProperty.call(unitsPerEur, currencyCode);
