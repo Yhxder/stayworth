@@ -156,10 +156,17 @@ test("keeps the country view in each country's own currency", () => {
   assert.equal(view.currencyCode, null);
 });
 
-test("admits which currencies cannot be converted yet", () => {
+test("converts every currency the panel uses, and refuses unknown ones", () => {
+  // 2026-09-28 换汇率源头后，原先缺汇率的 TWD / AED / COP 都能换算了。
   assert.equal(hasRate("CNY"), true);
-  assert.equal(hasRate("TWD"), false);
-  assert.equal(convertCurrency(100, "TWD", "CNY"), null);
+  assert.equal(hasRate("TWD"), true);
+  assert.equal(hasRate("COP"), true);
+  assert.equal(hasRate("AED"), true);
+
+  const twdToCny = convertCurrency(100, "TWD", "CNY");
+  assert.ok(twdToCny !== null && twdToCny > 0);
+  // 未知币种仍然必须返回 null，绝不猜
+  assert.equal(convertCurrency(100, "XYZ", "CNY"), null);
   assert.equal(convertCurrency(100, "CNY", "CNY"), 100);
 });
 

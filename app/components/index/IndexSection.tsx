@@ -34,10 +34,12 @@ type IndexSummary = {
   currency: {
     display: string;
     options: string[];
+    base?: string;
     referenceDate: string;
     sourceName: string;
     sourceUrl: string;
     nonRealTime: boolean;
+    usedFallback?: boolean;
   };
   views: {
     byCurrency: Record<string, { global: IndexView; tier: IndexView }>;
@@ -219,6 +221,7 @@ export function IndexSection({ hidden }: { hidden: boolean }) {
             来源
           </a>
           ），参考日期 {summary.currency.referenceDate}，非实时。
+          {summary.currency.usedFallback ? " 当日汇率未取到，此处使用带日期戳的兜底汇率表。" : null}
           {activeView.exclusions.length > 0 ? (
             <>
               {" "}

@@ -1,67 +1,66 @@
 /**
- * StayWorth Index 统一货币换算用的汇率表。
+ * StayWorth Index 统一货币换算。
  *
- * 来源：欧洲央行每日参考汇率（ECB reference rates），以欧元为基准。
- * 参考日期：2026-09-25（最近一个工作日）。
- * 该汇率仅用于展示层换算，不写回原始样本；页面上必须标注来源与日期，并注明非实时。
+ * 汇率来自开放接口（open.er-api.com，覆盖 166 种货币、无需密钥、每日更新），
+ * 每天由抓取端写入 D1 的 `fx_rates` 表，导出时读取最新一行。
  *
- * 覆盖情况：面板 18 种当地币种中，ECB 覆盖 15 种。
- * 缺口：TWD（新台币）、VND（越南盾）、AED（迪拉姆）不在 ECB 参考汇率清单内，
- * 因此台湾、越南、阿联酋三个市场的样本不参与统一货币视图，只提供当地货币口径。
- * 补齐来源前不得用近似值填充（见 docs/DATA_SAMPLING_SPEC.md 第八节）。
+ * 这里保留一份**兜底表**：D1 暂时读不到时用它在本地算出结果，并在页面上注明用的是兜底汇率。
+ * 兜底表是 2026-09-28 的真实快照，不是估算值。
+ *
+ * 口径：1 基准币 = rates[X] 个目标币。基准统一用 CNY。
  */
 
-export const INDEX_FX_REFERENCE_DATE = "2026-09-25";
-export const INDEX_FX_SOURCE_NAME = "欧洲央行参考汇率 (ECB)";
-export const INDEX_FX_SOURCE_URL =
-  "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+export const FX_BASE = "CNY";
+export const FX_FALLBACK_REFERENCE_DATE = "2026-09-28";
+export const FX_FALLBACK_SOURCE_NAME = "open.er-api.com（ExchangeRate-API 开放端点）";
+export const FX_FALLBACK_SOURCE_URL = "https://open.er-api.com/v6/latest/CNY";
 
-/** 1 欧元可兑换的当地货币数量。 */
-export const unitsPerEur: Record<string, number> = {
-  EUR: 1,
-  USD: 1.1403,
-  JPY: 179.7,
-  KRW: 1545.16,
-  SGD: 1.4563,
-  THB: 38.023,
-  HKD: 8.9445,
-  CNY: 7.6551,
-  GBP: 0.86045,
-  MYR: 4.6456,
-  IDR: 20427.22,
-  PHP: 71.244,
-  INR: 109.2605,
-  AUD: 1.622,
-  CAD: 1.6127,
-  BRL: 5.9091,
+/** 1 CNY = 表中数值个目标币。 */
+export const FX_FALLBACK_RATES: Record<string, number> = {
+  CNY: 1,
+  JPY: 23.456869,
+  KRW: 203.086921,
+  HKD: 1.167613,
+  TWD: 4.739336,
+  SGD: 0.190259,
+  THB: 4.963391,
+  INR: 14.265132,
+  AUD: 0.21233,
+  GBP: 0.112528,
+  EUR: 0.130816,
+  AED: 0.546545,
+  USD: 0.148821,
+  CAD: 0.210588,
+  BRL: 0.769408,
+  COP: 496.210616,
 };
 
-/**
- * 当前汇率来源未覆盖的币种。
- * 面板 v4 仍在用的是 TWD（台北）、AED（迪拜）、COP（波哥大）；这几个市场只提供当地货币口径，
- * 不参与统一货币视图。VND 同样不在 ECB 清单里，但面板已不再采越南城市，仅作记录。
- *
- * 结果是：**南美目前无法进入统一货币视图**——里约（BRL，有汇率）样本太薄，
- * 波哥大（样本充足）却没有可用汇率。需要南美进统一口径时，得先补 COP 的汇率来源。
- */
-export const currenciesWithoutRate = ["TWD", "AED", "COP", "VND"] as const;
-
-export function hasRate(currencyCode: string): boolean {
-  return Object.prototype.hasOwnProperty.call(unitsPerEur, currencyCode);
-}
-
-/**
- * 把 amount 从 from 换算到 to。
- * 任一币种缺少汇率时返回 null——宁可不要数字，也不猜汇率。
- */
-export function convertCurrency(
+export type ConvertCurrency = (
   amount: number,
   from: string,
   to: string,
-): number | null {
-  if (from === to) return amount;
-  const fromRate = unitsPerEur[from];
-  const toRate = unitsPerEur[to];
-  if (!fromRate || !toRate) return null;
-  return (amount / fromRate) * toRate;
+) => number | null;
+
+/**
+ * 用一张汇率表构造换算函数。
+ * 任一币种不在表里就返回 null——宁可不要数字，也不猜汇率。
+ */
+export function makeConverter(
+  rates: Record<string, number> = FX_FALLBACK_RATES,
+): ConvertCurrency {
+  return (amount, from, to) => {
+    if (from === to) return amount;
+    const fromRate = rates[from];
+    const toRate = rates[to];
+    if (!fromRate || !toRate) return null;
+    // rates[X] = 1 基准币可兑换的 X 数量：先折回基准币，再折到目标币
+    return (amount / fromRate) * toRate;
+  };
+}
+
+/** 用兜底汇率表构造的换算函数，供测试与无 D1 场景使用。 */
+export const convertCurrency: ConvertCurrency = makeConverter();
+
+export function hasRate(currencyCode: string, rates = FX_FALLBACK_RATES): boolean {
+  return Object.prototype.hasOwnProperty.call(rates, currencyCode);
 }

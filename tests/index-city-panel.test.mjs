@@ -7,9 +7,8 @@ import {
   displayOnlyCitySlugs,
 } from "../app/data/city-panel.ts";
 import {
-  currenciesWithoutRate,
+  FX_FALLBACK_RATES,
   hasRate,
-  unitsPerEur,
 } from "../app/data/index-fx.ts";
 
 test("keeps the city panel internally consistent", () => {
@@ -23,17 +22,14 @@ test("keeps the city panel internally consistent", () => {
   }
 });
 
-test("never leaves a panel currency without an explanation", () => {
-  // 每个币种要么有汇率，要么在「已知缺汇率」清单里被显式记下来。
+test("every panel currency has a rate so all regions reach the unified view", () => {
+  // 2026-09-28 起换成覆盖 166 种货币的开放接口，面板里每个币种都必须有汇率。
   // 新增城市时忘了补汇率，这条会直接失败，而不是让页面悄悄少一个国家。
-  const missing = currenciesWithoutRate;
+  const missing = [];
   for (const city of cityPanel) {
-    const covered = hasRate(city.currencyCode) || missing.includes(city.currencyCode);
-    assert.ok(
-      covered,
-      `${city.slug} 的币种 ${city.currencyCode} 既没有汇率也没登记在 currenciesWithoutRate`,
-    );
+    if (!hasRate(city.currencyCode)) missing.push(`${city.slug}:${city.currencyCode}`);
   }
+  assert.deepEqual(missing, [], `以下市场缺汇率：${missing.join("、")}`);
 });
 
 test("keeps display-only cities out of the value views", () => {
@@ -50,8 +46,11 @@ test("keeps display-only cities out of the value views", () => {
 });
 
 test("keeps the exchange-rate table honest about its coverage", () => {
-  assert.ok(Object.keys(unitsPerEur).length >= 16);
-  assert.equal(unitsPerEur.EUR, 1);
-  assert.equal(hasRate("COP"), false, "比索没有 ECB 汇率，必须如实返回 false");
-  assert.ok(currenciesWithoutRate.includes("COP"));
+  // 这三种就是被 ECB 漏掉、逼我们换源头的币种，必须都在
+  for (const code of ["TWD", "AED", "COP"]) {
+    assert.equal(hasRate(code), true, `${code} 必须有汇率`);
+    assert.ok(FX_FALLBACK_RATES[code] > 0);
+  }
+  assert.equal(FX_FALLBACK_RATES.CNY, 1, "基准币自身必须是 1");
+  assert.equal(hasRate("XYZ"), false, "未知币种必须如实返回 false");
 });

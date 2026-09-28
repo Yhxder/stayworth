@@ -15,6 +15,13 @@
       "when": 1787646743731,
       "tag": "0001_clarify_cyberport_source",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790569172955,
+      "tag": "0002_nebulous_sabra",
+      "breakpoints": true
     }
   ]
 }
