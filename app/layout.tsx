@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "StayWorth | Marriott Points Decision Tool",
   description:
-    "A low-fidelity prototype for comparing Marriott cash rates, points prices, and the net cost of paid stays.",
+    "Compare Marriott cash rates, points prices and the market reference value of 10,000 points before you book.",
   openGraph: {
     title: "StayWorth | Marriott Points Decision Tool",
     description:
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
         url: "https://raw.githubusercontent.com/Yhxder/stayworth/main/public/og.png",
         width: 1200,
         height: 630,
-        alt: "StayWorth — Marriott points, made clearer.",
+        alt: "StayWorth: Marriott points, made clearer.",
       },
     ],
     type: "website",

@@ -22,7 +22,7 @@ async function render() {
   );
 }
 
-test("server-renders the StayWorth low-fidelity prototype", async () => {
+test("server-renders the StayWorth decision home page", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
@@ -41,7 +41,7 @@ test("server-renders the StayWorth low-fidelity prototype", async () => {
   assert.match(html, /1,235/);
   assert.match(html, /当前支持香港/);
   assert.match(html, /上海/);
-  assert.match(html, /当前价格不是实时库存/);
+  assert.match(html, /不是实时库存/);
   assert.match(html, /结算币种/);
   assert.match(html, /不计分金额/);
   assert.match(html, /入住晚数/);
@@ -63,6 +63,22 @@ test("server-renders the StayWorth low-fidelity prototype", async () => {
   assert.match(html, /name="twitter:card" content="summary_large_image"/);
   assert.match(html, /raw\.githubusercontent\.com\/Yhxder\/stayworth\/main\/public\/og\.png/);
   assert.doesNotMatch(html, /codex-preview|Building your site|react-loading-skeleton/i);
+});
+
+test("server-renders the hero and the fluid glass booking panel", async () => {
+  const response = await render();
+  const html = await response.text();
+
+  assert.match(html, /class="hero"/);
+  assert.match(html, /哪个更值/);
+  assert.match(html, /StayWorth Index/);
+  assert.match(html, /class="liquid-edge rounded-glass liquid-panel booking-panel"/);
+  assert.match(html, /出行人数/);
+  assert.match(html, /Bonvoy 积分兑换/);
+  assert.match(html, /role="switch"/);
+  // 预订面板的行程字段与结果区共用同一份筛选条件，默认日期在服务端就已算好
+  assert.match(html, /id="booking-check-in" type="date" value="\d{4}-\d{2}-\d{2}"/);
+  assert.match(html, /id="booking-check-out" type="date" value="\d{4}-\d{2}-\d{2}"/);
 });
 
 test("prototype includes accessible controls for the two main workflows", async () => {

@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { BookingPanel } from "./components/home/BookingPanel";
+import type { BookingDraft } from "./components/home/BookingPanel";
+import { HeroSection } from "./components/home/HeroSection";
 import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import { IndexSection } from "./components/index/IndexSection";
 import { ComparisonSection } from "./components/search/ComparisonSection";
-import { SearchForm } from "./components/search/SearchForm";
 import { SearchResults } from "./components/search/SearchResults";
 import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
@@ -110,12 +112,21 @@ export default function Home() {
   const searchValidation = validateSearchFilters(filters);
   const searchError = searchValidation?.message ?? "";
 
-  async function handleSearch(nextFilters: SearchFilters = filters) {
+  async function handleSearch(
+    nextFilters: SearchFilters = filters,
+    draft?: BookingDraft,
+  ) {
     if (
       validateSearchFilters(nextFilters) ||
       resultsState.status === "loading"
     ) {
       return;
+    }
+
+    // 预订面板的积分开关决定结果区先按哪一口径排序：积分优先看兑换价值，
+    // 否则先看现金总价。
+    if (draft) {
+      setRankingCriterion(draft.usePoints ? "value" : "cash");
     }
 
     const submittedFilters = { ...nextFilters };
@@ -205,20 +216,24 @@ export default function Home() {
           <span className="wordmark-mark">SW</span>
           <span>
             <strong>StayWorth</strong>
-            <small>Marriott decision prototype</small>
+            <small>Marriott points decision</small>
           </span>
         </a>
-        <span className="prototype-badge">LOW-FI · v0.1</span>
+        <span className="prototype-badge">示例快照 · 非实时</span>
       </header>
 
-      <section className="intro" id="top">
-        <p className="eyebrow">先做正确的决定，再谈精美的界面</p>
-        <h1>这次入住，现金和积分哪个更值？</h1>
-        <p className="intro-copy">
-          使用香港和上海的有限价格快照验证搜索、比较和回血计算流程。
-          当前价格不是实时库存，也不代表最终视觉设计。
-        </p>
-      </section>
+      <HeroSection>
+        <BookingPanel
+          filters={filters}
+          invalidField={searchValidation?.field ?? null}
+          isLoading={resultsState.status === "loading"}
+          onFiltersChange={setFilters}
+          onSearch={(nextFilters, draft) => {
+            void handleSearch(nextFilters, draft);
+          }}
+          validationError={searchError}
+        />
+      </HeroSection>
 
       <nav className="module-switcher" aria-label="主要功能">
         <button
@@ -263,20 +278,13 @@ export default function Home() {
       >
         <div className="section-heading">
           <div>
-            <p className="step-label">MODULE 01</p>
-            <h2 id="comparison-title">搜索并比较酒店</h2>
+            <h2 id="comparison-title">酒店对比</h2>
           </div>
-          <p>先筛选，再选择 2–4 家酒店并排比较。</p>
+          <p>
+            在上方预订面板设置城市、日期和层级，再挑 2 到 4 家并排比较。
+          </p>
         </div>
 
-        <SearchForm
-          filters={filters}
-          isLoading={resultsState.status === "loading"}
-          onChange={setFilters}
-          onSearch={handleSearch}
-          invalidField={searchValidation?.field ?? null}
-          validationError={searchError}
-        />
         <SearchResults
           focusTargetRef={resultsFocusTarget}
           onApplyCoverage={applyCoverage}
@@ -311,7 +319,7 @@ export default function Home() {
 
       <footer>
         <p>
-          StayWorth 低保真原型 · 有限数据快照不构成预订或兑换建议。
+          StayWorth 独立项目 · 示例快照不构成预订或兑换建议。
         </p>
         <p>Independent project · Not affiliated with Marriott International.</p>
       </footer>

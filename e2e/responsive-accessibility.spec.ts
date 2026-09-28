@@ -39,6 +39,18 @@ async function tabAcrossNativeDateSegments(
   await expect(target).toBeFocused();
 }
 
+/** 原生日期控件内部有多个 Tab 停靠点，按阅读顺序前进时要允许跨过它们。 */
+async function tabUntilFocused(page: Page, target: Locator, maxTabs = 6) {
+  for (let attempt = 0; attempt < maxTabs; attempt += 1) {
+    await page.keyboard.press("Tab");
+    if (await target.evaluate((element) => element === document.activeElement)) {
+      return;
+    }
+  }
+
+  await expect(target).toBeFocused();
+}
+
 test("手机宽度保持单列，比较表只在自身内部横向滚动", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
@@ -116,30 +128,26 @@ test("纯键盘可以按阅读顺序搜索并选择酒店", async ({ page }) => 
   await page.goto("/");
   await page.waitForLoadState("networkidle");
 
-  const initialFocusOrder = [
-    page.getByRole("link", { name: "StayWorth 首页" }),
-    page.getByRole("button", { name: "切换到酒店对比模块" }),
-    page.getByRole("button", { name: "切换到积分回血模块" }),
-    page.getByRole("button", { name: "切换到每万分参考价值模块" }),
+  // 首屏预订面板排在阅读顺序最前：目的地、入住、退房、层级、人数、积分开关、提交。
+  const homeLink = page.getByRole("link", { name: "StayWorth 首页" });
+  await page.keyboard.press("Tab");
+  await expect(homeLink).toBeFocused();
+
+  const panelFocusOrder = [
     page.getByLabel("城市或目的地"),
     page.getByLabel("入住日期"),
+    page.getByLabel("退房日期"),
+    page.getByLabel("品牌层级"),
+    page.getByLabel("出行人数"),
+    page.getByRole("switch", { name: /Bonvoy/ }),
+    page.getByRole("button", { name: "搜索匹配酒店" }),
   ];
 
-  for (const control of initialFocusOrder) {
-    await page.keyboard.press("Tab");
-    await expect(control).toBeFocused();
+  for (const control of panelFocusOrder) {
+    await tabUntilFocused(page, control);
   }
 
-  const checkInInput = initialFocusOrder.at(-1)!;
-  const checkOutInput = page.getByLabel("退房日期");
-  const tierSelect = page.getByLabel("品牌层级");
-  const searchButton = page.getByRole("button", { name: "搜索匹配酒店" });
-  await checkInInput.fill(COVERED_CHECK_IN);
-  await tabAcrossNativeDateSegments(page, checkInInput, checkOutInput);
-  await checkOutInput.fill(COVERED_CHECK_OUT);
-  await tabAcrossNativeDateSegments(page, checkOutInput, tierSelect);
-  await page.keyboard.press("Tab");
-  await expect(searchButton).toBeFocused();
+  const searchButton = panelFocusOrder.at(-1)!;
 
   const focusOutline = await searchButton.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -147,6 +155,28 @@ test("纯键盘可以按阅读顺序搜索并选择酒店", async ({ page }) => 
   });
   expect(focusOutline.style).toBe("solid");
   expect(Number.parseFloat(focusOutline.width)).toBeGreaterThanOrEqual(3);
+
+  // 面板之后是三个模块切换按钮，仍在同一条键盘路径上。
+  const moduleButtons = [
+    page.getByRole("button", { name: "切换到酒店对比模块" }),
+    page.getByRole("button", { name: "切换到积分回血模块" }),
+    page.getByRole("button", { name: "切换到每万分参考价值模块" }),
+  ];
+  for (const button of moduleButtons) {
+    await page.keyboard.press("Tab");
+    await expect(button).toBeFocused();
+  }
+  for (let step = 0; step < moduleButtons.length; step += 1) {
+    await page.keyboard.press("Shift+Tab");
+  }
+  await expect(searchButton).toBeFocused();
+
+  const checkInInput = page.getByLabel("入住日期");
+  const checkOutInput = page.getByLabel("退房日期");
+  await checkInInput.fill(COVERED_CHECK_IN);
+  await tabAcrossNativeDateSegments(page, checkInInput, checkOutInput);
+  await checkOutInput.fill(COVERED_CHECK_OUT);
+  await searchButton.focus();
 
   await page.keyboard.press("Enter");
   const resultsHeading = page.getByRole("heading", {

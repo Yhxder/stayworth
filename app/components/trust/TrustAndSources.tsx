@@ -18,7 +18,6 @@ export function TrustAndSources() {
     <section aria-labelledby="trust-title" className="trust-section">
       <div className="section-heading">
         <div>
-          <p className="step-label">BEFORE YOU DECIDE</p>
           <h2 id="trust-title">数据来源、隐私与独立声明</h2>
         </div>
         <p>三条底线：数据可追溯、输入不外传、与万豪没有隶属关系。</p>

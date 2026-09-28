@@ -21,7 +21,7 @@ test("默认展示全球参考值，并带上区间、样本量与数据日期",
   const table = section.locator(".index-table");
   await expect(table).toContainText("全部品牌");
   // 表格里必须同时出现数值区间与口径说明，不能只给一个孤立数字。
-  await expect(table).toContainText(/¥\s?[\d,]+\.\d{2}\s*–\s*¥\s?[\d,]+\.\d{2}/);
+  await expect(table).toContainText(/¥\s?[\d,]+\.\d{2}\s*-\s*¥\s?[\d,]+\.\d{2}/);
   await expect(section).toContainText(/先在城市内取中位数，\s*再跨城市取中位数/);
   await expect(section).toContainText("抽样估算");
 });

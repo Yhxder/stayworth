@@ -266,7 +266,6 @@ export function RebateCalculator({
     >
       <div className="section-heading">
         <div>
-          <p className="step-label">MODULE 02</p>
           <h2 id="rebate-title">积分回血计算器</h2>
         </div>
         <p>先估算能赚多少分，再换算入住后的真实成本。</p>
@@ -391,7 +390,7 @@ export function RebateCalculator({
             <div className="rate-reference" role="note">
               <strong>参考汇率日期：{EXCHANGE_RATE_REFERENCE_DATE}</strong>
               <span>
-                非实时数据 · 1 USD ≈ {exchangeRateInput || "—"} {currencyCode}{" "}
+                非实时数据 · 1 USD ≈ {exchangeRateInput || "-"} {currencyCode}{" "}
                 · 可手动修改
               </span>
               <a href={EXCHANGE_RATE_SOURCE_URL} rel="noreferrer" target="_blank">

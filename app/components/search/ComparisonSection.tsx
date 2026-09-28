@@ -47,7 +47,6 @@ export function ComparisonSection({
         <section className="comparison-table-wrap" aria-label="酒店并排比较">
           <div className="comparison-heading">
             <div>
-              <p className="step-label">COMPARISON</p>
               <h3>选择结果一览</h3>
             </div>
             <button className="text-button" onClick={onClose} type="button">

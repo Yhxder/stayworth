@@ -113,7 +113,6 @@ export function SearchResults({
     <div className="results-block">
       <div className="results-toolbar">
         <div>
-          <p className="step-label">SEARCH RESULTS</p>
           <h3 ref={focusTargetRef} tabIndex={-1}>
             {state.query} · {state.hotels.length} 家酒店快照
           </h3>

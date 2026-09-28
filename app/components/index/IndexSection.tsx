@@ -86,8 +86,8 @@ function formatMoney(value: number | null, currency: string): string {
 }
 
 function formatRange(p25: number | null, p75: number | null, currency: string): string {
-  if (p25 === null || p75 === null) return "—";
-  return `${formatMoney(p25, currency)} – ${formatMoney(p75, currency)}`;
+  if (p25 === null || p75 === null) return "-";
+  return `${formatMoney(p25, currency)} - ${formatMoney(p75, currency)}`;
 }
 
 export function IndexSection({ hidden }: { hidden: boolean }) {
@@ -114,7 +114,6 @@ export function IndexSection({ hidden }: { hidden: boolean }) {
     >
       <div className="section-heading">
         <div>
-          <p className="step-label">MODULE 03</p>
           <h2 id="index-title">StayWorth Index · 每万分参考价值</h2>
         </div>
         <p>
@@ -178,7 +177,7 @@ export function IndexSection({ hidden }: { hidden: boolean }) {
           <tr>
             <th scope="col">分组</th>
             <th scope="col">每万分参考价值</th>
-            <th scope="col">P25 – P75</th>
+            <th scope="col">P25 - P75</th>
             <th scope="col">样本</th>
             <th scope="col">城市</th>
           </tr>
