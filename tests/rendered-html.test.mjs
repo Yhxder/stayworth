@@ -69,7 +69,7 @@ test("server-renders the hero, the booking panel and the material split", async 
   const response = await render();
   const html = await response.text();
 
-  assert.match(html, /class="hero"/);
+  assert.match(html, /class="hero-slogan"/);
   assert.match(html, /哪个更值/);
   assert.match(html, /StayWorth Index/);
   // 功能层玻璃只出现在吸顶栏与比较托盘

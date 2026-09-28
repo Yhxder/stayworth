@@ -101,3 +101,40 @@
 | `<InputField />` | `app/components/ui/InputField.tsx` | Label over Value 字段行（无硬边框） |
 
 验收：`npm run lint`、`npm test`、`npm run test:e2e` 全绿；390px 无横向溢出；既有 ARIA 契约、键盘顺序、URL 参数与接口结构不变。
+
+---
+
+# 第四轮：巨幅 Hero Slogan + 非对称酒店实体卡片
+
+## 8. Token 锁定
+
+| Token | 深色 | 浅色 | 用途 |
+| --- | --- | --- | --- |
+| `--surface-oled` | `#090a0f` | `#f4f5f7` | Slogan 区底色（深色即提示词的 OLED 黑） |
+| `--surface-panel-solid` | `#16161a` | `#ffffff` | 展示卡面板（沿用上一轮 token） |
+| `--panel-border` | `rgba(255,255,255,0.12)` | `rgba(9,10,14,0.12)` | 1px 发丝线（≈ zinc-800） |
+| `--panel-border-hover` | `rgba(255,255,255,0.20)` | `rgba(9,10,14,0.20)` | 悬停时的发丝线（≈ zinc-700 过渡） |
+| `--hero-highlight-from/to` | `#fde68a` → `#facc15` | `#7a5b12` → `#7a5b12` | 「哪个更值？」的香槟金渐变（浅色为青铜实色） |
+| `--card-ambient` | `rgba(227,200,143,0.22)` | `rgba(122,91,18,0.16)` | 悬停时的金色环境光 |
+
+字号与行高：主标题 `3rem`（桌面 `3.75rem`）/ `1.05` / `-0.03em` / 900；顶部微标签 `0.75rem` / `0.2em` / 500；副标题 `1rem` / `1.65`；卡片指标 `2.25rem` / 等宽 + `tabular-nums`。
+
+两处有意偏离（依据冲突裁决顺序，无障碍优先）：
+1. `text-zinc-500`（`#71717a`）压在 `#090a0f` 上只有 **3.96:1**，12px 达不到 AA；改用 `--label-tertiary`（≈7.5:1）。
+2. `from-amber-200 to-yellow-400` 在浅色底上只有约 1.4–1.6:1；浅色模式改用青铜实色 `#7a5b12`（6.3:1），渐变只在深色出现。
+
+## 9. 排版蓝图：非对称留白
+
+1. 桌面 12 列切成 **3fr / 2fr**（左 60% / 右 40%），不与内容列中心线对齐：左列文字块左对齐、最大宽度锁在 `34rem`，右列卡片**下沉 40px**，让两块不在同一条基线上，打破对称网格。
+2. Slogan 区纵向留白 `py-24`（桌面 `py-32`），与预订面板的 `p-8` 形成"大留白—紧结构"的对比。
+3. 悬浮玻璃岛固定在视口顶部，Slogan 区的 OLED 底色与文字从岛下方穿过：文字会短暂进入岛的模糊范围，被 24px 的 backdrop-blur 与 40% 的不透明底吃掉边缘，离开后立刻恢复清晰；1px 高光边始终把岛与内容层剥离开，不发生颜色串色。
+4. 移动端（<1024px）双列塌陷为单列：先文字、后卡片，主标题 `3rem → 2.25rem`（`text-4xl` 量级），行高与字重不变；卡片宽度撑满并保持 4:3 图像比例，避免首屏出现两屏高的空白。
+
+## 10. 组件清单
+
+| 组件 | 文件 | 职责 |
+| --- | --- | --- |
+| `<HeroSloganSection />` | `app/components/home/HeroSloganSection.tsx` | 左侧巨幅排版 + 右侧卡片，props 传入指标数据 |
+| `<HotelShowcaseCard />` | `app/components/home/HotelShowcaseCard.tsx` | 真实酒店 Banner（经 `IMAGE_PROXY_URL`）+ 酒店名 + 每万分兑换价值区间 |
+
+`IMAGE_PROXY_URL` 数据模型：`/media/hotel?src=<encodeURIComponent(官方图片地址)>`，宽度用 `&w=400|800|1200` 追加；换代理只改 `app/lib/image-proxy.ts` 一个常量。

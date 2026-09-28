@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookingPanel } from "./components/home/BookingPanel";
 import type { BookingDraft } from "./components/home/BookingPanel";
-import { HeroSection } from "./components/home/HeroSection";
+import { HeroSloganSection } from "./components/home/HeroSloganSection";
 import { IndexSection } from "./components/index/IndexSection";
 import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import {
@@ -214,18 +214,18 @@ export default function Home() {
     <main className="prototype-shell">
       <FloatingHeader snapshotLabel="示例快照，非实时" />
 
-      <HeroSection>
-        <BookingPanel
-          filters={filters}
-          invalidField={searchValidation?.field ?? null}
-          isLoading={resultsState.status === "loading"}
-          onFiltersChange={setFilters}
-          onSearch={(nextFilters, draft) => {
-            void handleSearch(nextFilters, draft);
-          }}
-          validationError={searchError}
-        />
-      </HeroSection>
+      <HeroSloganSection />
+
+      <BookingPanel
+        filters={filters}
+        invalidField={searchValidation?.field ?? null}
+        isLoading={resultsState.status === "loading"}
+        onFiltersChange={setFilters}
+        onSearch={(nextFilters, draft) => {
+          void handleSearch(nextFilters, draft);
+        }}
+        validationError={searchError}
+      />
 
       <nav aria-label="主要功能" className="module-switcher">
         <button
