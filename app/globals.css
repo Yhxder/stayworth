@@ -2402,11 +2402,11 @@ footer p {
 @media (max-width: 768px) {
   .hero-slogan {
     margin: 0 -16px;
-    padding: 72px 16px;
+    padding: 32px 16px 72px;
   }
 
   .hero-slogan-title {
-    font-size: 2.25rem;
+    font-size: 2rem;
   }
 }
 
@@ -2449,21 +2449,43 @@ footer p {
 
 @media (max-width: 768px) {
   :root {
-    --header-height: 56px;
+    --header-height: 64px;
   }
 
   .prototype-shell {
-    padding: 0 16px 40px;
+    /* 顶部必须给悬浮岛留出位置，否则首屏文字会被胶囊压住 */
+    padding: calc(var(--header-height) + 16px) 16px 40px;
   }
 
+  /* 手机端把悬浮岛做成纯胶囊：芯片四周留 10px 呼吸位，圆角取满 */
   .site-header {
-    margin: 0 -16px;
-    padding: 0 16px;
+    border-radius: 999px;
+    gap: 8px;
+    padding: 0 12px;
   }
 
-  /* 边缘带要和栏体同宽，否则会顶破 8px 造成横向溢出 */
-  .site-header-edge {
-    margin: 0 -16px -28px;
+  .wordmark {
+    gap: 8px;
+  }
+
+  .wordmark-mark {
+    font-size: 0.75rem;
+    height: 28px;
+    width: 28px;
+  }
+
+  .wordmark strong {
+    font-size: 1rem;
+  }
+
+  .theme-toggle {
+    gap: 2px;
+  }
+
+  .theme-toggle button {
+    font-size: 0.75rem;
+    min-width: 40px;
+    padding: 4px 10px;
   }
 
   .hero {
