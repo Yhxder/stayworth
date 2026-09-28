@@ -1,4 +1,5 @@
 import { BrandLogo } from "./BrandLogo";
+import { ThemeToggle } from "../theme/ThemeToggle";
 
 type FloatingHeaderProps = {
   /** 数据状态徽标：说明这一屏的价格来自什么口径。 */
@@ -17,14 +18,17 @@ type FloatingHeaderProps = {
  * 内容从岛的下方穿过（页面用 `--header-height` 预留起点），
  * 折射渐隐由岛体自身的 backdrop-blur 完成，不铺整幅底色。
  *
- * 岛内只放"这一屏的数据从哪来"：品牌与快照徽标。外观切换属于偏好，
- * 不是任务控件，按 HIG 收在页脚，不占首屏的主控件位。
+ * 岛内两件东西：这一屏的数据从哪来（快照徽标），以及访问者的外观偏好。
+ * 两者都做成实体微色块，不叠玻璃。
  */
 export function FloatingHeader({ snapshotLabel }: FloatingHeaderProps) {
   return (
     <header className="glass-functional fluid-edge site-header">
       <BrandLogo />
-      <span className="prototype-badge">{snapshotLabel}</span>
+      <div className="header-controls">
+        <span className="prototype-badge">{snapshotLabel}</span>
+        <ThemeToggle />
+      </div>
     </header>
   );
 }

@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
 
 const projectFiles = [
-  "app/components/home/HeroSloganSection.tsx",
+  "app/components/home/TaskFirstSection.tsx",
   "app/components/home/HotelShowcaseCard.tsx",
   "app/components/home/BookingPanel.tsx",
   "app/components/shell/FloatingHeader.tsx",
@@ -33,7 +33,7 @@ test("splits the home page into focused, reusable components", () => {
 
   const pageSource = readFileSync("app/page.tsx", "utf8");
   assert.match(pageSource, /<FloatingHeader/);
-  assert.match(pageSource, /<HeroSloganSection/);
+  assert.match(pageSource, /<TaskFirstSection/);
   assert.match(pageSource, /<BookingPanel/);
   assert.match(pageSource, /<ComparisonTray/);
   assert.match(pageSource, /<SearchResults/);

@@ -65,12 +65,14 @@ test("server-renders the StayWorth decision home page", async () => {
   assert.doesNotMatch(html, /codex-preview|Building your site|react-loading-skeleton/i);
 });
 
-test("server-renders the hero, the booking panel and the material split", async () => {
+test("server-renders the task-first open, the booking panel and the material split", async () => {
   const response = await render();
   const html = await response.text();
 
-  assert.match(html, /class="hero-slogan"/);
+  // 首屏是 Operate 顺序：说明 → 搜索条件；市场参考小卡是判断依据
+  assert.match(html, /class="task-first"/);
   assert.match(html, /哪个更值/);
+  assert.match(html, /class="market-card"/);
   assert.match(html, /StayWorth Index/);
   // 功能层玻璃只出现在吸顶栏与比较托盘
   assert.match(html, /class="glass-functional fluid-edge site-header"/);

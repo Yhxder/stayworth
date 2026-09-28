@@ -39,14 +39,15 @@ const amountFormatter = new Intl.NumberFormat("zh-CN", {
 });
 
 /**
- * 真实酒店展示卡（内容层）。
+ * 首屏右侧的市场参考小卡（内容层，Operate 版式）。
  *
  * 三件事必须同时成立才算合格：
- * 1. 图是真实酒店 Banner，且只经 IMAGE_PROXY_URL 代理加载（浏览器不直连第三方 CDN）；
+ * 1. 图是真实酒店 Banner，且只经 IMAGE_PROXY_URL 代理加载（浏览器不直连第三方 CDN），
+ *    来源标注始终可见；
  * 2. 面板是近乎实心的深色高档面，不是"玻璃叠玻璃"；
  * 3. 指标名与全站一致（每万分兑换价值），并写明这是市场口径而不是这家酒店的成交价。
  *
- * 悬停只淡入一层金色环境光并让 1px 发丝线提亮，不做 scale 放大。
+ * 它只是判断依据，不是首屏主角：横向排布、照片收窄，主操作留给下方的搜索面板。
  */
 export function HotelShowcaseCard({ metric }: HotelShowcaseCardProps) {
   const [hotel, setHotel] = useState<FeaturedHotel | null>(null);
@@ -76,36 +77,35 @@ export function HotelShowcaseCard({ metric }: HotelShowcaseCardProps) {
 
   if (failed || !hotel) {
     return (
-      <article className="showcase-card">
-        <div className="showcase-figure">
-          <div className="hotel-photo-fallback">
-            <strong>官方图片暂不可用</strong>
-            <span>指标数据不受影响</span>
-          </div>
+      <article className="market-card">
+        <div className="market-card-figure is-empty">
+          <span>官方图片暂不可用</span>
         </div>
-        <div className="showcase-body">
-          <p className="showcase-meta">真实酒店目录</p>
-          <h2 className="showcase-name">酒店示例暂不可用</h2>
-          <MetricBlock metric={metric} />
+        <div className="market-card-body">
+          <p className="market-card-city">真实酒店目录</p>
+          <h2 className="market-card-name">酒店示例暂不可用</h2>
+          <MarketMetric metric={metric} />
         </div>
       </article>
     );
   }
 
   return (
-    <article className="showcase-card">
-      <figure className="showcase-figure">
+    <article className="market-card">
+      <figure className="market-card-figure">
         <HotelImage
           imagePath={hotel.imagePath}
           nameZh={hotel.nameZh}
           priority
         />
-        <figcaption>图片：{hotel.imageSourceLabel}，经本站代理加载</figcaption>
       </figure>
-      <div className="showcase-body">
-        <p className="showcase-meta">{hotel.cityNameZh}</p>
-        <h2 className="showcase-name">{hotel.nameZh}</h2>
-        <MetricBlock metric={metric} />
+      <div className="market-card-body">
+        <p className="market-card-city">{hotel.cityNameZh}</p>
+        <h2 className="market-card-name">{hotel.nameZh}</h2>
+        <MarketMetric metric={metric} />
+        <p className="market-card-credit">
+          图片：{hotel.imageSourceLabel}，经本站代理加载
+        </p>
       </div>
     </article>
   );
@@ -113,28 +113,26 @@ export function HotelShowcaseCard({ metric }: HotelShowcaseCardProps) {
 
 /**
  * 市场参考区块。它和上面那家酒店不是一回事：一个单店，一个市场，
- * 所以用分隔线与标题把它独立出来，避免大数字被读成「这家酒店值多少」。
+ * 所以单独成块并写明口径，避免大数字被读成「这家酒店值多少」。
  */
-function MetricBlock({ metric }: { metric: ShowcaseMetric }) {
+function MarketMetric({ metric }: { metric: ShowcaseMetric }) {
   return (
-    <div className="showcase-metric">
-      <p className="showcase-metric-title">市场参考</p>
-      <span className="showcase-metric-label">
-        {metric.label} · {metric.scopeLabel}
+    <div className="market-metric">
+      <span className="market-metric-label">
+        市场参考 · {metric.label}（{metric.scopeLabel}）
       </span>
-      <span className="showcase-metric-value">
+      <span className="market-metric-value">
         {metric.value === null ? "-" : amountFormatter.format(metric.value)}
         <small>{metric.currencyCode} / 万分</small>
       </span>
-      <span className="showcase-metric-range">
+      <span className="market-metric-range">
         P25 {metric.p25 === null ? "-" : amountFormatter.format(metric.p25)}
         {" - "}
         P75 {metric.p75 === null ? "-" : amountFormatter.format(metric.p75)}
       </span>
-      <p className="showcase-note">
+      <p className="market-metric-note">
         抽样日期 {metric.snapshotDate}，覆盖 {metric.cityCount} 城 /{" "}
-        {metric.sampleCount} 家样本。这是{metric.scopeLabel}的市场参考中位数，
-        不是这家酒店的成交价。
+        {metric.sampleCount} 家样本；市场口径，不是这家酒店的成交价。
       </p>
     </div>
   );

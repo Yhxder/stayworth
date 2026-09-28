@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookingPanel } from "./components/home/BookingPanel";
 import type { BookingDraft } from "./components/home/BookingPanel";
-import { HeroSloganSection } from "./components/home/HeroSloganSection";
+import { TaskFirstSection } from "./components/home/TaskFirstSection";
 import { IndexSection } from "./components/index/IndexSection";
 import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import {
@@ -12,7 +12,6 @@ import {
 } from "./components/search/ComparisonSection";
 import { SearchResults } from "./components/search/SearchResults";
 import { FloatingHeader } from "./components/shell/FloatingHeader";
-import { ThemeToggle } from "./components/theme/ThemeToggle";
 import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
 import type { RankingCriterion } from "./lib/hotel-ranking";
@@ -215,18 +214,18 @@ export default function Home() {
     <main className="prototype-shell">
       <FloatingHeader snapshotLabel="示例快照，非实时" />
 
-      <HeroSloganSection />
-
-      <BookingPanel
-        filters={filters}
-        invalidField={searchValidation?.field ?? null}
-        isLoading={resultsState.status === "loading"}
-        onFiltersChange={setFilters}
-        onSearch={(nextFilters, draft) => {
-          void handleSearch(nextFilters, draft);
-        }}
-        validationError={searchError}
-      />
+      <TaskFirstSection>
+        <BookingPanel
+          filters={filters}
+          invalidField={searchValidation?.field ?? null}
+          isLoading={resultsState.status === "loading"}
+          onFiltersChange={setFilters}
+          onSearch={(nextFilters, draft) => {
+            void handleSearch(nextFilters, draft);
+          }}
+          validationError={searchError}
+        />
+      </TaskFirstSection>
 
       <nav aria-label="主要功能" className="module-switcher">
         <button
@@ -311,11 +310,8 @@ export default function Home() {
       <TrustAndSources />
 
       <footer>
-        <div>
-          <p>StayWorth 是独立项目，与 Marriott International 没有隶属关系。</p>
-          <p>示例快照不是实时库存，不构成预订、兑换或税务建议。</p>
-        </div>
-        <ThemeToggle />
+        <p>StayWorth 是独立项目，与 Marriott International 没有隶属关系。</p>
+        <p>示例快照不是实时库存，不构成预订、兑换或税务建议。</p>
       </footer>
     </main>
   );

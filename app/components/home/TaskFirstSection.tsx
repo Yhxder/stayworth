@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import summaryJson from "../../data/index-summary.json";
 import {
   HotelShowcaseCard,
@@ -45,30 +46,32 @@ function readMetric(): ShowcaseMetric {
   };
 }
 
+type TaskFirstSectionProps = {
+  /** 预订面板由页面持有状态，作为子节点放进来。 */
+  children: ReactNode;
+};
+
 /**
- * 巨幅 Slogan 区：左侧文字是第一落点，右侧真实酒店卡是观点的佐证。
+ * 首屏（Operate 版式）。
  *
- * 版式是非对称 3fr / 2fr，右卡整体下沉 40px，刻意不与左列共用基线；
- * 纵向 py-24（桌面 py-32）留出发布会式的呼吸感。
- * 底色走 `--surface-oled`：深色是 OLED 黑，浅色跟随画布，避免页面出现反色区块。
+ * 这一屏的访问者是来完成一次比价的，不是来读海报的，所以顺序是
+ * 「一句话说明 → 搜索条件」：标题降到产品尺度，任务紧跟在同一条视线上，
+ * 首屏之内就能按到主操作。市场参考与真实酒店图收成右侧一张小卡，
+ * 它提供判断依据，但不与主操作争夺注意力。
  *
- * 标题上方不放眉标：标题自己承担落点，多余的标签只会削弱它。
+ * 标题不再使用渐变文字：强调交给字号与字重，颜色留给主操作与状态。
  */
-export function HeroSloganSection() {
+export function TaskFirstSection({ children }: TaskFirstSectionProps) {
   return (
-    <section className="hero-slogan" id="top">
-      <div className="hero-slogan-grid">
-        <div>
-          <h1 className="hero-slogan-title">
-            现金还是积分，
-            <em>哪个更值？</em>
-          </h1>
-          <p className="hero-slogan-copy">
-            用同一张快照对齐现金总价、积分价和每万分兑换价值，结论留给你自己判断。
-          </p>
-        </div>
-        <HotelShowcaseCard metric={readMetric()} />
+    <section className="task-first" id="top">
+      <div className="task-first-head">
+        <h1 className="task-first-title">现金还是积分，哪个更值？</h1>
+        <p className="task-first-copy">
+          用同一张快照对齐现金总价、积分价和每万分兑换价值，结论留给你自己判断。
+        </p>
       </div>
+      {children}
+      <HotelShowcaseCard metric={readMetric()} />
     </section>
   );
 }
