@@ -33,5 +33,7 @@ export function createRebatePrefill(
     currency: hotel.currency,
     nights: countStayNights(checkIn, checkOut),
     brandId: hotel.brandId,
+    citySlug: hotel.citySlug,
+    countryCode: hotel.countryCode,
   };
 }

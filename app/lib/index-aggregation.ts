@@ -66,7 +66,7 @@ export type IndexViewExclusion = {
 };
 
 export type IndexView = {
-  id: "global" | "tier" | "country";
+  id: "global" | "tier" | "country" | "city";
   /** 该视图的计价币种；全球与档位视图为统一货币，国家视图为「各自当地货币」 */
   currencyCode: string | null;
   rows: IndexViewRow[];
@@ -276,6 +276,50 @@ export function tierView(
  * 视图三：主要国家。
  * 每个国家用当地货币口径（同一国家在面板中只有一种币种），不做隐式换算。
  */
+/**
+ * 城市口径：每个采样城市一个值，用于「用户选了某城市的酒店」时的一级回退。
+ * 单城市不需要两步聚合，但仍要求达到城市样本下限，否则不给值。
+ */
+export function cityView(
+  samples: IndexSample[],
+  cityLabel: (slug: string) => string,
+): IndexView {
+  const byCity = new Map<string, IndexSample[]>();
+  for (const sample of samples) {
+    const list = byCity.get(sample.citySlug) ?? [];
+    list.push(sample);
+    byCity.set(sample.citySlug, list);
+  }
+
+  const rows: IndexViewRow[] = [];
+  for (const [slug, citySamples] of byCity) {
+    if (citySamples.length < MIN_CITY_SAMPLES) continue;
+    const values = citySamples.map((sample) => sample.valuePerTenThousand);
+    const center = median(values);
+    if (center === null || center <= 0) continue;
+    rows.push({
+      key: slug,
+      label: cityLabel(slug),
+      currencyCode: citySamples[0].currencyCode,
+      value: center,
+      p25: quantile(values, 0.25),
+      p75: quantile(values, 0.75),
+      sampleCount: values.length,
+      cityCount: 1,
+    });
+  }
+  rows.sort((a, b) => b.sampleCount - a.sampleCount);
+
+  return {
+    id: "city",
+    currencyCode: null,
+    rows,
+    sampleCount: rows.reduce((sum, row) => sum + row.sampleCount, 0),
+    cityCount: rows.length,
+    exclusions: [],
+  };
+}
+
 export function countryView(
   samples: IndexSample[],
   countryOf: (sample: IndexSample) => { code: string; label: string } | null,

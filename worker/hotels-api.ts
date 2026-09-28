@@ -35,6 +35,8 @@ type HotelSnapshotRow = {
   brand: string;
   tier: string;
   city: string;
+  citySlug: string;
+  countryCode: string;
   district: string;
   cashPriceMinor: number;
   pointsRequired: number;
@@ -99,6 +101,8 @@ export async function queryHotelSnapshots(
         h.brand_name AS "brand",
         h.portfolio_tier AS "tier",
         c.name_zh AS "city",
+        c.slug AS "citySlug",
+        c.country_code AS "countryCode",
         h.district AS "district",
         ps.cash_price_minor AS "cashPriceMinor",
         ps.points_required AS "pointsRequired",
@@ -123,6 +127,8 @@ export async function queryHotelSnapshots(
       "brand",
       "tier",
       "city",
+      "citySlug",
+      "countryCode",
       "district",
       "cashPriceMinor",
       "pointsRequired",

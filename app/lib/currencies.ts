@@ -90,3 +90,20 @@ export function convertCurrencyAmount(
     roundingFactor
   );
 }
+
+export function isSupportedCurrency(code: string): code is CurrencyCode {
+  return currencyOptions.some((option) => option.code === code);
+}
+
+/**
+ * 供 StayWorth Index 参考值换算使用：币种不认识时返回 null 而不是抛错，
+ * 让调用方可以退化成「只显示当地货币」。
+ */
+export function tryConvertCurrencyAmount(
+  value: number,
+  fromCode: string,
+  toCode: string,
+): number | null {
+  if (!isSupportedCurrency(fromCode) || !isSupportedCurrency(toCode)) return null;
+  return convertCurrencyAmount(value, fromCode, toCode);
+}

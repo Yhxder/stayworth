@@ -1,6 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import indexSummary from "../../data/index-summary.json";
+import {
+  findMarketReference,
+  type IndexSummaryShape,
+} from "../../lib/index-reference";
 import {
   BRAND_RULE_REFERENCE_DATE,
   BRAND_RULE_SOURCE_URL,
@@ -21,6 +26,8 @@ import {
   type CurrencyCode,
   formatCurrencyAmount,
   getCurrencyConfig,
+  isSupportedCurrency,
+  tryConvertCurrencyAmount,
 } from "../../lib/currencies";
 import { formatPoints } from "../../lib/format";
 import {
@@ -90,6 +97,21 @@ export function RebateCalculator({
   const [pointValuationInput, setPointValuationInput] = useState(() =>
     String(convertCurrencyAmount(400, "CNY", initialCurrency)),
   );
+
+  /**
+   * 市场参考中位数：用户从酒店比较带入某家酒店时，按 城市 → 国家/地区 → 全球 回退。
+   * 手动输入（没有 prefill）时不显示，避免给一个和处境无关的数字。
+   */
+  const marketReference = useMemo(() => {
+    if (!prefill) return null;
+    return findMarketReference({
+      summary: indexSummary as unknown as IndexSummaryShape,
+      citySlug: prefill.citySlug,
+      countryCode: prefill.countryCode,
+      currency: currencyCode,
+      convert: tryConvertCurrencyAmount,
+    });
+  }, [prefill, currencyCode]);
 
   const cashPrice = parseNumericInput(cashPriceInput);
   const ineligibleSpend = parseNumericInput(ineligibleSpendInput);
@@ -469,6 +491,50 @@ export function RebateCalculator({
                 />
               </label>
             </div>
+            {marketReference ? (
+              <div className="market-reference" role="note">
+                <div>
+                  <strong>
+                    市场参考中位数 · {marketReference.levelLabel}
+                  </strong>
+                  <span>
+                    {marketReference.currencyCode}{" "}
+                    {marketReference.value.toFixed(2)} / 万分
+                    {marketReference.localValue !== null
+                      ? `（当地 ${marketReference.localCurrencyCode} ${marketReference.localValue.toFixed(2)}）`
+                      : ""}
+                  </span>
+                  <small>
+                    口径范围：{marketReference.scopeLabel}｜样本{" "}
+                    {marketReference.sampleCount} 家
+                    {marketReference.cityCount > 1
+                      ? `｜覆盖 ${marketReference.cityCount} 个城市`
+                      : ""}
+                    ｜数据日期 {marketReference.runKey}
+                  </small>
+                  <small>
+                    这是同地区酒店的市场参考中位数，不是这家酒店的兑换价值；
+                    是否采用由你决定。
+                  </small>
+                </div>
+                <button
+                  onClick={() => {
+                    // 参考值的币种理论上一定受支持；缺失时退回当前结算币种，避免抛错。
+                    const digits = getCurrencyConfig(
+                      isSupportedCurrency(marketReference.currencyCode)
+                        ? marketReference.currencyCode
+                        : currencyCode,
+                    ).fractionDigits;
+                    setPointValuationInput(
+                      marketReference.value.toFixed(digits),
+                    );
+                  }}
+                  type="button"
+                >
+                  使用市场参考值
+                </button>
+              </div>
+            ) : null}
             <div className="card-reference" role="note">
               {selectedCard ? (
                 <>

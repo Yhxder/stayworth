@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T05:47:43.494Z",
+  "generatedAt": "2026-09-28T06:25:43.322Z",
   "runKey": "2026-09-28T11:48",
   "window": {
     "daysAhead": 30,
@@ -355,6 +355,195 @@
           "value": 74.60317460317461,
           "p25": 74.60317460317461,
           "p75": 74.60317460317461,
+          "sampleCount": 11,
+          "cityCount": 1
+        }
+      ],
+      "sampleCount": 691,
+      "cityCount": 18,
+      "exclusions": []
+    },
+    "city": {
+      "id": "city",
+      "currencyCode": null,
+      "rows": [
+        {
+          "key": "washington",
+          "label": "华盛顿",
+          "currencyCode": "USD",
+          "value": 59.938709677419354,
+          "p25": 51.9948717948718,
+          "p75": 69.836,
+          "sampleCount": 89,
+          "cityCount": 1
+        },
+        {
+          "key": "shanghai",
+          "label": "上海",
+          "currencyCode": "CNY",
+          "value": 364.8343070652174,
+          "p25": 323.1269642857143,
+          "p75": 425.37716426193117,
+          "sampleCount": 76,
+          "cityCount": 1
+        },
+        {
+          "key": "london",
+          "label": "伦敦",
+          "currencyCode": "GBP",
+          "value": 36.721311475409834,
+          "p25": 31.470588235294116,
+          "p75": 43.64347826086956,
+          "sampleCount": 65,
+          "cityCount": 1
+        },
+        {
+          "key": "minneapolis",
+          "label": "明尼阿波利斯",
+          "currencyCode": "USD",
+          "value": 67.0364709851552,
+          "p25": 56.34913488700565,
+          "p75": 76.14925328554361,
+          "sampleCount": 58,
+          "cityCount": 1
+        },
+        {
+          "key": "seattle",
+          "label": "西雅图",
+          "currencyCode": "USD",
+          "value": 58.11219512195122,
+          "p25": 50.955882352941174,
+          "p75": 70.7,
+          "sampleCount": 57,
+          "cityCount": 1
+        },
+        {
+          "key": "dubai",
+          "label": "迪拜",
+          "currencyCode": "AED",
+          "value": 214.6943133802817,
+          "p25": 169.9203488372093,
+          "p75": 248.51041666666666,
+          "sampleCount": 56,
+          "cityCount": 1
+        },
+        {
+          "key": "toronto",
+          "label": "多伦多",
+          "currencyCode": "CAD",
+          "value": 91.52953555878085,
+          "p25": 77.61081198436821,
+          "p75": 111.3989611809732,
+          "sampleCount": 56,
+          "cityCount": 1
+        },
+        {
+          "key": "paris",
+          "label": "巴黎",
+          "currencyCode": "EUR",
+          "value": 43.44884615384615,
+          "p25": 38.301782858970256,
+          "p75": 51.654779927109615,
+          "sampleCount": 42,
+          "cityCount": 1
+        },
+        {
+          "key": "beijing",
+          "label": "北京",
+          "currencyCode": "CNY",
+          "value": 331.41346153846155,
+          "p25": 311.0538461538461,
+          "p75": 358.7176470588235,
+          "sampleCount": 29,
+          "cityCount": 1
+        },
+        {
+          "key": "bangkok",
+          "label": "曼谷",
+          "currencyCode": "THB",
+          "value": 1820.728205128205,
+          "p25": 1601.6756756756756,
+          "p75": 2121.6179487179484,
+          "sampleCount": 25,
+          "cityCount": 1
+        },
+        {
+          "key": "frankfurt",
+          "label": "法兰克福",
+          "currencyCode": "EUR",
+          "value": 47.9081081081081,
+          "p25": 41.16444444444444,
+          "p75": 55.75,
+          "sampleCount": 25,
+          "cityCount": 1
+        },
+        {
+          "key": "mumbai",
+          "label": "孟买",
+          "currencyCode": "INR",
+          "value": 6764.655172413793,
+          "p25": 4742.04054054054,
+          "p75": 7630.083333333334,
+          "sampleCount": 19,
+          "cityCount": 1
+        },
+        {
+          "key": "singapore",
+          "label": "新加坡",
+          "currencyCode": "SGD",
+          "value": 76.28038541666666,
+          "p25": 72.09785714285714,
+          "p75": 85.82371794871796,
+          "sampleCount": 18,
+          "cityCount": 1
+        },
+        {
+          "key": "tokyo",
+          "label": "东京",
+          "currencyCode": "JPY",
+          "value": 10030.568068068067,
+          "p25": 7613.823143285821,
+          "p75": 12742.114472549583,
+          "sampleCount": 18,
+          "cityCount": 1
+        },
+        {
+          "key": "seoul",
+          "label": "首尔",
+          "currencyCode": "KRW",
+          "value": 124404.7619047619,
+          "p25": 97375,
+          "p75": 139333.33333333334,
+          "sampleCount": 17,
+          "cityCount": 1
+        },
+        {
+          "key": "taipei",
+          "label": "台北",
+          "currencyCode": "TWD",
+          "value": 2073.3658536585363,
+          "p25": 1760.7046511627905,
+          "p75": 2163.403846153846,
+          "sampleCount": 17,
+          "cityCount": 1
+        },
+        {
+          "key": "hong-kong",
+          "label": "香港",
+          "currencyCode": "HKD",
+          "value": 378.0669144981413,
+          "p25": 358.8277777777778,
+          "p75": 488.75797665369646,
+          "sampleCount": 13,
+          "cityCount": 1
+        },
+        {
+          "key": "melbourne",
+          "label": "墨尔本",
+          "currencyCode": "AUD",
+          "value": 74.60317460317461,
+          "p25": 67.74425287356321,
+          "p75": 83.49645008605853,
           "sampleCount": 11,
           "cityCount": 1
         }

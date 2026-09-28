@@ -1490,6 +1490,54 @@ footer p {
   color: var(--ink);
 }
 
+.market-reference {
+  align-items: center;
+  background: var(--accent-soft);
+  border: 1.5px solid var(--accent);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding: 14px 16px;
+}
+
+.market-reference strong {
+  display: block;
+  font-size: 12px;
+}
+
+.market-reference span {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.market-reference small {
+  color: var(--muted);
+  display: block;
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 3px;
+}
+
+.market-reference button {
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px 14px;
+  white-space: nowrap;
+}
+
+.market-reference button:hover {
+  background: var(--accent);
+  color: #ffffff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .state-mark {
     animation: none;

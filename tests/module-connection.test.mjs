@@ -22,6 +22,8 @@ const hotel = {
   brand: "Le Méridien",
   tier: "Premium",
   city: "香港",
+  citySlug: "hong-kong",
+  countryCode: "HK",
   district: "香港岛 · 数码港",
   cashPrice: 1235,
   pointsRequired: 37000,
@@ -132,6 +134,9 @@ test("creates a calculator prefill without guessing ineligible spend", () => {
       currency: "CNY",
       nights: 3,
       brandId: "le-meridien",
+      // 带上城市与国家，回血计算器才能查到 StayWorth Index 的市场参考值
+      citySlug: "hong-kong",
+      countryCode: "HK",
     },
   );
 });

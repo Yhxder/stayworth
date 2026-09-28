@@ -77,6 +77,8 @@ function isHotel(value: unknown): value is Hotel {
     typeof value.tier === "string" &&
     portfolioTiers.has(value.tier as PortfolioTier) &&
     typeof value.city === "string" &&
+    typeof value.citySlug === "string" &&
+    typeof value.countryCode === "string" &&
     typeof value.district === "string" &&
     typeof value.cashPrice === "number" &&
     Number.isFinite(value.cashPrice) &&

@@ -18,6 +18,10 @@ export type Hotel = {
   brand: string;
   tier: PortfolioTier;
   city: string;
+  /** 城市在采样面板里的标识，如 hong-kong；用于查 StayWorth Index */
+  citySlug: string;
+  /** 国家/地区代码，如 HK；城市口径缺失时退到国家口径 */
+  countryCode: string;
   district: string;
   cashPrice: number;
   pointsRequired: number;
@@ -52,4 +56,7 @@ export type RebatePrefill = {
   currency: CurrencyCode;
   nights: number;
   brandId: string;
+  /** 用于查 StayWorth Index 市场参考值；手动输入时为 null */
+  citySlug: string | null;
+  countryCode: string | null;
 };
