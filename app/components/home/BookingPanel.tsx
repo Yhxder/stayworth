@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { SurfaceCard } from "../ui/SurfaceCard";
 import { InputField } from "../ui/InputField";
+import { SurfaceCard } from "../ui/SurfaceCard";
 import type { SearchFilters, TierFilter } from "../../types/hotel";
 
 const tierOptions: TierFilter[] = [
@@ -34,15 +34,14 @@ type BookingPanelProps = {
 };
 
 /**
- * 流体玻璃预订面板。
+ * 嵌入式预订面板（内容层，近实心高对比面板，不用玻璃）。
  *
- * 字段顺序固定为旅行直觉顺序（目的地、入住、退房、品牌层级、人数、积分开关），
- * 不为了视觉节奏打乱操作习惯。
+ * 排版照 iOS「嵌入式分组」：字段没有四周硬边框，只有底色与圆角，
+ * Label 在上（0.75rem）、Value 在下（1.125rem 粗体），聚焦时整行加深。
+ * 字段顺序仍是旅行直觉顺序，开关与主操作单独成行，不为了视觉节奏打乱填写习惯。
  *
- * 状态归属：行程字段（目的地、入住、退房、品牌层级）由页面级 useState 统一持有，
- * 面板每次输入都回写这份状态，这样结果区、空状态和「用这段日期重新搜索」永远
- * 指向同一份条件，不会出现面板显示旧日期而结果用新日期的错位。出行人数与积分
- * 兑换开关只影响本次提交，作为面板自己的 useState 状态。
+ * 状态归属：行程字段由页面级 useState 持有、面板回写，结果区与空状态共用同一份条件；
+ * 出行人数与积分开关属于面板自己的状态。
  */
 export function BookingPanel({
   filters,
@@ -75,6 +74,9 @@ export function BookingPanel({
     >
       <div className="booking-head">
         <h2 className="booking-title">预订条件</h2>
+        <p className="booking-note">
+          快照不区分入住人数，人数只记录出行规模，不参与价格筛选。
+        </p>
       </div>
 
       <div className="search-form">
@@ -137,7 +139,12 @@ export function BookingPanel({
           />
         </InputField>
 
-        <InputField className="booking-field" id="booking-tier" label="品牌层级">
+        <InputField
+          className="booking-field"
+          controlType="select"
+          id="booking-tier"
+          label="品牌层级"
+        >
           <select
             id="booking-tier"
             onChange={(event) =>
@@ -153,6 +160,7 @@ export function BookingPanel({
 
         <InputField
           className="booking-field"
+          controlType="select"
           id="booking-travelers"
           label="出行人数"
         >
@@ -169,10 +177,7 @@ export function BookingPanel({
           </select>
         </InputField>
 
-        <label
-          className="booking-toggle field-control"
-          htmlFor="booking-use-points"
-        >
+        <label className="booking-toggle" htmlFor="booking-use-points">
           <input
             checked={usePoints}
             id="booking-use-points"
@@ -181,8 +186,12 @@ export function BookingPanel({
             type="checkbox"
           />
           <span className="booking-toggle-text">
-            <strong>Bonvoy 积分兑换</strong>
-            <small>{usePoints ? "优先按每万分兑换价值排序" : "优先按现金总价排序"}</small>
+            <strong>使用万豪旅享家 Bonvoy 积分（Points）兑换</strong>
+            <small>
+              {usePoints
+                ? "结果优先按每万分兑换价值排序"
+                : "结果优先按现金总价排序"}
+            </small>
           </span>
         </label>
 
@@ -203,7 +212,7 @@ export function BookingPanel({
       ) : null}
 
       <p className="booking-foot">
-        价格来自人工维护的示例快照，不是实时库存；示例快照不区分入住人数，人数这项先记录你的出行规模。
+        价格来自人工维护的示例快照，不是实时库存；每一行都会显示来源与快照日期。
       </p>
     </SurfaceCard>
   );

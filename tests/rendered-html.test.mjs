@@ -84,7 +84,7 @@ test("server-renders the hero, the booking panel and the material split", async 
   assert.match(html, /stayworth-theme/);
   assert.match(html, /name="theme-color"/);
   assert.match(html, /出行人数/);
-  assert.match(html, /Bonvoy 积分兑换/);
+  assert.match(html, /使用万豪旅享家 Bonvoy 积分（Points）兑换/);
   assert.match(html, /role="switch"/);
   // 预订面板的行程字段与结果区共用同一份筛选条件，默认日期在服务端就已算好
   assert.match(html, /id="booking-check-in" type="date" value="\d{4}-\d{2}-\d{2}"/);

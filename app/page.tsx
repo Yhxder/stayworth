@@ -11,7 +11,7 @@ import {
   ComparisonTray,
 } from "./components/search/ComparisonSection";
 import { SearchResults } from "./components/search/SearchResults";
-import { Header } from "./components/shell/Header";
+import { FloatingHeader } from "./components/shell/FloatingHeader";
 import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
 import type { RankingCriterion } from "./lib/hotel-ranking";
@@ -212,7 +212,7 @@ export default function Home() {
 
   return (
     <main className="prototype-shell">
-      <Header snapshotLabel="示例快照，非实时" />
+      <FloatingHeader snapshotLabel="示例快照，非实时" />
 
       <HeroSection>
         <BookingPanel

@@ -6,7 +6,8 @@ const projectFiles = [
   "app/components/home/HeroSection.tsx",
   "app/components/home/HeroImage.tsx",
   "app/components/home/BookingPanel.tsx",
-  "app/components/shell/Header.tsx",
+  "app/components/shell/FloatingHeader.tsx",
+  "app/components/shell/BrandLogo.tsx",
   "app/components/theme/ThemeToggle.tsx",
   "app/components/ui/SurfaceCard.tsx",
   "app/components/ui/InputField.tsx",
@@ -20,6 +21,7 @@ const projectFiles = [
   "app/lib/hotel-ranking.ts",
   "app/lib/stay-dates.ts",
   "app/lib/theme.ts",
+  "app/lib/image-proxy.ts",
   "app/types/hotel.ts",
   "worker/media-proxy.ts",
 ];
@@ -30,7 +32,7 @@ test("splits the home page into focused, reusable components", () => {
   }
 
   const pageSource = readFileSync("app/page.tsx", "utf8");
-  assert.match(pageSource, /<Header/);
+  assert.match(pageSource, /<FloatingHeader/);
   assert.match(pageSource, /<HeroSection/);
   assert.match(pageSource, /<BookingPanel/);
   assert.match(pageSource, /<ComparisonTray/);

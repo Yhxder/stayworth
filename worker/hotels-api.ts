@@ -1,3 +1,5 @@
+import { IMAGE_PROXY_URL } from "../app/lib/image-proxy.ts";
+
 const portfolioTiers = new Set([
   "Luxury",
   "Premium",
@@ -51,7 +53,7 @@ type HotelSnapshotRow = {
 /** 图片走本站代理：浏览器不直连万豪 CDN，缓存与尺寸都由本站控制。 */
 export function proxiedImagePath(source: string | null): string | null {
   if (!source) return null;
-  return `/media/hotel?src=${encodeURIComponent(source)}`;
+  return `${IMAGE_PROXY_URL}?src=${encodeURIComponent(source)}`;
 }
 
 function normalizeSearchText(value: string) {

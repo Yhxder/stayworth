@@ -11,6 +11,8 @@
    ========================================================================== */
 
 @theme {
+  /* 字体与字距沿用上一轮规范（本轮不动）：标题 Helvetica Neue，
+     正文 PingFang SC，数值 SF Mono + tabular-nums，中文不加字距。 */
   --font-display:
     "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei",
     "Noto Sans SC", Arial, sans-serif;
@@ -35,15 +37,27 @@
   --color-accent-fill: var(--accent-fill);
   --color-ink-on-accent: var(--ink-on-accent);
   --color-alert: var(--alert);
+  --color-panel-solid: var(--surface-panel-solid);
+  --color-field: var(--field-surface);
 
   /* 形状一致性锁：面板 20 / 卡片 16 / 控件 12 / 药丸 999 */
   --radius-panel: 20px;
   --radius-card: 16px;
   --radius-control: 12px;
+  --radius-island: 20px;
 }
 
 :root {
-  --header-height: 64px;
+  --header-height: 72px;
+  /* 悬浮岛参数：深色黑玻璃 / 浅色白玻璃，四周 1px 折射高光 */
+  --header-glass: rgba(255, 255, 255, 0.4);
+  --header-glass-edge: rgba(9, 10, 14, 0.12);
+  --header-shadow:
+    0 12px 32px -12px rgba(9, 10, 14, 0.24), 0 2px 8px rgba(9, 10, 14, 0.12);
+  --surface-panel-solid: #ffffff;
+  --panel-border: rgba(9, 10, 14, 0.12);
+  --field-surface: #eceef1;
+  --field-surface-active: rgba(9, 10, 14, 0.05);
   /* 保底：不支持 light-dark() 的浏览器固定在浅色，不出现半套配色 */
   --surface-canvas: #f4f5f7;
   --surface-raised: #ffffff;
@@ -76,6 +90,28 @@
     --surface-overlay: light-dark(
       rgba(255, 255, 255, 0.72),
       rgba(10, 12, 16, 0.72)
+    );
+    --header-glass: light-dark(
+      rgba(255, 255, 255, 0.4),
+      rgba(0, 0, 0, 0.4)
+    );
+    --header-glass-edge: light-dark(
+      rgba(9, 10, 14, 0.12),
+      rgba(255, 255, 255, 0.16)
+    );
+    --header-shadow: light-dark(
+      0 12px 32px -12px rgba(9, 10, 14, 0.2),
+      0 12px 32px -12px rgba(0, 0, 0, 0.6)
+    );
+    --surface-panel-solid: light-dark(#ffffff, #16161a);
+    --panel-border: light-dark(
+      rgba(9, 10, 14, 0.12),
+      rgba(255, 255, 255, 0.12)
+    );
+    --field-surface: light-dark(#eceef1, rgba(255, 255, 255, 0.04));
+    --field-surface-active: light-dark(
+      rgba(9, 10, 14, 0.05),
+      rgba(255, 255, 255, 0.08)
     );
     --hairline: light-dark(rgba(9, 10, 14, 0.1), rgba(255, 255, 255, 0.1));
     --hairline-strong: light-dark(
@@ -240,54 +276,31 @@ button:disabled {
 .prototype-shell {
   margin: 0 auto;
   max-width: 1200px;
-  padding: 0 24px 64px;
+  /* 悬浮岛脱离文档流，页面顶部留出岛的视觉起点 */
+  padding: calc(var(--header-height) + 16px) 24px 64px;
 }
 
+/* 悬浮玻璃岛：功能层唯一的常驻玻璃面（fixed，不推开内容） */
 .site-header {
   align-items: center;
+  border: 1px solid var(--header-glass-edge);
+  border-radius: var(--radius-island);
+  box-shadow: var(--header-shadow);
   display: flex;
   gap: 16px;
+  left: 50%;
   height: var(--header-height);
   justify-content: space-between;
-  /* 内容从栏体下方滚过，栏体不用 border-bottom 画硬线 */
-  margin: 0 -24px;
-  padding: 0 24px;
-  position: sticky;
-  top: 0;
+  max-width: 80rem;
+  padding: 0 16px;
+  position: fixed;
+  top: 16px;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
   z-index: 40;
   animation: header-elevate linear both;
   animation-range: 0 120px;
   animation-timeline: scroll(root);
-}
-
-.site-header::before {
-  border-radius: 0;
-}
-
-/* 滚动边缘带：内容在这里渐隐，取代半透明底 + 硬边框 */
-.site-header-edge {
-  height: 28px;
-  margin: 0 -24px -28px;
-  pointer-events: none;
-  position: sticky;
-  top: var(--header-height);
-  z-index: 39;
-  animation: edge-fade linear both;
-  animation-range: 0 80px;
-  animation-timeline: scroll(root);
-}
-
-.site-header-edge::after {
-  background: linear-gradient(
-    to bottom,
-    var(--surface-overlay),
-    transparent
-  );
-  content: "";
-  inset: 0;
-  -webkit-mask-image: linear-gradient(to bottom, #000, transparent);
-  mask-image: linear-gradient(to bottom, #000, transparent);
-  position: absolute;
 }
 
 @keyframes header-elevate {
@@ -295,27 +308,14 @@ button:disabled {
     box-shadow: none;
   }
   to {
-    box-shadow: var(--shadow-card);
-  }
-}
-
-@keyframes edge-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+    box-shadow: var(--header-shadow);
   }
 }
 
 /* 不支持滚动驱动动画的浏览器常显边缘带，功能不依赖动效 */
 @supports not (animation-timeline: scroll()) {
   .site-header {
-    box-shadow: var(--shadow-card);
-  }
-
-  .site-header-edge {
-    opacity: 1;
+    box-shadow: var(--header-shadow);
   }
 }
 
@@ -366,8 +366,8 @@ button:disabled {
 
 .prototype-badge,
 .data-notice {
-  background-color: var(--surface-raised);
-  border: 1px solid var(--hairline);
+  background-color: var(--field-surface);
+  border: 1px solid transparent;
   border-radius: 999px;
   color: var(--label-secondary);
   font-size: 0.75rem;
@@ -538,6 +538,8 @@ button:disabled {
    ========================================================================== */
 
 .booking-panel {
+  background-color: var(--surface-panel-solid);
+  border: 1px solid var(--panel-border);
   border-radius: var(--radius-panel);
   box-shadow: var(--shadow-panel);
   margin: 32px 0 0;
@@ -545,18 +547,23 @@ button:disabled {
 }
 
 .booking-head {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  justify-content: space-between;
-  margin-bottom: 16px;
+  display: grid;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.booking-note {
+  color: var(--label-tertiary);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 60ch;
 }
 
 .booking-title {
   font-family: var(--font-display);
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.01em;
   margin: 0;
 }
@@ -570,36 +577,65 @@ button:disabled {
 
 .search-form {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   grid-template-columns: 1.5fr 1fr 1fr 1fr;
 }
 
 .booking-submit {
   align-self: end;
-  grid-column: span 2;
+  grid-column: span 1;
 }
 
 .field-block {
   display: grid;
-  gap: 8px;
+  gap: 0;
 }
 
 label {
   display: grid;
-  gap: 8px;
+  gap: 0;
+}
+
+/* iOS 嵌入式分组：字段没有自己的硬边框，只有底色与圆角 */
+.field-row {
+  background-color: var(--field-surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  display: grid;
+  gap: 4px;
+  min-height: 64px;
+  padding: 10px 12px;
+  transition:
+    background-color 200ms ease-out,
+    border-color 200ms ease-out;
+}
+
+.field-row:hover {
+  background-color: color-mix(in srgb, var(--field-surface) 70%, var(--label-primary) 6%);
+}
+
+/* 点击或聚焦时整行加深，给出物理确定感 */
+.field-row:focus-within {
+  background-color: var(--field-surface-active);
+  border-color: var(--hairline-strong);
+}
+
+.field-row[data-invalid="true"] {
+  background-color: var(--alert-surface);
+  border-color: var(--alert-line);
 }
 
 .field-label,
 label > span {
-  color: var(--label-secondary);
+  color: var(--label-tertiary);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0;
 }
 
 label:focus-within > .field-label,
 .field-block:focus-within .field-label,
-.field-control:focus-within .field-label {
+.field-row:focus-within .field-label {
   color: var(--accent-text);
 }
 
@@ -612,29 +648,29 @@ label > small {
 
 .field-control {
   align-items: center;
-  background-color: var(--surface-sunken);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-control);
+  background: transparent;
+  border: 0;
   display: flex;
-  gap: 8px;
+  justify-content: space-between;
   min-height: 44px;
-  padding: 0 12px;
-  transition:
-    border-color 150ms ease-out,
-    background-color 150ms ease-out;
+  padding: 0;
 }
 
-.field-control:hover {
-  border-color: color-mix(in srgb, var(--label-primary) 18%, transparent);
+/* 原生下拉在嵌入式行里会画出自己的浅色底与箭头，这里统一交给 CSS 画 */
+.field-control select {
+  appearance: none;
+  -webkit-appearance: none;
 }
 
-.field-control:focus-within {
-  border-color: var(--hairline-strong);
-}
-
-.field-control[data-invalid="true"] {
-  background-color: var(--alert-surface);
-  border-color: var(--alert-line);
+.field-chevron {
+  border-bottom: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  color: var(--label-tertiary);
+  flex: none;
+  height: 8px;
+  margin-right: 4px;
+  transform: rotate(45deg) translate(-2px, -2px);
+  width: 8px;
 }
 
 .field-control input,
@@ -643,24 +679,26 @@ label > small {
   border: 0;
   border-radius: 0;
   color: var(--label-primary);
+  font-size: 1.125rem;
   font-variant-numeric: tabular-nums;
-  min-height: 44px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  min-height: 32px;
   padding: 0;
   width: 100%;
 }
 
 .field-control input:focus-visible,
 .field-control select:focus-visible {
-  box-shadow: none;
-  outline: 0;
+  outline-offset: 1px;
 }
 
 .field-control input::placeholder {
   color: var(--label-tertiary);
 }
 
-.field-control select,
-.field-control option {
+/* 只给下拉列表项上底色；select 本体必须保持透明，否则会在行里露出一块浅底 */
+.field-control select option {
   background-color: var(--surface-raised);
   color: var(--label-primary);
 }
@@ -692,42 +730,54 @@ select[aria-invalid="true"] {
 .booking-toggle {
   align-items: center;
   align-self: end;
-  background-color: var(--surface-sunken);
-  border: 1px solid var(--hairline);
+  background-color: var(--field-surface);
+  border: 1px solid transparent;
   border-radius: var(--radius-control);
   cursor: pointer;
   display: flex;
   gap: 12px;
-  min-height: 68px;
-  padding: 8px 12px;
+  grid-column: span 2;
+  min-height: 64px;
+  padding: 10px 12px;
+  transition: background-color 200ms ease-out;
 }
 
+.booking-toggle:focus-within,
+.booking-toggle:hover {
+  background-color: var(--field-surface-active);
+}
+
+/* iOS 原生开关比例：51×31 轨道 + 27px 滑块 */
 .booking-toggle input {
   appearance: none;
-  background-color: color-mix(in srgb, var(--label-primary) 12%, transparent);
-  border: 1px solid var(--hairline);
+  background-color: color-mix(in srgb, var(--label-primary) 22%, transparent);
+  border: 0;
   border-radius: 999px;
   cursor: pointer;
   flex: none;
-  height: 24px;
+  height: 31px;
   margin: 0;
-  min-height: 24px;
+  min-height: 31px;
   position: relative;
-  transition: background-color 200ms ease-out;
-  width: 44px;
+  transition:
+    background-color 220ms ease-out,
+    transform 220ms ease-out;
+  width: 51px;
 }
 
 .booking-toggle input::after {
   background-color: var(--surface-raised);
   border-radius: 999px;
-  box-shadow: var(--shadow-row);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.15),
+    0 1px 1px rgba(0, 0, 0, 0.16);
   content: "";
-  height: 18px;
+  height: 27px;
   left: 2px;
   position: absolute;
   top: 2px;
-  transition: transform 200ms ease-out;
-  width: 18px;
+  transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  width: 27px;
 }
 
 .booking-toggle input:checked {
@@ -2078,30 +2128,25 @@ dd {
 /* 主题三态切换：不靠颜色表达状态，带文字标签 */
 .theme-toggle {
   align-items: center;
-  background-color: var(--surface-sunken);
-  border: 1px solid var(--hairline);
-  border-radius: 999px;
   display: inline-flex;
-  gap: 2px;
-  padding: 2px;
+  gap: 4px;
 }
 
 .theme-toggle button {
-  background-color: transparent;
+  background-color: var(--field-surface);
   border: 0;
   border-radius: 999px;
   color: var(--label-secondary);
   font-size: 0.75rem;
-  min-height: 28px;
+  min-height: 32px;
   min-width: 44px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   transition: background-color 150ms ease-out;
 }
 
 .theme-toggle button[aria-pressed="true"] {
-  background-color: var(--surface-raised);
-  box-shadow: var(--shadow-row);
-  color: var(--label-primary);
+  background-color: var(--accent-fill);
+  color: var(--ink-on-accent);
   font-weight: 600;
 }
 
@@ -2152,6 +2197,13 @@ footer p {
 
   .module-switcher {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 桌面端给预订面板更大的呼吸感 */
+@media (min-width: 768px) {
+  .booking-panel {
+    padding: 32px;
   }
 }
 
@@ -2244,6 +2296,10 @@ footer p {
   }
 
   .booking-submit {
+    grid-column: auto;
+  }
+
+  .booking-toggle {
     grid-column: auto;
   }
 

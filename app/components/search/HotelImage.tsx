@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-/** 代理接口接受的固定宽度档位，用来生成 srcset。 */
-const WIDTHS = [400, 800, 1200];
+import { IMAGE_WIDTHS, imageUrlAtWidth } from "../../lib/image-proxy";
 
 type HotelImageProps = {
   /** /media/hotel?src=... 的代理路径；null 表示目录里没有这家酒店。 */
@@ -55,10 +53,10 @@ export function HotelImage({
         onError={() => setStatus("failed")}
         onLoad={() => setStatus("ready")}
         sizes="(max-width: 560px) 100vw, (max-width: 1024px) 50vw, 360px"
-        src={`${imagePath}&w=800`}
-        srcSet={WIDTHS.map((width) => `${imagePath}&w=${width} ${width}w`).join(
-          ", ",
-        )}
+        src={imageUrlAtWidth(imagePath, 800)}
+        srcSet={IMAGE_WIDTHS.map(
+          (width) => `${imageUrlAtWidth(imagePath, width)} ${width}w`,
+        ).join(", ")}
         width={640}
       />
     </>

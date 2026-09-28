@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { IMAGE_WIDTHS, imageUrlAtWidth } from "../../lib/image-proxy";
 
 type FeaturedHotel = {
   code: string;
@@ -58,9 +59,10 @@ export function HeroImage() {
           loading="eager"
           onError={() => setFailed(true)}
           sizes="(max-width: 1024px) 100vw, 420px"
-          src={`${hotel.imagePath}&w=1200`}
-          srcSet={[400, 800, 1200]
-            .map((width) => `${hotel.imagePath}&w=${width} ${width}w`)
+          src={imageUrlAtWidth(hotel.imagePath, 1200)}
+          srcSet={IMAGE_WIDTHS.map(
+            (width) => `${imageUrlAtWidth(hotel.imagePath!, width)} ${width}w`,
+          )
             .join(", ")}
           width={640}
         />
