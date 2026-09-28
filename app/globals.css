@@ -284,6 +284,7 @@ button:disabled {
 }
 
 .liquid-edge-focus:focus-within::before,
+.liquid-field:focus-within::before,
 .booking-panel:focus-within::before,
 .form-section:focus-within::before {
   background: var(--edge-focus);
@@ -2268,6 +2269,21 @@ footer p {
 
   .calculator-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 视口高度有限时收起档位明细，保证主按钮仍留在首屏 */
+@media (min-width: 1024px) and (max-height: 820px) {
+  .hero {
+    padding-top: 16px;
+  }
+
+  .hero-visual {
+    margin-top: 16px;
+  }
+
+  .hero-visual-stage {
+    display: none;
   }
 }
 
