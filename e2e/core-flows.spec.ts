@@ -69,7 +69,7 @@ test("完成固定案例的积分回血计算并核对关键结果", async ({ pa
     .selectOption("us-amex-brilliant");
   await calculator.getByLabel("欢迎积分").fill("1000");
   await calculator.getByLabel("额外活动积分").fill("0");
-  await calculator.getByLabel("每万分价值（CNY）").fill("400");
+  await calculator.getByLabel("每万分兑换价值（CNY）").fill("400");
 
   const result = page.getByRole("complementary", {
     name: "积分回血计算结果",

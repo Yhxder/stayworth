@@ -29,6 +29,8 @@ export type Hotel = {
   sourceLabel: string;
   sourceUrl: string | null;
   updatedAt: string;
+  /** 官方图片的代理路径（/media/hotel?...）；目录没有匹配到酒店时为 null。 */
+  imagePath?: string | null;
 };
 
 export type SearchFilters = {

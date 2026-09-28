@@ -5,7 +5,7 @@ import { openPrototype } from "./support/stay";
 async function openIndexModule(page: import("@playwright/test").Page) {
   await openPrototype(page);
   await page
-    .getByRole("button", { name: "切换到每万分参考价值模块" })
+    .getByRole("button", { name: "切换到每万分兑换价值模块" })
     .click();
   await expect(page.getByRole("heading", { name: /StayWorth Index/ })).toBeVisible();
 }
@@ -14,7 +14,7 @@ test("默认展示全球参考值，并带上区间、样本量与数据日期",
   await openIndexModule(page);
 
   const section = page.locator("#index");
-  await expect(section).toContainText("每万分参考价值");
+  await expect(section).toContainText("每万分兑换价值");
   await expect(section).toContainText("统一货币 CNY");
   await expect(section).toContainText("数据日期");
 
@@ -75,7 +75,7 @@ test("回血模块提供跳转到参考价值的入口", async ({ page }) => {
   await openPrototype(page);
   await page.getByRole("button", { name: "切换到积分回血模块" }).click();
 
-  const entry = page.getByRole("button", { name: "查看参考价值" });
+  const entry = page.getByRole("button", { name: "查看每万分兑换价值" });
   await expect(entry).toBeVisible();
   await entry.click();
 

@@ -1,7 +1,12 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
-import { handleHotelSearchRequest, type HotelDatabase } from "./hotels-api";
+import {
+  handleFeaturedHotelRequest,
+  handleHotelSearchRequest,
+  type HotelDatabase,
+} from "./hotels-api";
+import { handleHotelImageRequest } from "./media-proxy";
 
 interface Env {
   ASSETS: Fetcher;
@@ -32,6 +37,14 @@ const worker = {
 
     if (url.pathname === "/api/hotels") {
       return handleHotelSearchRequest(request, env.DB);
+    }
+
+    if (url.pathname === "/api/catalog/featured") {
+      return handleFeaturedHotelRequest(env.DB);
+    }
+
+    if (url.pathname === "/media/hotel") {
+      return handleHotelImageRequest(request, env.IMAGES);
     }
 
     if (url.pathname === "/_vinext/image") {

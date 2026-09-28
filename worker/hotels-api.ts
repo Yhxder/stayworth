@@ -44,7 +44,15 @@ type HotelSnapshotRow = {
   sourceLabel: string;
   sourceUrl: string | null;
   updatedAt: string;
+  bannerWideUrl: string | null;
+  bannerClassicUrl: string | null;
 };
+
+/** 图片走本站代理：浏览器不直连万豪 CDN，缓存与尺寸都由本站控制。 */
+export function proxiedImagePath(source: string | null): string | null {
+  if (!source) return null;
+  return `/media/hotel?src=${encodeURIComponent(source)}`;
+}
 
 function normalizeSearchText(value: string) {
   return value.trim().toLocaleLowerCase().replaceAll(/\s+/g, " ");
@@ -110,6 +118,8 @@ export async function queryHotelSnapshots(
         ps.source_name AS "sourceLabel",
         ps.source_url AS "sourceUrl",
         ps.updated_at AS "updatedAt",
+        cat.banner_wide_url AS "bannerWideUrl",
+        cat.banner_classic_url AS "bannerClassicUrl",
         ROW_NUMBER() OVER (
           PARTITION BY h.id
           ORDER BY ps.updated_at DESC, ps.id DESC
@@ -117,6 +127,8 @@ export async function queryHotelSnapshots(
       FROM cities c
       INNER JOIN hotels h ON h.city_id = c.id
       INNER JOIN price_snapshots ps ON ps.hotel_id = h.id
+        /* 目录与价格解耦：按官方英文名对齐，目录是空的或没匹配上时图片走回退 */
+      LEFT JOIN hotel_catalog cat ON LOWER(cat.name_en) = LOWER(h.name_en)
       WHERE ${conditions.join("\n        AND ")}
     )
     SELECT
@@ -135,17 +147,72 @@ export async function queryHotelSnapshots(
       "currency",
       "sourceLabel",
       "sourceUrl",
-      "updatedAt"
+      "updatedAt",
+      "bannerWideUrl",
+      "bannerClassicUrl"
     FROM ranked_snapshots
     WHERE snapshot_rank = 1
     ORDER BY "cashPriceMinor" ASC, "id" ASC
   `);
   const result = await statement.bind(...bindings).all<HotelSnapshotRow>();
 
-  return (result.results ?? []).map((row) => ({
-    ...row,
-    cashPrice: row.cashPriceMinor / 100,
-  }));
+  return (result.results ?? []).map((row) => {
+    const { bannerWideUrl, bannerClassicUrl, ...rest } = row;
+    return {
+      ...rest,
+      cashPrice: row.cashPriceMinor / 100,
+      imagePath: proxiedImagePath(bannerWideUrl ?? bannerClassicUrl),
+    };
+  });
+}
+
+type FeaturedHotelRow = {
+  code: string;
+  nameZh: string;
+  nameEn: string;
+  cityNameZh: string;
+  bannerWideUrl: string | null;
+  bannerClassicUrl: string | null;
+};
+
+/**
+ * 首页的「一处奢华信号」：从真实目录里挑一家有官方图片的酒店。
+ * 排序固定（评级、点评数、代号），同一份数据每次返回同一家，不随机。
+ */
+export async function handleFeaturedHotelRequest(database: HotelDatabase) {
+  try {
+    const statement = database.prepare(`
+      SELECT
+        hotel_code AS "code",
+        name_zh AS "nameZh",
+        name_en AS "nameEn",
+        city_name_zh AS "cityNameZh",
+        banner_wide_url AS "bannerWideUrl",
+        banner_classic_url AS "bannerClassicUrl"
+      FROM hotel_catalog
+      WHERE banner_wide_url IS NOT NULL OR banner_classic_url IS NOT NULL
+      ORDER BY COALESCE(rating, 0) DESC, COALESCE(review_count, 0) DESC, hotel_code ASC
+      LIMIT 1
+    `);
+    const result = await statement.all<FeaturedHotelRow>();
+    const row = result.results?.[0];
+
+    if (!row) {
+      return jsonResponse({ hotel: null });
+    }
+
+    const { bannerWideUrl, bannerClassicUrl, ...rest } = row;
+    return jsonResponse({
+      hotel: {
+        ...rest,
+        imagePath: proxiedImagePath(bannerWideUrl ?? bannerClassicUrl),
+        imageSourceLabel: "万豪官方图片",
+      },
+    });
+  } catch (error) {
+    console.error("Featured hotel query failed", error);
+    return jsonResponse({ hotel: null }, 500);
+  }
 }
 
 type CoverageRow = {

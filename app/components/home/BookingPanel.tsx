@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { GlassCard } from "../ui/GlassCard";
+import { SurfaceCard } from "../ui/SurfaceCard";
 import { InputField } from "../ui/InputField";
 import type { SearchFilters, TierFilter } from "../../types/hotel";
 
@@ -66,7 +66,7 @@ export function BookingPanel({
   }
 
   return (
-    <GlassCard
+    <SurfaceCard
       as="form"
       className="booking-panel"
       noValidate
@@ -170,7 +170,7 @@ export function BookingPanel({
         </InputField>
 
         <label
-          className="liquid-edge liquid-field liquid-focusable booking-toggle"
+          className="booking-toggle field-control"
           htmlFor="booking-use-points"
         >
           <input
@@ -205,6 +205,6 @@ export function BookingPanel({
       <p className="booking-foot">
         价格来自人工维护的示例快照，不是实时库存；示例快照不区分入住人数，人数这项先记录你的出行规模。
       </p>
-    </GlassCard>
+    </SurfaceCard>
   );
 }

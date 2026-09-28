@@ -90,6 +90,7 @@ function isHotel(value: unknown): value is Hotel {
     currencyCodes.has(value.currency as Hotel["currency"]) &&
     typeof value.sourceLabel === "string" &&
     isNullableString(value.sourceUrl) &&
+    (value.imagePath === undefined || isNullableString(value.imagePath)) &&
     typeof value.updatedAt === "string" &&
     Number.isFinite(new Date(value.updatedAt).getTime())
   );

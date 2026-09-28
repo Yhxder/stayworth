@@ -160,7 +160,7 @@ test("纯键盘可以按阅读顺序搜索并选择酒店", async ({ page }) => 
   const moduleButtons = [
     page.getByRole("button", { name: "切换到酒店对比模块" }),
     page.getByRole("button", { name: "切换到积分回血模块" }),
-    page.getByRole("button", { name: "切换到每万分参考价值模块" }),
+    page.getByRole("button", { name: "切换到每万分兑换价值模块" }),
   ];
   for (const button of moduleButtons) {
     await page.keyboard.press("Tab");

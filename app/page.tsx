@@ -4,10 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BookingPanel } from "./components/home/BookingPanel";
 import type { BookingDraft } from "./components/home/BookingPanel";
 import { HeroSection } from "./components/home/HeroSection";
-import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import { IndexSection } from "./components/index/IndexSection";
-import { ComparisonSection } from "./components/search/ComparisonSection";
+import { RebateCalculator } from "./components/rebate/RebateCalculator";
+import {
+  ComparisonSection,
+  ComparisonTray,
+} from "./components/search/ComparisonSection";
 import { SearchResults } from "./components/search/SearchResults";
+import { Header } from "./components/shell/Header";
 import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
 import type { RankingCriterion } from "./lib/hotel-ranking";
@@ -60,8 +64,7 @@ function validateSearchFilters(filters: SearchFilters): SearchValidation {
 }
 
 export default function Home() {
-  const [activeModule, setActiveModule] =
-    useState<ModuleName>("comparison");
+  const [activeModule, setActiveModule] = useState<ModuleName>("comparison");
   const [filters, setFilters] = useState<SearchFilters>(() =>
     createInitialFilters(),
   );
@@ -103,9 +106,7 @@ export default function Home() {
 
   const selectedHotels = useMemo(
     () =>
-      availableHotels.filter((hotel) =>
-        selectedHotelIds.includes(hotel.id),
-      ),
+      availableHotels.filter((hotel) => selectedHotelIds.includes(hotel.id)),
     [availableHotels, selectedHotelIds],
   );
 
@@ -211,16 +212,7 @@ export default function Home() {
 
   return (
     <main className="prototype-shell">
-      <header className="site-header">
-        <a className="wordmark" href="#top" aria-label="StayWorth 首页">
-          <span className="wordmark-mark">SW</span>
-          <span>
-            <strong>StayWorth</strong>
-            <small>Marriott points decision</small>
-          </span>
-        </a>
-        <span className="prototype-badge">示例快照 · 非实时</span>
-      </header>
+      <Header snapshotLabel="示例快照，非实时" />
 
       <HeroSection>
         <BookingPanel
@@ -235,7 +227,7 @@ export default function Home() {
         />
       </HeroSection>
 
-      <nav className="module-switcher" aria-label="主要功能">
+      <nav aria-label="主要功能" className="module-switcher">
         <button
           aria-label="切换到酒店对比模块"
           aria-pressed={activeModule === "comparison"}
@@ -243,9 +235,8 @@ export default function Home() {
           onClick={() => setActiveModule("comparison")}
           type="button"
         >
-          <span>01</span>
-          酒店对比
-          <small>现金价 vs 积分价</small>
+          <strong>酒店对比</strong>
+          <small>现金价与积分价逐家对照</small>
         </button>
         <button
           aria-label="切换到积分回血模块"
@@ -254,20 +245,18 @@ export default function Home() {
           onClick={() => setActiveModule("rebate")}
           type="button"
         >
-          <span>02</span>
-          积分回血
-          <small>计算真实入住成本</small>
+          <strong>积分回血</strong>
+          <small>估算入住后赚回多少积分</small>
         </button>
         <button
-          aria-label="切换到每万分参考价值模块"
+          aria-label="切换到每万分兑换价值模块"
           aria-pressed={activeModule === "index"}
           className={activeModule === "index" ? "is-active" : ""}
           onClick={() => setActiveModule("index")}
           type="button"
         >
-          <span>03</span>
-          每万分参考价值
-          <small>StayWorth Index</small>
+          <strong>每万分兑换价值</strong>
+          <small>市场参考中位数与区间</small>
         </button>
       </nav>
 
@@ -281,10 +270,14 @@ export default function Home() {
             <h2 id="comparison-title">酒店对比</h2>
           </div>
           <p>
-            在上方预订面板设置城市、日期和层级，再挑 2 到 4 家并排比较。
+            在上方预订面板设置城市、日期和层级，再挑 2 到 4 家并排比较现金价与积分价。
           </p>
         </div>
 
+        <ComparisonTray
+          hotels={selectedHotels}
+          onOpen={() => setComparisonOpen(true)}
+        />
         <SearchResults
           focusTargetRef={resultsFocusTarget}
           onApplyCoverage={applyCoverage}
@@ -301,7 +294,6 @@ export default function Home() {
           hotels={selectedHotels}
           isOpen={comparisonOpen}
           onClose={() => setComparisonOpen(false)}
-          onOpen={() => setComparisonOpen(true)}
           onUseForRebate={useHotelForRebate}
         />
       </section>
@@ -318,10 +310,8 @@ export default function Home() {
       <TrustAndSources />
 
       <footer>
-        <p>
-          StayWorth 独立项目 · 示例快照不构成预订或兑换建议。
-        </p>
-        <p>Independent project · Not affiliated with Marriott International.</p>
+        <p>StayWorth 是独立项目，与 Marriott International 没有隶属关系。</p>
+        <p>示例快照不是实时库存，不构成预订、兑换或税务建议。</p>
       </footer>
     </main>
   );

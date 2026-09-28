@@ -4,12 +4,10 @@ import {
   RANKING_OPTIONS,
   RANKING_SCOPE_NOTE,
   getRankingOption,
-  rankHotels,
   type RankingCriterion,
 } from "../../lib/hotel-ranking";
-import { getSearchStateContent } from "../../lib/hotel-search";
 import type { SearchResultsState } from "../../types/hotel";
-import { HotelCard } from "./HotelCard";
+import { HotelCardList } from "./HotelCardList";
 
 type SearchResultsProps = {
   focusTargetRef: RefObject<HTMLHeadingElement | null>;
@@ -22,6 +20,10 @@ type SearchResultsProps = {
   onToggleHotel: (hotelId: string) => void;
 };
 
+/**
+ * 结果区：工具条与排序控件在这里，卡片与四种状态交给 HotelCardList。
+ * 焦点管理保持在同一个地方：查询结束后焦点落到结果标题（tabIndex=-1）。
+ */
 export function SearchResults({
   focusTargetRef,
   state,
@@ -34,79 +36,24 @@ export function SearchResults({
 }: SearchResultsProps) {
   if (state.status === "idle") return null;
 
-  if (state.status === "loading") {
-    const content = getSearchStateContent("loading");
+  if (state.status === "loading" || state.status === "empty" || state.status === "error") {
     return (
-      <section className="search-state is-loading" role="status">
-        <span className="state-mark" aria-hidden="true" />
-        <div>
-          <h3 ref={focusTargetRef} tabIndex={-1}>
-            {content.title}
-          </h3>
-          <p>{content.message}</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (state.status === "empty") {
-    const content = getSearchStateContent("empty");
-    const coverage = state.coverage;
-    return (
-      <section className="search-state" role="status">
-        <span className="state-code">EMPTY</span>
-        <div>
-          <h3 ref={focusTargetRef} tabIndex={-1}>
-            {content.title}
-          </h3>
-          <p>
-            “{state.query}”没有完全匹配该城市、日期和层级的快照。{content.message}
-          </p>
-          {coverage && (
-            <>
-              <p className="coverage-hint">
-                “{state.query}”目前只有 {coverage.checkIn} 至 {coverage.checkOut}{" "}
-                的示例快照。
-              </p>
-              <button
-                className="text-button"
-                onClick={() => onApplyCoverage(coverage)}
-                type="button"
-              >
-                用这段日期重新搜索
-              </button>
-            </>
-          )}
-        </div>
-      </section>
-    );
-  }
-
-  if (state.status === "error") {
-    const content = getSearchStateContent("error");
-    return (
-      <section className="search-state is-error" role="alert">
-        <span className="state-code">ERROR</span>
-        <div>
-          <h3 ref={focusTargetRef} tabIndex={-1}>
-            {content.title}
-          </h3>
-          <p>{state.message || content.message}</p>
-          <button className="text-button" onClick={onRetry} type="button">
-            重新查询
-          </button>
-        </div>
-      </section>
+      <HotelCardList
+        focusTargetRef={focusTargetRef}
+        onApplyCoverage={onApplyCoverage}
+        onRetry={onRetry}
+        onToggleHotel={onToggleHotel}
+        rankingCriterion={rankingCriterion}
+        selectedHotelIds={selectedHotelIds}
+        state={state}
+      />
     );
   }
 
   const newestSnapshot = state.hotels.reduce(
-    (latest, hotel) =>
-      hotel.updatedAt > latest ? hotel.updatedAt : latest,
+    (latest, hotel) => (hotel.updatedAt > latest ? hotel.updatedAt : latest),
     state.hotels[0].updatedAt,
   );
-  const staleContent = getSearchStateContent("stale");
-  const rankedHotels = rankHotels(state.hotels, rankingCriterion);
   const rankingOption = getRankingOption(rankingCriterion);
 
   return (
@@ -117,18 +64,13 @@ export function SearchResults({
             {state.query} · {state.hotels.length} 家酒店快照
           </h3>
         </div>
-        <p className={`data-notice ${state.status === "stale" ? "is-stale" : ""}`}>
+        <p
+          className={`data-notice ${state.status === "stale" ? "is-stale" : ""}`}
+        >
           {state.status === "stale" ? "数据已过期" : "有限快照"} · 更新于{" "}
           {formatSnapshotDate(newestSnapshot)}
         </p>
       </div>
-
-      {state.status === "stale" && (
-        <div className="stale-warning" role="note">
-          <strong>{staleContent.title}</strong>
-          <span>{staleContent.message}</span>
-        </div>
-      )}
 
       <fieldset className="ranking-toolbar">
         <legend>排序口径</legend>
@@ -155,18 +97,15 @@ export function SearchResults({
         {RANKING_SCOPE_NOTE} 当前共比较 {state.hotels.length} 家。
       </p>
 
-      <div className="hotel-grid">
-        {rankedHotels.map(({ hotel, rank }) => (
-          <HotelCard
-            hotel={hotel}
-            key={hotel.id}
-            onToggle={onToggleHotel}
-            rank={rank}
-            rankingCriterion={rankingCriterion}
-            selected={selectedHotelIds.includes(hotel.id)}
-          />
-        ))}
-      </div>
+      <HotelCardList
+        focusTargetRef={focusTargetRef}
+        onApplyCoverage={onApplyCoverage}
+        onRetry={onRetry}
+        onToggleHotel={onToggleHotel}
+        rankingCriterion={rankingCriterion}
+        selectedHotelIds={selectedHotelIds}
+        state={state}
+      />
     </div>
   );
 }

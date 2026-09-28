@@ -44,8 +44,8 @@ test("带入酒店后显示市场参考中位数，并标明用的是城市口�
 test("用户点按钮才写入参考值，不覆盖已经填好的数字", async ({ page }) => {
   const calculator = await bringHotelIntoCalculator(page);
   const reference = calculator.locator(".market-reference");
-  // 用 role 精确定位输入框：结算币种下拉的说明里也含「每万分价值」四个字
-  const input = calculator.getByRole("spinbutton", { name: /^每万分价值/ });
+  // 用 role 精确定位输入框：结算币种下拉的说明里也含「每万分兑换价值」
+  const input = calculator.getByRole("spinbutton", { name: /^每万分兑换价值/ });
 
   // 带入时不应该已经覆盖用户的值
   const before = await input.inputValue();

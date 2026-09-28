@@ -39,11 +39,11 @@ import type { RebatePrefill } from "../../types/hotel";
 
 const memberTiers = {
   Member: { label: "普通会员", bonusRate: 0 },
-  Silver: { label: "银卡 · 10% 加成", bonusRate: 0.1 },
-  Gold: { label: "金卡 · 25% 加成", bonusRate: 0.25 },
-  Platinum: { label: "白金卡 · 50% 加成", bonusRate: 0.5 },
-  Titanium: { label: "钛金卡 · 75% 加成", bonusRate: 0.75 },
-  Ambassador: { label: "大使 · 75% 加成", bonusRate: 0.75 },
+  Silver: { label: "银卡（10% 加成）", bonusRate: 0.1 },
+  Gold: { label: "金卡（25% 加成）", bonusRate: 0.25 },
+  Platinum: { label: "白金卡（50% 加成）", bonusRate: 0.5 },
+  Titanium: { label: "钛金卡（75% 加成）", bonusRate: 0.75 },
+  Ambassador: { label: "大使（75% 加成）", bonusRate: 0.75 },
 } as const;
 
 type MemberTier = keyof typeof memberTiers;
@@ -194,13 +194,13 @@ export function RebateCalculator({
                                   pointValuation <= 0
                                 ? {
                                     field: "pointValuation",
-                                    message: "请输入大于 0 的每万分价值。",
+                                    message: "请输入大于 0 的每万分兑换价值。",
                                   }
                                 : pointValuation >
                                     CALCULATOR_LIMITS.pointValuation.max
                                   ? {
                                       field: "pointValuation",
-                                      message: "每万分价值不能超过 1,000,000。",
+                                      message: "每万分兑换价值不能超过 1,000,000。",
                                     }
                                   : null;
   const calculatorError = calculatorValidation?.message ?? "";
@@ -297,11 +297,11 @@ export function RebateCalculator({
                 >
                   {currencyOptions.map((currency) => (
                     <option key={currency.code} value={currency.code}>
-                      {currency.label} · {currency.code}
+                      {currency.label}（{currency.code}）
                     </option>
                   ))}
                 </select>
-                <small>不改写酒店价格；每万分价值会按参考汇率换算</small>
+                <small>不改写酒店价格；每万分兑换价值会按参考汇率换算</small>
               </label>
               <label>
                 <span>现金总价（{currencyCode}）</span>
@@ -376,7 +376,7 @@ export function RebateCalculator({
             <div className="brand-reference" role="note">
               <div>
                 <strong>
-                  {selectedBrand.name} · 自动 {selectedBrand.baseRate}×
+                  {selectedBrand.name}（自动 {selectedBrand.baseRate}×）
                 </strong>
                 <span>
                   {selectedBrand.note ?? "会员等级加成会根据该品牌的基础积分计算。"}
@@ -390,8 +390,8 @@ export function RebateCalculator({
             <div className="rate-reference" role="note">
               <strong>参考汇率日期：{EXCHANGE_RATE_REFERENCE_DATE}</strong>
               <span>
-                非实时数据 · 1 USD ≈ {exchangeRateInput || "-"} {currencyCode}{" "}
-                · 可手动修改
+                非实时数据，1 USD ≈ {exchangeRateInput || "-"} {currencyCode}
+                ，可手动修改
               </span>
               <a href={EXCHANGE_RATE_SOURCE_URL} rel="noreferrer" target="_blank">
                 查看汇率来源
@@ -477,7 +477,7 @@ export function RebateCalculator({
                 />
               </label>
               <label>
-                <span>每万分价值（{currencyCode}）</span>
+                <span>每万分兑换价值（{currencyCode}）</span>
                 <input
                   {...getValidationProps("pointValuation")}
                   max={CALCULATOR_LIMITS.pointValuation.max}
@@ -494,7 +494,7 @@ export function RebateCalculator({
               <div className="market-reference" role="note">
                 <div>
                   <strong>
-                    市场参考中位数 · {marketReference.levelLabel}
+                    市场参考中位数（{marketReference.levelLabel}）
                   </strong>
                   <span>
                     {marketReference.currencyCode}{" "}
@@ -539,7 +539,7 @@ export function RebateCalculator({
                 <>
                   <div>
                     <strong>
-                      {selectedCard.segment} · {selectedCard.earningDescription}
+                      {selectedCard.segment}，{selectedCard.earningDescription}
                     </strong>
                     <span>{selectedCard.note}</span>
                     <small>
@@ -581,7 +581,7 @@ export function RebateCalculator({
           aria-live="polite"
           className="calculation-result"
         >
-          <p className="step-label">ESTIMATED RESULT</p>
+          <p className="step-label">预计结果</p>
           <h3>
             {rebateResult?.isNetReturn ? "预计净回报" : "预计有效入住成本"}
           </h3>
@@ -699,16 +699,15 @@ export function RebateCalculator({
 
       <section className="index-placeholder">
         <div>
-          <p className="step-label">RELATED DATA MODULE</p>
-          <h3>StayWorth Index · 每万分参考价</h3>
+          <h3>StayWorth Index · 每万分兑换价值</h3>
           <p>
-            已经上线：基于 30 个代表城市的每日抽样，展示每万分参考价值的中位数、区间、样本量与更新时间。
+            已经上线：基于每日抽样的代表城市，展示每万分兑换价值的中位数、区间、样本量与更新时间。
             可以拿它对照上面自己填的估值，判断这次兑换是高还是低。
           </p>
         </div>
         {onOpenIndex ? (
           <button onClick={onOpenIndex} type="button">
-            查看参考价值
+            查看每万分兑换价值
           </button>
         ) : null}
       </section>

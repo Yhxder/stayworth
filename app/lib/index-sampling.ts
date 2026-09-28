@@ -269,7 +269,7 @@ export function toMajorUnits(minor: number, decimalPoint: number): number {
   return minor / 10 ** decimalPoint;
 }
 
-/** 每万分价值 = 含税含费总额 ÷ 积分需求 × 10000。 */
+/** 每万分兑换价值 = 含税含费总额 ÷ 积分需求 × 10000。 */
 export function valuePerTenThousand(
   totalMinor: number,
   totalDecimalPoint: number,
@@ -390,7 +390,7 @@ function toSample(input: CleanInput, dropped: DroppedSample[]): IndexSample | nu
 /**
  * 清洗一个城市的一批酒店：
  * 1. 丢弃缺积分、缺现金价、非正数与未映射品牌的记录；
- * 2. 计算每万分价值；
+ * 2. 计算每万分兑换价值；
  * 3. 丢弃偏离城市中位数 5 倍以上的异常值（通常是现金价异常）。
  */
 export function cleanCitySamples(inputs: CleanInput[]): CleanResult {

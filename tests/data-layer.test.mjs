@@ -6,6 +6,7 @@ import {
   handleHotelSearchRequest,
   queryHotelSnapshots,
 } from "../worker/hotels-api.ts";
+import { handleHotelImageRequest } from "../worker/media-proxy.ts";
 
 const requiredFiles = [
   "db/schema.ts",
@@ -102,7 +103,49 @@ test("queries exact city and dates with prepared-statement bindings", async () =
     ...databaseRow,
     cashPrice: 1235,
     currency: "CNY",
+    imagePath: null,
   });
+});
+
+test("routes catalog banners through the site proxy instead of shipping CDN urls", async () => {
+  const bannerUrl =
+    "https://cache.marriott.com/content/dam/marriott-renditions/MD/md-main-002-hor-feat.jpg";
+  const database = createFakeDatabase([
+    {
+      ...databaseRow,
+      bannerWideUrl: bannerUrl,
+      bannerClassicUrl: null,
+    },
+  ]);
+  const hotels = await queryHotelSnapshots(database, {
+    city: "Hong Kong",
+    checkIn: "2026-08-15",
+    checkOut: "2026-08-16",
+  });
+
+  assert.equal(hotels[0].imagePath, `/media/hotel?src=${encodeURIComponent(bannerUrl)}`);
+  // 第三方地址留在服务端，前端只拿到代理路径
+  assert.equal(hotels[0].bannerWideUrl, undefined);
+});
+
+test("media proxy refuses hosts outside the allowlist", async () => {
+  const blocked = await handleHotelImageRequest(
+    new Request(
+      "https://stayworth.test/media/hotel?src=https%3A%2F%2Fexample.com%2Fa.jpg",
+    ),
+  );
+  const missing = await handleHotelImageRequest(
+    new Request("https://stayworth.test/media/hotel"),
+  );
+  const insecure = await handleHotelImageRequest(
+    new Request(
+      "https://stayworth.test/media/hotel?src=http%3A%2F%2Fcache.marriott.com%2Fa.jpg",
+    ),
+  );
+
+  assert.equal(blocked.status, 403);
+  assert.equal(missing.status, 400);
+  assert.equal(insecure.status, 403);
 });
 
 test("returns an explicit empty response for an uncovered date", async () => {

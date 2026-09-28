@@ -7,7 +7,7 @@ export type InputFieldProps = {
   hint?: ReactNode;
   /** 帮助文案的 id，供控件的 aria-describedby 引用。 */
   hintId?: string;
-  /** 校验失败时描边转警示色，文字不改变颜色。 */
+  /** 校验失败时只换描边与底色，文字颜色不变。 */
   invalid?: boolean;
   className?: string;
   /** 实际控件，调用方负责把 aria-invalid / aria-describedby 写在控件上。 */
@@ -15,8 +15,9 @@ export type InputFieldProps = {
 };
 
 /**
- * 高可用输入框外壳：标签在上、控件在玻璃槽内、帮助文案在下。
- * label 同时包住控件并写 htmlFor，屏幕阅读器读到的是完整字段名。
+ * 表单字段外壳：标签在上、控件在下、帮助文案在末。
+ * label 同时包住控件并写 htmlFor，屏幕阅读器读到的是完整字段名；
+ * 错误文案由调用方用 role="alert" 渲染并就近放置（writing.md：错误贴近问题位置）。
  */
 export function InputField({
   id,
@@ -32,7 +33,7 @@ export function InputField({
       <label className="field-block" htmlFor={id}>
         <span className="field-label">{label}</span>
         <span
-          className="liquid-edge liquid-field liquid-focusable"
+          className="field-control"
           data-invalid={invalid ? "true" : undefined}
         >
           {children}

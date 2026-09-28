@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { THEME_INLINE_SCRIPT } from "./lib/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "StayWorth | Marriott Points Decision Tool",
   description:
-    "Compare Marriott cash rates, points prices and the market reference value of 10,000 points before you book.",
+    "Compare Marriott cash rates, points prices and the value of 10,000 points before you book. Sample snapshots, not live inventory.",
   openGraph: {
     title: "StayWorth | Marriott Points Decision Tool",
     description:
@@ -30,13 +31,25 @@ export const metadata: Metadata = {
   },
 };
 
+/** 浏览器界面色跟随画布；深浅各一条，交给系统偏好决定。 */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f5f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#08090c" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        {/* 首屏前写入已保存的外观覆盖，避免闪白或闪黑 */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INLINE_SCRIPT }} />
+      </head>
       <body>{children}</body>
     </html>
   );

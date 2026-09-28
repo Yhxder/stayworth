@@ -60,7 +60,7 @@ const summary = summaryJson as unknown as IndexSummary;
 type ViewId = "global" | "tier" | "country";
 
 const VIEW_LABELS: Array<{ id: ViewId; label: string; hint: string }> = [
-  { id: "global", label: "全球参考值", hint: "不区分品牌档位与国家" },
+  { id: "global", label: "全球口径", hint: "不区分品牌档位与国家" },
   { id: "tier", label: "品牌档位", hint: "五档分层，另列单独品牌" },
   { id: "country", label: "主要国家", hint: "按当地货币呈现" },
 ];
@@ -114,22 +114,22 @@ export function IndexSection({ hidden }: { hidden: boolean }) {
     >
       <div className="section-heading">
         <div>
-          <h2 id="index-title">StayWorth Index · 每万分参考价值</h2>
+          <h2 id="index-title">StayWorth Index · 每万分兑换价值</h2>
         </div>
         <p>
           每日抽样 {summary.cityCount} 个城市、{summary.sampleCount} 家酒店，
-          用含税现金价与同期积分兑换价估算 10,000 积分的参考价值。
+          用含税现金价与同期积分兑换价估算 10,000 积分的兑换价值。
         </p>
       </div>
 
       {stale ? (
         <p className="index-stale" role="status">
-          参考值可能已过期：最近一次采样是 {summary.runKey}，已超过 48 小时。
+          这批参考数据可能已过期：最近一次采样是 {summary.runKey}，已超过 48 小时。
         </p>
       ) : null}
 
       <div className="index-controls">
-        <div className="index-tabs" role="group" aria-label="切换参考值视图">
+        <div className="index-tabs" role="group" aria-label="切换市场参考视图">
           {VIEW_LABELS.map((option) => (
             <button
               aria-pressed={viewId === option.id}
@@ -176,7 +176,7 @@ export function IndexSection({ hidden }: { hidden: boolean }) {
         <thead>
           <tr>
             <th scope="col">分组</th>
-            <th scope="col">每万分参考价值</th>
+            <th scope="col">每万分兑换价值</th>
             <th scope="col">P25 - P75</th>
             <th scope="col">样本</th>
             <th scope="col">城市</th>
