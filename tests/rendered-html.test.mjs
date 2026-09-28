@@ -39,7 +39,7 @@ test("server-renders the StayWorth decision home page", async () => {
   assert.match(html, /Le Méridien/);
   assert.match(html, /系统自动应用[\s\S]{0,40}10(?:<!-- -->)?×/);
   assert.match(html, /1,235/);
-  assert.match(html, /当前支持香港/);
+  assert.match(html, /已接入每日采样/);
   assert.match(html, /上海/);
   assert.match(html, /不是实时库存/);
   assert.match(html, /结算币种/);

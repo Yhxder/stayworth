@@ -5,6 +5,15 @@ import type { FormEvent } from "react";
 import { InputField } from "../ui/InputField";
 import { SurfaceCard } from "../ui/SurfaceCard";
 import type { SearchFilters, TierFilter } from "../../types/hotel";
+import { cityPanel } from "../../data/city-panel.ts";
+
+/**
+ * 覆盖范围提示由面板生成，避免加城市后文案忘记同步。
+ * 面板里每个城市都能用中文名、英文名或代号搜索（服务端按三者匹配）。
+ */
+const cityHint =
+  `已接入每日采样：${cityPanel.slice(0, 6).map((city) => city.nameZh).join(" / ")}` +
+  ` 等 ${cityPanel.length} 个城市，输入中文名、英文名或代号均可`;
 
 const tierOptions: TierFilter[] = [
   "全部等级",
@@ -82,7 +91,7 @@ export function BookingPanel({
       <div className="search-form">
         <InputField
           className="booking-field"
-          hint="当前支持香港 / Hong Kong / HK 与上海 / Shanghai / SHA"
+          hint={cityHint}
           hintId="city-search-hint"
           id="booking-destination"
           invalid={invalidField === "city"}

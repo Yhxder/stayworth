@@ -30,6 +30,11 @@ function createFakeDatabase(rows = [], error = null, coverageRows = []) {
         },
         async all() {
           if (error) throw error;
+          // 搜索会先问每日采样表；这里让它返回空，走回手工快照分支，
+          // 与「每日采样没覆盖时退回快照」的生产行为一致。
+          if (/FROM index_samples/.test(call.sql)) {
+            return { results: [], success: true };
+          }
           const isCoverageQuery = /AS "checkIn"/.test(call.sql);
           return {
             results: isCoverageQuery ? coverageRows : rows,

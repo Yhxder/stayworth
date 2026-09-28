@@ -1,11 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import indexSummary from "../../data/index-summary.json";
-import {
-  findMarketReference,
-  type IndexSummaryShape,
-} from "../../lib/index-reference";
+import { makeConverter } from "../../data/index-fx.ts";
+import { findMarketReference } from "../../lib/index-reference";
+import { useIndexSummary } from "../../lib/index-summary-client";
 import {
   BRAND_RULE_REFERENCE_DATE,
   BRAND_RULE_SOURCE_URL,
@@ -102,16 +100,21 @@ export function RebateCalculator({
    * 市场参考中位数：用户从酒店比较带入某家酒店时，按 城市 → 国家/地区 → 全球 回退。
    * 手动输入（没有 prefill）时不显示，避免给一个和处境无关的数字。
    */
+  const indexState = useIndexSummary();
   const marketReference = useMemo(() => {
-    if (!prefill) return null;
+    if (!prefill || indexState.status !== "ready") return null;
+    const summary = indexState.summary;
     return findMarketReference({
-      summary: indexSummary as unknown as IndexSummaryShape,
+      summary,
       citySlug: prefill.citySlug,
       countryCode: prefill.countryCode,
       currency: currencyCode,
-      convert: tryConvertCurrencyAmount,
+      // 参考值的当地货币换算优先用接口给的同批汇率，取不到才退回打包快照
+      convert: summary.currency.rates
+        ? makeConverter(summary.currency.rates)
+        : tryConvertCurrencyAmount,
     });
-  }, [prefill, currencyCode]);
+  }, [prefill, currencyCode, indexState]);
 
   const cashPrice = parseNumericInput(cashPriceInput);
   const ineligibleSpend = parseNumericInput(ineligibleSpendInput);

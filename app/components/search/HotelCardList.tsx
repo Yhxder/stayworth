@@ -6,6 +6,7 @@ import {
 import { getSearchStateContent } from "../../lib/hotel-search";
 import type { SearchResultsState } from "../../types/hotel";
 import { HotelCard } from "./HotelCard";
+import { CityCatalogList } from "./CityCatalogList";
 
 type HotelCardListProps = {
   state: SearchResultsState;
@@ -103,6 +104,7 @@ export function HotelCardList({
               </button>
             </>
           ) : null}
+          <CityCatalogList city={state.query} />
         </div>
       </section>
     );

@@ -60,3 +60,6 @@ TODO.md
 /.data/
 # 该测试依赖 scraper/，只能在本地跑，不能进公开仓库
 /tests/scraper-guards.test.mjs
+
+# Index 现在由 /api/index 运行时读 D1，本地导出只作离线核对
+/app/data/index-summary.json

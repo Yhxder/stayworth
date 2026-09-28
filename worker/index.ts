@@ -3,10 +3,12 @@ import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } fr
 import handler from "vinext/server/app-router-entry";
 import {
   handleFeaturedHotelRequest,
+  handleCatalogRequest,
   handleHotelSearchRequest,
   type HotelDatabase,
 } from "./hotels-api";
 import { handleHotelImageRequest } from "./media-proxy";
+import { handleIndexRequest } from "./index-api";
 
 interface Env {
   ASSETS: Fetcher;
@@ -41,6 +43,14 @@ const worker = {
 
     if (url.pathname === "/api/catalog/featured") {
       return handleFeaturedHotelRequest(env.DB);
+    }
+
+    if (url.pathname === "/api/catalog") {
+      return handleCatalogRequest(request, env.DB);
+    }
+
+    if (url.pathname === "/api/index") {
+      return handleIndexRequest(env.DB);
     }
 
     if (url.pathname === "/media/hotel") {

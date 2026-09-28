@@ -1,38 +1,34 @@
 import type { ReactNode } from "react";
-import summaryJson from "../../data/index-summary.json";
 import {
   HotelShowcaseCard,
   type ShowcaseMetric,
 } from "./HotelShowcaseCard";
+import { useIndexSummary } from "../../lib/index-summary-client";
 
-type IndexRow = {
-  key: string;
-  value: number | null;
-  p25: number | null;
-  p75: number | null;
-  sampleCount: number;
-  cityCount: number;
-  currencyCode: string;
+/** 数据缺失时给一个「没有数字」的占位，界面照样写明口径与日期。 */
+const EMPTY_METRIC: ShowcaseMetric = {
+  label: "每万分兑换价值",
+  value: null,
+  currencyCode: "CNY",
+  p25: null,
+  p75: null,
+  scopeLabel: "全球口径",
+  sampleCount: 0,
+  cityCount: 0,
+  snapshotDate: "—",
 };
-
-type IndexSummary = {
-  runKey: string;
-  currency: { display: string; options: string[] };
-  views: {
-    byCurrency: Record<string, { global: { rows: IndexRow[] } }>;
-  };
-};
-
-const summary = summaryJson as unknown as IndexSummary;
 
 /** 市场口径指标：全球中位数，界面必须写明口径与日期。 */
-function readMetric(): ShowcaseMetric {
+function readMetric(
+  summary: import("../../lib/index-reference").IndexSummary | null,
+): ShowcaseMetric {
+  if (!summary) return EMPTY_METRIC;
   const currencyCode =
     summary.views.byCurrency[summary.currency.display] !== undefined
       ? summary.currency.display
       : summary.currency.options[0];
-  const global = summary.views.byCurrency[currencyCode].global.rows[0];
-
+  const global = summary.views.byCurrency[currencyCode]?.global.rows[0];
+  if (!global) return EMPTY_METRIC;
   return {
     label: "每万分兑换价值",
     value: global.value,
@@ -62,6 +58,7 @@ type TaskFirstSectionProps = {
  * 标题不再使用渐变文字：强调交给字号与字重，颜色留给主操作与状态。
  */
 export function TaskFirstSection({ children }: TaskFirstSectionProps) {
+  const indexState = useIndexSummary();
   return (
     <section className="task-first" id="top">
       <div className="task-first-head">
@@ -71,7 +68,9 @@ export function TaskFirstSection({ children }: TaskFirstSectionProps) {
         </p>
       </div>
       {children}
-      <HotelShowcaseCard metric={readMetric()} />
+      <HotelShowcaseCard
+        metric={readMetric(indexState.status === "ready" ? indexState.summary : null)}
+      />
     </section>
   );
 }

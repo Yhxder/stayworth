@@ -2,7 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 
-import summaryJson from "../../data/index-summary.json";
+import { useIndexSummary } from "../../lib/index-summary-client";
 
 type IndexRow = {
   key: string;
@@ -23,39 +23,6 @@ type IndexView = {
   cityCount: number;
   exclusions: Array<{ currencyCode: string; sampleCount: number }>;
 };
-
-type IndexSummary = {
-  generatedAt: string;
-  runKey: string;
-  window: { daysAhead: number; nights: number };
-  panelVersion: string;
-  sampleCount: number;
-  cityCount: number;
-  currency: {
-    display: string;
-    options: string[];
-    base?: string;
-    referenceDate: string;
-    sourceName: string;
-    sourceUrl: string;
-    nonRealTime: boolean;
-    usedFallback?: boolean;
-  };
-  views: {
-    byCurrency: Record<string, { global: IndexView; tier: IndexView }>;
-    country: IndexView;
-  };
-  separateBrands: Array<{
-    code: string;
-    nameEn: string;
-    reason: string;
-    sampleCount: number;
-    cityCount: number;
-  }>;
-  note: string;
-};
-
-const summary = summaryJson as unknown as IndexSummary;
 
 type ViewId = "global" | "tier" | "country";
 
@@ -91,13 +58,37 @@ function formatRange(p25: number | null, p75: number | null, currency: string): 
 }
 
 export function IndexSection({ hidden }: { hidden: boolean }) {
+  const state = useIndexSummary();
   const [viewId, setViewId] = useState<ViewId>("global");
-  const [currency, setCurrency] = useState(summary.currency.display);
+  const [picked, setPicked] = useState<string | null>(null);
+
+  const summary = state.status === "ready" ? state.summary : null;
+  const currency = picked ?? summary?.currency.display ?? "CNY";
   const stale = useSyncExternalStore(
     noopSubscribe,
-    () => isStale(summary.generatedAt),
+    () => (summary?.generatedAt ? isStale(summary.generatedAt) : false),
     () => false,
   );
+
+  if (!summary) {
+    return (
+      <section aria-labelledby="index-title" className="index-section" hidden={hidden} id="index">
+        <div className="section-heading">
+          <div>
+            <p className="step-label">MODULE 03</p>
+            <h2 id="index-title">StayWorth Index · 每万分兑换价值</h2>
+          </div>
+        </div>
+        <p className="index-state" role="status">
+          {state.status === "loading"
+            ? "正在读取最近的采样结果…"
+            : state.status === "empty"
+              ? "还没有可用的采样结果。每日采样完成后这里会自动显示。"
+              : `参考值暂时取不到：${state.message}`}
+        </p>
+      </section>
+    );
+  }
 
   const currencyViews =
     summary.views.byCurrency[currency] ?? summary.views.byCurrency[summary.currency.display];
@@ -156,7 +147,7 @@ export function IndexSection({ hidden }: { hidden: boolean }) {
                 aria-pressed={currency === option}
                 className={currency === option ? "is-active" : ""}
                 key={option}
-                onClick={() => setCurrency(option)}
+                onClick={() => setPicked(option)}
                 type="button"
               >
                 {option}
@@ -232,10 +223,10 @@ export function IndexSection({ hidden }: { hidden: boolean }) {
             </>
           ) : null}
         </p>
-        {summary.separateBrands.length > 0 ? (
+        {(summary.separateBrands ?? []).length > 0 ? (
           <p>
             单独列出（不归入五档，也不计为未映射）：
-            {summary.separateBrands
+            {(summary.separateBrands ?? [])
               .map(
                 (brand) =>
                   `${brand.nameEn}（${brand.code}，样本 ${brand.sampleCount}）`,

@@ -39,6 +39,35 @@ export type IndexSummaryShape = {
   };
 };
 
+/**
+ * 页面从 `/api/index` 拿到的完整结构。
+ * 这是 IndexSummaryShape 的超集：参考值查找只需要其中一小部分字段，
+ * 但页面展示还要用到汇率、批次与免责声明。
+ */
+export type IndexSummary = IndexSummaryShape & {
+  generatedAt?: string;
+  panelVersion?: string;
+  window?: { daysAhead: number; nights: number };
+  currency: IndexSummaryShape["currency"] & {
+    base?: string;
+    referenceDate?: string;
+    sourceName?: string;
+    sourceUrl?: string;
+    nonRealTime?: boolean;
+    usedFallback?: boolean;
+    /** 1 基准币 = rates[X] 个 X，用于把当地货币参考值换算到用户选的币种 */
+    rates?: Record<string, number>;
+  };
+  separateBrands?: Array<{
+    code: string;
+    nameEn: string;
+    reason: string;
+    sampleCount: number;
+    cityCount: number;
+  }>;
+  note?: string;
+};
+
 export type ReferenceLevel = "city" | "country" | "global";
 
 export type MarketReference = {

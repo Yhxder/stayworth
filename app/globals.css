@@ -1841,6 +1841,62 @@ dd {
   color: var(--label-secondary);
 }
 
+.city-catalog {
+  margin-top: 22px;
+}
+
+.city-catalog-head h3 {
+  font-size: 15px;
+  margin: 0 0 6px;
+}
+
+.city-catalog-head p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.city-catalog-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.city-catalog-grid li {
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+}
+
+.city-catalog-grid li strong {
+  font-size: 13px;
+}
+
+.city-catalog-grid li small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.catalog-note {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 16px;
+}
+
+.index-state {
+  background: var(--surface);
+  border: 1.5px dashed var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  padding: 18px;
+}
+
 .market-reference {
   align-items: center;
   background-color: var(--surface-sunken);

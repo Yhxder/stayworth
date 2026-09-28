@@ -121,7 +121,7 @@ test("过期快照醒目标注但仍允许用户完成比较", async ({ page }) 
   await expect(comparison.getByText("香港喜来登酒店")).toBeVisible();
 });
 
-test("默认入住日期在未来，未覆盖日期会给出可用快照日期", async ({ page }) => {
+test("默认日期落在每日采样窗口内能直接搜到，未覆盖日期仍如实显示暂无数据", async ({ page }) => {
   await openSearch(page);
 
   const checkIn = await page.getByLabel("入住日期").inputValue();
@@ -129,9 +129,19 @@ test("默认入住日期在未来，未覆盖日期会给出可用快照日期",
   expect(checkIn > todayInAppTimeZone()).toBe(true);
   expect(checkOut > checkIn).toBe(true);
 
+  // 每日采样的窗口就是「今天 + 30 天」，所以默认搜索现在应该有结果
+  await page.getByRole("button", { name: "搜索匹配酒店" }).click();
+  await expect(
+    page.getByRole("button", { name: /^选择.+进行比较$/ }).first(),
+  ).toBeVisible();
+  await expect(page.getByText(/StayWorth Index 每日采样/).first()).toBeVisible();
+
+  // 明显未覆盖的日期不伪造价格，并给出可用窗口
+  await page.getByLabel("入住日期").fill("2099-01-01");
+  await page.getByLabel("退房日期").fill("2099-01-02");
   await page.getByRole("button", { name: "搜索匹配酒店" }).click();
   const emptyState = page.getByRole("status").filter({ hasText: "暂无数据" });
-  await expect(emptyState).toContainText("目前只有 2026-08-15 至 2026-08-16");
+  await expect(emptyState).toBeVisible();
   await expect(
     page.getByRole("button", { name: /^选择.+进行比较$/ }),
   ).toHaveCount(0);
@@ -139,9 +149,9 @@ test("默认入住日期在未来，未覆盖日期会给出可用快照日期",
   await emptyState
     .getByRole("button", { name: "用这段日期重新搜索" })
     .click();
-  await expect(page.getByLabel("入住日期")).toHaveValue(COVERED_CHECK_IN);
-  await expect(page.getByLabel("退房日期")).toHaveValue(COVERED_CHECK_OUT);
+  await expect(page.getByLabel("入住日期")).toHaveValue(checkIn);
+  await expect(page.getByLabel("退房日期")).toHaveValue(checkOut);
   await expect(
-    page.getByRole("heading", { name: "香港 · 4 家酒店快照" }),
+    page.getByRole("button", { name: /^选择.+进行比较$/ }).first(),
   ).toBeVisible();
 });
