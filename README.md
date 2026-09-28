@@ -62,7 +62,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Styling | Tailwind CSS |
 | Edge API | Cloudflare Workers — finite query endpoint active |
 | Database | Cloudflare D1 — schema and APAC database active |
-| Hosting | Cloudflare Workers — `workers.dev` preview active |
+| Hosting | Cloudflare Workers — live at `stayworth.top` (custom domain) with the `workers.dev` address kept as a fallback |
 | Testing | Node.js test runner, Playwright |
 | Delivery | GitHub Actions — lint, logic tests, and browser tests on every push |
 | Development | VS Code, Git |
@@ -88,7 +88,7 @@ result when a date has no snapshot instead of substituting another date's rate.
 | Validate mobile, tablet, keyboard, and form accessibility | ✅ |
 | Validate empty, API-error, and stale-data recovery flows | ✅ |
 | Deploy the MVP to Cloudflare Workers | ✅ |
-| Publish the MVP on a custom domain | ⬜ |
+| Publish the MVP on a custom domain | ✅ |
 
 **Legend:** ✅ Complete · ⏳ In progress · ⬜ Planned
 
