@@ -97,8 +97,10 @@ test("过期快照醒目标注但仍允许用户完成比较", async ({ page }) 
   await page.getByRole("button", { name: "搜索匹配酒店" }).click();
 
   await expect(page.getByText(/数据已过期 · 更新于/)).toBeVisible();
-  const warning = page.getByRole("note").filter({ hasText: "数据已过期" });
-  await expect(warning).toContainText("请前往 Marriott 官方渠道重新核验");
+  // 状态词在徽标里；横幅承担"要做什么"，两者不再重复同一句话。
+  const warning = page.getByRole("note").filter({ hasText: "需要重新核验价格" });
+  await expect(warning).toContainText("不是当前可订价格");
+  await expect(warning).toContainText("Marriott 官方渠道");
   const cyberportCard = page.getByRole("article").filter({
     has: page.getByRole("heading", { name: "香港数码港艾美酒店" }),
   });

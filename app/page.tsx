@@ -12,6 +12,7 @@ import {
 } from "./components/search/ComparisonSection";
 import { SearchResults } from "./components/search/SearchResults";
 import { FloatingHeader } from "./components/shell/FloatingHeader";
+import { ThemeToggle } from "./components/theme/ThemeToggle";
 import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
 import type { RankingCriterion } from "./lib/hotel-ranking";
@@ -310,8 +311,11 @@ export default function Home() {
       <TrustAndSources />
 
       <footer>
-        <p>StayWorth 是独立项目，与 Marriott International 没有隶属关系。</p>
-        <p>示例快照不是实时库存，不构成预订、兑换或税务建议。</p>
+        <div>
+          <p>StayWorth 是独立项目，与 Marriott International 没有隶属关系。</p>
+          <p>示例快照不是实时库存，不构成预订、兑换或税务建议。</p>
+        </div>
+        <ThemeToggle />
       </footer>
     </main>
   );

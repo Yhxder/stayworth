@@ -38,7 +38,7 @@ function readMetric(): ShowcaseMetric {
     currencyCode,
     p25: global.p25,
     p75: global.p75,
-    scopeLabel: "全球口径 · 市场参考中位数",
+    scopeLabel: "全球口径",
     sampleCount: global.sampleCount,
     cityCount: global.cityCount,
     snapshotDate: summary.runKey.slice(0, 10),
@@ -51,15 +51,14 @@ function readMetric(): ShowcaseMetric {
  * 版式是非对称 3fr / 2fr，右卡整体下沉 40px，刻意不与左列共用基线；
  * 纵向 py-24（桌面 py-32）留出发布会式的呼吸感。
  * 底色走 `--surface-oled`：深色是 OLED 黑，浅色跟随画布，避免页面出现反色区块。
+ *
+ * 标题上方不放眉标：标题自己承担落点，多余的标签只会削弱它。
  */
 export function HeroSloganSection() {
   return (
     <section className="hero-slogan" id="top">
       <div className="hero-slogan-grid">
         <div>
-          <p className="hero-slogan-topline">
-            Marriott Bonvoy value calculator
-          </p>
           <h1 className="hero-slogan-title">
             现金还是积分，
             <em>哪个更值？</em>

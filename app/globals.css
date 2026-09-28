@@ -401,7 +401,6 @@ button:disabled {
   color: var(--alert);
 }
 
-.eyebrow,
 .step-label {
   color: var(--accent-text);
   font-family: var(--font-mono);
@@ -2050,6 +2049,8 @@ dd {
   gap: 8px;
   min-height: 44px;
   padding: 0 16px;
+  /* 中文标签必须整块换行，否则 999px 圆角会把换行后的药丸压成竖排文字的圆圈 */
+  white-space: nowrap;
 }
 
 .ranking-options label.is-active {
@@ -2204,6 +2205,11 @@ footer p {
   margin: 0;
 }
 
+footer > div {
+  display: grid;
+  gap: 6px;
+}
+
 /* ==========================================================================
    响应式
    ========================================================================== */
@@ -2222,15 +2228,6 @@ footer p {
   grid-template-columns: 3fr 2fr;
   margin: 0 auto;
   max-width: 1200px;
-}
-
-.hero-slogan-topline {
-  color: var(--label-tertiary);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  margin: 0 0 16px;
-  text-transform: uppercase;
 }
 
 .hero-slogan-title {
@@ -2338,6 +2335,13 @@ footer p {
   display: grid;
   gap: 2px;
   padding-top: 16px;
+}
+
+.showcase-metric-title {
+  color: var(--label-primary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  margin: 0 0 6px;
 }
 
 .showcase-metric-label {

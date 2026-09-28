@@ -100,14 +100,10 @@ export function HotelShowcaseCard({ metric }: HotelShowcaseCardProps) {
           nameZh={hotel.nameZh}
           priority
         />
-        <figcaption>
-          {hotel.nameZh}，图片：{hotel.imageSourceLabel}，经本站代理加载
-        </figcaption>
+        <figcaption>图片：{hotel.imageSourceLabel}，经本站代理加载</figcaption>
       </figure>
       <div className="showcase-body">
-        <p className="showcase-meta">
-          {hotel.cityNameZh}，目录代号 {hotel.code}
-        </p>
+        <p className="showcase-meta">{hotel.cityNameZh}</p>
         <h2 className="showcase-name">{hotel.nameZh}</h2>
         <MetricBlock metric={metric} />
       </div>
@@ -115,11 +111,16 @@ export function HotelShowcaseCard({ metric }: HotelShowcaseCardProps) {
   );
 }
 
+/**
+ * 市场参考区块。它和上面那家酒店不是一回事：一个单店，一个市场，
+ * 所以用分隔线与标题把它独立出来，避免大数字被读成「这家酒店值多少」。
+ */
 function MetricBlock({ metric }: { metric: ShowcaseMetric }) {
   return (
     <div className="showcase-metric">
+      <p className="showcase-metric-title">市场参考</p>
       <span className="showcase-metric-label">
-        StayWorth Index · {metric.label}（{metric.scopeLabel}）
+        {metric.label} · {metric.scopeLabel}
       </span>
       <span className="showcase-metric-value">
         {metric.value === null ? "-" : amountFormatter.format(metric.value)}
@@ -132,7 +133,8 @@ function MetricBlock({ metric }: { metric: ShowcaseMetric }) {
       </span>
       <p className="showcase-note">
         抽样日期 {metric.snapshotDate}，覆盖 {metric.cityCount} 城 /{" "}
-        {metric.sampleCount} 家样本。这是同口径的市场参考中位数，不是这家酒店的成交价。
+        {metric.sampleCount} 家样本。这是{metric.scopeLabel}的市场参考中位数，
+        不是这家酒店的成交价。
       </p>
     </div>
   );

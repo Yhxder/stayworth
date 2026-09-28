@@ -1,4 +1,3 @@
-import { ThemeToggle } from "../theme/ThemeToggle";
 import { BrandLogo } from "./BrandLogo";
 
 type FloatingHeaderProps = {
@@ -17,15 +16,15 @@ type FloatingHeaderProps = {
  * 这样"玻璃只出现在岛的壳体上"，岛内文字对比度不受背景穿透影响。
  * 内容从岛的下方穿过（页面用 `--header-height` 预留起点），
  * 折射渐隐由岛体自身的 backdrop-blur 完成，不铺整幅底色。
+ *
+ * 岛内只放"这一屏的数据从哪来"：品牌与快照徽标。外观切换属于偏好，
+ * 不是任务控件，按 HIG 收在页脚，不占首屏的主控件位。
  */
 export function FloatingHeader({ snapshotLabel }: FloatingHeaderProps) {
   return (
     <header className="glass-functional fluid-edge site-header">
       <BrandLogo />
-      <div className="flex items-center gap-3">
-        <span className="prototype-badge">{snapshotLabel}</span>
-        <ThemeToggle />
-      </div>
+      <span className="prototype-badge">{snapshotLabel}</span>
     </header>
   );
 }
