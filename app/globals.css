@@ -962,7 +962,7 @@ select[aria-invalid="true"] {
 .primary-button:disabled {
   background: rgba(255, 255, 255, 0.1);
   box-shadow: none;
-  color: rgba(247, 248, 250, 0.5);
+  color: #767e8c;
 }
 
 .search-button {
@@ -1145,10 +1145,11 @@ select[aria-invalid="true"] {
     linear-gradient(150deg, #10141d, #070a11);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-field);
-  color: rgba(247, 248, 250, 0.42);
+  /* 文字一律纯色：占位标签也走实心钢灰，保证 4.5:1 以上对比 */
+  color: var(--steel);
   display: flex;
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   height: 106px;
   justify-content: center;
   letter-spacing: 0.32em;
@@ -1845,8 +1846,12 @@ dd {
 }
 
 .index-tabs button small {
+  color: var(--steel);
   font-size: 0.6875rem;
-  opacity: 0.85;
+}
+
+.index-tabs button.is-active small {
+  color: #4a4231;
 }
 
 .index-currency {
