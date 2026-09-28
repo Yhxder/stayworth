@@ -23,6 +23,7 @@ import {
   tierView,
 } from "../app/lib/index-aggregation.ts";
 import type { IndexSample } from "../app/lib/index-sampling.ts";
+import { pickDisplayRun } from "../app/lib/index-run-selection.ts";
 import type { HotelDatabase } from "./hotels-api.ts";
 
 type RunRow = {
@@ -31,6 +32,7 @@ type RunRow = {
   panel_version: string | null;
   days_ahead: number;
   nights: number;
+  cities_ok: number;
 };
 
 type SampleRow = {
@@ -95,15 +97,23 @@ function toIndexSample(row: SampleRow): IndexSample {
 // 组装 Index 响应。没有任何可用批次时返回 status: empty，
 // 由前端显示「暂无数据」，而不是编造数字。
 export async function buildIndexPayload(database: HotelDatabase) {
+  // 取最近 10 个已完成批次，再挑出覆盖足够城市的那一个。
+  // 只按 id 取最新会选中开发期的一城验证批次，让「全球参考值」由一个城市算出来。
   const runResult = await database
     .prepare(
-      `SELECT id, run_key, panel_version, days_ahead, nights
+      `SELECT id, run_key, panel_version, days_ahead, nights, cities_ok
        FROM index_runs
        WHERE status IN ('ok', 'partial')
-       ORDER BY id DESC LIMIT 1`,
+       ORDER BY id DESC LIMIT 10`,
     )
     .all<RunRow>();
-  const run = runResult.results?.[0];
+  const run = pickDisplayRun(
+    (runResult.results ?? []).map((row) => ({
+      ...row,
+      citiesOk: Number(row.cities_ok),
+    })),
+    cityPanel.length,
+  ) as RunRow | null;
   if (!run) return { status: "empty" as const };
 
   const sampleResult = await database
