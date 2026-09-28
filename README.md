@@ -16,6 +16,23 @@ personal project built as a portfolio piece for internship and graduate-school
 applications, and the prototype is live at
 [stayworth.top](https://stayworth.top).
 
+## 🖼️ Screenshots
+
+Captured from the deployed site. The interface follows the system appearance by
+default, and the header carries a three-state override (system / light / dark).
+
+| Hero and booking panel | Hotel comparison |
+| --- | --- |
+| ![Hero and booking panel in the dark appearance](docs/screenshots/home-dark.png) | ![Hotel comparison with real hotel photos](docs/screenshots/results-dark.png) |
+
+| Points rebate calculator | Value per 10,000 points | Light appearance |
+| --- | --- | --- |
+| ![Points rebate calculator](docs/screenshots/rebate-dark.png) | ![Market reference panel](docs/screenshots/index-dark.png) | ![Hero in the light appearance](docs/screenshots/home-light.png) |
+
+Hotel photographs come from Marriott's official image library and are loaded
+through this site's own proxy; they appear here only to illustrate the
+interface. Prices in the captures are sample snapshots, not live inventory.
+
 ## ✨ MVP Features
 
 ### 01 · Hotel Comparison
@@ -109,6 +126,8 @@ cities, and the results are published as global, brand-tier, and country views.
 | Add end-to-end tests for the core user flows | ✅ |
 | Validate mobile, tablet, keyboard, and form accessibility | ✅ |
 | Validate empty, API-error, and stale-data recovery flows | ✅ |
+| Rebuild the interface on Apple HIG material and typography rules | ✅ |
+| Serve every hotel photo through a site-owned image proxy | ✅ |
 | Deploy the MVP to Cloudflare Workers | ✅ |
 | Publish the MVP on a custom domain | ✅ |
 | Refresh the published reference value automatically | ⬜ |
@@ -182,6 +201,10 @@ rendered below the three modules:
   `status: "empty"` instead of substituting another date's rate. The interface
   also lists the reference dates for the Marriott brand earning rules, the
   credit-card rules, and the exchange rates, each linked to its official source.
+- **Hotel photos.** Property photographs come from Marriott's official image
+  library and are fetched through this site's own Worker proxy, which keeps the
+  browser off the third-party CDN, sets a seven-day immutable cache, and serves
+  width-limited WebP. They only show which property a row refers to.
 - **Exchange rates.** The Index and the rebate calculator share one dated rate
   snapshot from the `open.er-api.com` open endpoint. Rates are explicitly
   non-real-time, and the fallback table is dated instead of being silently used
@@ -211,7 +234,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000` to use the low-fidelity prototype. Run `npm test`
+Open `http://localhost:3000` to use the prototype. Run `npm test`
 to build the site, verify the calculation rules, and run the logic tests.
 
 Every push to `main` and every pull request runs the same checks in GitHub
@@ -278,6 +301,20 @@ endorsed by, or sponsored by Marriott International.
 [English](#-stayworth) · **简体中文**
 
 StayWorth 是一个专注万豪的住宿决策工具，用于对比现金价、积分兑换和付费入住的真实净成本。它是一个独立个人项目，作为实习与研究生申请的作品集，原型已上线：[stayworth.top](https://stayworth.top)。
+
+## 🖼️ 界面截图
+
+以下截图取自线上站点。界面默认跟随系统外观，页头提供「跟随系统 / 浅色 / 深色」三态覆盖。
+
+| 首屏与预订面板 | 酒店对比 |
+| --- | --- |
+| ![深色首屏与预订面板](docs/screenshots/home-dark.png) | ![带真实官图的酒店对比结果](docs/screenshots/results-dark.png) |
+
+| 积分回血计算器 | 每万分兑换价值 | 浅色外观 |
+| --- | --- | --- |
+| ![积分回血计算器](docs/screenshots/rebate-dark.png) | ![市场参考中位数面板](docs/screenshots/index-dark.png) | ![浅色首屏](docs/screenshots/home-light.png) |
+
+酒店图片来自万豪官方图库，经本站代理加载，仅用于展示界面；截图中的价格为示例快照，不是实时库存。
 
 ## ✨ MVP 功能
 
@@ -347,6 +384,8 @@ StayWorth 是一个专注万豪的住宿决策工具，用于对比现金价、�
 | 为核心用户流程补端到端测试 | ✅ |
 | 验证移动端、平板、键盘与表单可访问性 | ✅ |
 | 验证暂无数据、接口失败、快照过期三类恢复流程 | ✅ |
+| 按 Apple HIG 的材质与排版规则重构界面 | ✅ |
+| 酒店图片全部改为经本站代理加载 | ✅ |
 | 部署 MVP 到 Cloudflare Workers | ✅ |
 | 用自有域名发布 MVP | ✅ |
 | 让线上参考值自动更新 | ⬜ |
@@ -396,6 +435,7 @@ GET /api/hotels?city=Hong%20Kong&checkIn=2026-08-15&checkOut=2026-08-16&tier=Pre
 
 - **数据来源与时效。** 香港与上海的价格是人工维护的快照，不是实时库存。每张酒店卡片都显示来源标签与更新日期；城市或日期没有覆盖时返回 `status: "empty"`，不会拿其他日期的价格替代。界面同时列出万豪品牌积分规则、信用卡规则与汇率的参考日期，并链接到各自官方来源。
 - **汇率。** Index 与回血计算器共用同一份带日期的汇率快照，来源为 `open.er-api.com` 开放端点。汇率明确标注为非实时；兜底汇率表也带日期，不会被静默当作最新值。
+- **酒店图片。** 酒店照片来自万豪官方图库，经本站 Worker 代理加载：浏览器不会直连第三方 CDN，代理层设置七天不可变缓存并按宽度输出 WebP。图片只用来标明这一行对应哪家酒店。
 - **隐私。** 没有注册，也不收集万豪账号、银行卡或预订信息。原型不加载分析、广告或跨站追踪脚本。现金价、积分、汇率与会员等级等输入都在浏览器内计算，不上传、不存储到服务器。如果未来加入数据分析，会先更新这段声明。
 - **独立项目。** StayWorth 是独立个人项目，与 Marriott International 无隶属、无背书、无赞助关系。Marriott 与 Marriott Bonvoy 的名称与商标归各自所有者。本工具只提供估算，不构成预订、兑换、税务或财务建议。
 
@@ -408,7 +448,7 @@ npm install
 npm run dev
 ```
 
-打开 `http://localhost:3000` 即可使用低保真原型。运行 `npm test` 会先构建站点，再验证计算规则并执行逻辑测试。
+打开 `http://localhost:3000` 即可使用原型。运行 `npm test` 会先构建站点，再验证计算规则并执行逻辑测试。
 
 每次推送到 `main` 以及每个 Pull Request，都会在 GitHub Actions（`.github/workflows/ci.yml`）跑同一套检查：lint、`npm test`、`npm run test:e2e`。
 
