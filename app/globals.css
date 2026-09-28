@@ -17,8 +17,8 @@
     "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei",
     "Noto Sans SC", Arial, sans-serif;
   --font-sans:
-    "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei",
-    "Noto Sans SC", Arial, sans-serif;
+    "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei",
+    "Noto Sans SC", sans-serif;
   --font-mono:
     "SF Mono", ui-monospace, SFMono-Regular, "JetBrains Mono", Consolas, Menlo,
     monospace;
@@ -110,8 +110,9 @@
     );
     --surface-panel-solid: light-dark(#ffffff, #16161a);
     --surface-oled: light-dark(#f4f5f7, #090a0f);
-    --hero-highlight-from: light-dark(#7a5b12, #fde68a);
-    --hero-highlight-to: light-dark(#7a5b12, #facc15);
+    /* 钛金白 → 香槟金：只在标题文字上出现，不再使用纯黄 */
+    --hero-highlight-from: light-dark(#7a5b12, #f7f8fa);
+    --hero-highlight-to: light-dark(#7a5b12, #e3c88f);
     --card-ambient: light-dark(
       rgba(122, 91, 18, 0.16),
       rgba(227, 200, 143, 0.22)
@@ -828,10 +829,11 @@ select[aria-invalid="true"] {
    ========================================================================== */
 
 .primary-button {
-  background-color: var(--accent-fill);
+  /* 主操作走钛金/墨色实体块：功能层与交互底色不再出现黄棕色调 */
+  background-color: var(--label-primary);
   border: 0;
   border-radius: 999px;
-  color: var(--ink-on-accent);
+  color: var(--surface-canvas);
   font-size: 0.9375rem;
   font-weight: 600;
   min-height: 44px;
@@ -1297,9 +1299,9 @@ dd {
 }
 
 .hotel-card.is-selected .select-button {
-  background-color: var(--accent-fill);
-  border-color: var(--accent-fill);
-  color: var(--ink-on-accent);
+  background-color: color-mix(in srgb, var(--label-primary) 14%, transparent);
+  border-color: var(--hairline-strong);
+  color: var(--label-primary);
 }
 
 .rank-chip {
@@ -1316,9 +1318,9 @@ dd {
 }
 
 .rank-number {
-  background-color: var(--accent-fill);
+  background-color: color-mix(in srgb, var(--label-primary) 14%, transparent);
   border-radius: 999px;
-  color: var(--ink-on-accent);
+  color: var(--label-primary);
   font-family: var(--font-mono);
   font-weight: 600;
   padding: 2px 8px;
@@ -1786,6 +1788,8 @@ dd {
   gap: 16px;
   justify-content: space-between;
   margin-bottom: 16px;
+  /* 与上方分割线拉开呼吸感，标签不再压迫区块标题 */
+  margin-top: 32px;
 }
 
 .index-tabs,
@@ -1799,6 +1803,7 @@ dd {
   background-color: var(--surface-raised);
   border: 1px solid var(--hairline);
   border-radius: 999px;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--label-primary) 8%, transparent);
   color: var(--label-primary);
   display: grid;
   gap: 2px;
@@ -1815,9 +1820,10 @@ dd {
 }
 
 .index-tabs button.is-active {
-  background-color: var(--accent-fill);
-  border-color: var(--accent-fill);
-  color: var(--ink-on-accent);
+  background-color: color-mix(in srgb, var(--label-primary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--label-primary) 28%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--label-primary) 14%, transparent);
+  color: var(--label-primary);
 }
 
 .index-tabs button span {
@@ -1832,7 +1838,7 @@ dd {
 
 .index-tabs button.is-active span,
 .index-tabs button.is-active small {
-  color: var(--ink-on-accent);
+  color: var(--label-primary);
 }
 
 .index-currency {
@@ -1856,9 +1862,9 @@ dd {
 }
 
 .index-currency button.is-active {
-  background-color: var(--accent-fill);
-  border-color: var(--accent-fill);
-  color: var(--ink-on-accent);
+  background-color: color-mix(in srgb, var(--label-primary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--label-primary) 28%, transparent);
+  color: var(--label-primary);
 }
 
 .index-currency-note {
@@ -2047,12 +2053,12 @@ dd {
 }
 
 .ranking-options label.is-active {
-  background-color: var(--accent-fill);
-  border-color: var(--accent-fill);
+  background-color: color-mix(in srgb, var(--label-primary) 10%, transparent);
+  border-color: color-mix(in srgb, var(--label-primary) 28%, transparent);
 }
 
 .ranking-options label.is-active span {
-  color: var(--ink-on-accent);
+  color: var(--label-primary);
 }
 
 .ranking-options input {
@@ -2082,47 +2088,63 @@ dd {
 .trust-section {
   border-top: 1px solid var(--hairline);
   margin-top: 48px;
-  padding-top: 32px;
+  padding-top: 24px;
+}
+
+/* 脚注式页脚：透明底 + 小字 + 三列紧凑排布，回归附录层级 */
+.trust-section .section-heading {
+  border-bottom: 0;
+  gap: 2px;
+  padding-bottom: 16px;
+}
+
+.trust-section .section-heading h2 {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .trust-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .trust-grid article {
-  background-color: var(--surface-raised);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-row);
-  padding: 24px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 .trust-grid h3 {
-  font-family: var(--font-display);
-  font-size: 1.0625rem;
+  color: var(--label-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
   font-weight: 600;
-  margin: 0 0 12px;
+  margin: 0 0 6px;
 }
 
 .trust-grid ul {
-  color: var(--label-secondary);
-  font-size: 0.8125rem;
-  line-height: 1.65;
+  color: var(--label-tertiary);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  list-style: none;
   margin: 0;
-  padding-left: 16px;
+  padding-left: 0;
 }
 
 .trust-grid li + li {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .trust-grid p {
-  color: var(--label-secondary);
-  font-size: 0.8125rem;
-  line-height: 1.65;
-  margin: 0 0 8px;
+  color: var(--label-tertiary);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  margin: 0 0 4px;
 }
 
 .trust-grid p:last-child {
@@ -2137,7 +2159,7 @@ dd {
 
 .trust-links a {
   color: var(--accent-text);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -2161,8 +2183,8 @@ dd {
 }
 
 .theme-toggle button[aria-pressed="true"] {
-  background-color: var(--accent-fill);
-  color: var(--ink-on-accent);
+  background-color: color-mix(in srgb, var(--label-primary) 16%, transparent);
+  color: var(--label-primary);
   font-weight: 600;
 }
 
@@ -2205,9 +2227,10 @@ footer p {
 .hero-slogan-topline {
   color: var(--label-tertiary);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.2em;
   margin: 0 0 16px;
+  text-transform: uppercase;
 }
 
 .hero-slogan-title {
@@ -2453,9 +2476,12 @@ footer p {
 
   .booking-panel,
   .module-panel,
-  .form-section,
-  .trust-grid article {
+  .form-section {
     padding: 16px;
+  }
+
+  .trust-grid {
+    grid-template-columns: 1fr;
   }
 
   /* 移动端托盘回到单手可达的底部 */

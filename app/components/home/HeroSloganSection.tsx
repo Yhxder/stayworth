@@ -57,7 +57,9 @@ export function HeroSloganSection() {
     <section className="hero-slogan" id="top">
       <div className="hero-slogan-grid">
         <div>
-          <p className="hero-slogan-topline">只做万豪的住宿决策工具</p>
+          <p className="hero-slogan-topline">
+            Marriott Bonvoy value calculator
+          </p>
           <h1 className="hero-slogan-title">
             现金还是积分，
             <em>哪个更值？</em>
