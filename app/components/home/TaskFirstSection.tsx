@@ -64,7 +64,7 @@ export function TaskFirstSection({ children }: TaskFirstSectionProps) {
       <div className="task-first-head">
         <h1 className="task-first-title">现金还是积分，哪个更值？</h1>
         <p className="task-first-copy">
-          用同一张快照对齐现金总价、积分价和每万分兑换价值，结论留给你自己判断。
+          一张快照对齐现金价、积分价与每万分兑换价值，结论留给你。
         </p>
       </div>
       {children}

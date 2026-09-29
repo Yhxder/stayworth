@@ -76,8 +76,9 @@ test("answers every system accessibility setting", () => {
   );
   assert.match(reducedMotion, /transform: none/);
 
-  // 焦点环在两种底色上都可见：描边 + 偏移 + 内晕
-  assert.match(css, /outline:\s*3px solid var\(--accent-text\)/);
+  // 焦点环在两种底色上都可见：描边 + 偏移 + 内晕。
+  // 用中性色而不是品牌青铜：3px 的青铜环在浅色下又厚又脏，还会压住下拉箭头。
+  assert.match(css, /outline:\s*3px solid var\(--label-primary\)/);
   assert.match(css, /outline-offset:\s*2px/);
   assert.match(css, /box-shadow:\s*0 0 0 1px var\(--surface-canvas\)/);
 });

@@ -9,6 +9,7 @@ import {
   formatCurrencyAmount,
   getCurrencyConfig,
 } from "../app/lib/currencies.ts";
+import { FX_SNAPSHOT } from "../app/data/fx-snapshot.ts";
 
 test("provides the supported currencies with dated reference rates", () => {
   // 汇率来自每日抓取写入的快照（源头是 D1 的 fx_rates），不再手抄。
@@ -24,8 +25,11 @@ test("provides the supported currencies with dated reference rates", () => {
   );
   // 美元必须正好是 1，其它币种与快照同源、不能出现两个日期两套数字
   assert.equal(getCurrencyConfig("USD").unitsPerUsd, 1);
+  // 期望值从快照推导，不写死数字：汇率每天由定时任务刷新，
+  // 写死的话每天第一次提交都会让 CI 变红。
   assert.ok(
-    Math.abs(getCurrencyConfig("CNY").unitsPerUsd - 1 / 0.148821) < 0.0001,
+    Math.abs(getCurrencyConfig("CNY").unitsPerUsd - 1 / FX_SNAPSHOT.rates.USD) <
+      0.0001,
   );
   assert.ok(currencyOptions.every((currency) => currency.unitsPerUsd > 0));
 });
@@ -40,9 +44,16 @@ test("formats amounts with unambiguous currency symbols", () => {
 });
 
 test("converts a point valuation when the selected currency changes", () => {
-  // 用快照汇率验算：400 CNY → HKD 与 400 CNY → JPY 都应落在合理区间
-  assert.ok(Math.abs(convertCurrencyAmount(400, "CNY", "HKD") - 467.05) < 1);
-  assert.ok(Math.abs(convertCurrencyAmount(400, "CNY", "JPY") - 9382.75) < 1);
+  // 换算按 unitsPerUsd 折算，等于 value × rates[to] / rates[from]。
+  // 容差取 1：日元没有小数位，结果会被四舍五入到整数。
+  const conv = (value, to) =>
+    (value * FX_SNAPSHOT.rates[to]) / FX_SNAPSHOT.rates.CNY;
+  assert.ok(
+    Math.abs(convertCurrencyAmount(400, "CNY", "HKD") - conv(400, "HKD")) < 1,
+  );
+  assert.ok(
+    Math.abs(convertCurrencyAmount(400, "CNY", "JPY") - conv(400, "JPY")) < 1,
+  );
 });
 
 test("rejects an unsupported currency code", () => {

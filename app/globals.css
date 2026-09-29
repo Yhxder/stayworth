@@ -49,22 +49,21 @@
 
 :root {
   --header-height: 72px;
-  /* 悬浮岛参数：深色黑玻璃 / 浅色白玻璃，四周 1px 折射高光 */
-  --header-glass: rgba(255, 255, 255, 0.4);
-  --header-glass-edge: rgba(9, 10, 14, 0.12);
+  /* 玻璃一律中性：任何带色相的值都会在虚化后把身后的暖色内容染成米黄 */
+  --glass-rim: rgba(9, 10, 14, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.7);
   --header-shadow:
     0 12px 32px -12px rgba(9, 10, 14, 0.24), 0 2px 8px rgba(9, 10, 14, 0.12);
   --surface-panel-solid: #ffffff;
   --panel-border: rgba(9, 10, 14, 0.12);
   --panel-border-hover: rgba(9, 10, 14, 0.2);
-  --card-ambient: rgba(122, 91, 18, 0.16);
   --field-surface: #eceef1;
   --field-surface-active: rgba(9, 10, 14, 0.05);
   /* 保底：不支持 light-dark() 的浏览器固定在浅色，不出现半套配色 */
   --surface-canvas: #f4f5f7;
   --surface-raised: #ffffff;
   --surface-sunken: #eceef1;
-  --surface-overlay: rgba(255, 255, 255, 0.72);
+  --surface-overlay: rgba(255, 255, 255, 0.55);
   --hairline: rgba(9, 10, 14, 0.1);
   --hairline-strong: rgba(122, 91, 18, 0.4);
   --label-primary: #101319;
@@ -90,26 +89,19 @@
     --surface-raised: light-dark(#ffffff, #101216);
     --surface-sunken: light-dark(#eceef1, #0b0d11);
     --surface-overlay: light-dark(
-      rgba(255, 255, 255, 0.72),
-      rgba(10, 12, 16, 0.72)
+      rgba(255, 255, 255, 0.55),
+      rgba(14, 16, 21, 0.55)
     );
-    --header-glass: light-dark(
-      rgba(255, 255, 255, 0.4),
-      rgba(0, 0, 0, 0.4)
-    );
-    --header-glass-edge: light-dark(
-      rgba(9, 10, 14, 0.12),
-      rgba(255, 255, 255, 0.16)
+    --glass-rim: light-dark(rgba(9, 10, 14, 0.14), rgba(255, 255, 255, 0.18));
+    --glass-highlight: light-dark(
+      rgba(255, 255, 255, 0.75),
+      rgba(255, 255, 255, 0.24)
     );
     --header-shadow: light-dark(
       0 12px 32px -12px rgba(9, 10, 14, 0.2),
       0 12px 32px -12px rgba(0, 0, 0, 0.6)
     );
     --surface-panel-solid: light-dark(#ffffff, #16161a);
-    --card-ambient: light-dark(
-      rgba(122, 91, 18, 0.16),
-      rgba(227, 200, 143, 0.22)
-    );
     --panel-border-hover: light-dark(
       rgba(9, 10, 14, 0.2),
       rgba(255, 255, 255, 0.2)
@@ -202,7 +194,8 @@ select:focus-visible,
 [role="radio"]:focus-visible,
 [role="switch"]:focus-visible {
   box-shadow: 0 0 0 1px var(--surface-canvas);
-  outline: 3px solid var(--accent-text);
+  /* 中性色而不是品牌青铜：3px 的青铜环在浅色下又厚又脏，还压住下拉箭头 */
+  outline: 3px solid var(--label-primary);
   outline-offset: 2px;
 }
 
@@ -248,33 +241,24 @@ button:disabled {
   border-radius: var(--radius-card);
 }
 
-/* 功能层玻璃：只允许吸顶栏与比较托盘使用 */
+/* 功能层玻璃：只允许吸顶栏与比较托盘使用。
+   blur 拉大才有"内容在玻璃下虚化"的观感；saturate 只轻微提鲜，
+   数值偏高会把身后的暖色内容放大成米黄，所以压在 135%。 */
 .glass-functional {
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(135%);
+  backdrop-filter: blur(40px) saturate(135%);
   background-color: var(--surface-overlay);
 }
 
-/* 1px 流体高光边，只挂在功能层玻璃上 */
+/* 1px 高光边。旧版用 mask + mask-composite 只保留一圈渐变描边，
+   但遮罩合成一旦不被支持，整块渐变会铺满玻璃面（暖色渐变 → 整片米黄）。
+   现在改成完全不依赖遮罩的描边，任何浏览器都只会画出一圈。 */
 .fluid-edge::before {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--label-primary) 22%, transparent) 0%,
-    color-mix(in srgb, var(--accent-text) 32%, transparent) 38%,
-    color-mix(in srgb, var(--label-primary) 8%, transparent) 100%
-  );
+  border: 1px solid var(--glass-rim);
   border-radius: inherit;
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
   content: "";
   inset: 0;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  padding: 1px;
   pointer-events: none;
   position: absolute;
 }
@@ -293,7 +277,6 @@ button:disabled {
 /* 悬浮玻璃岛：功能层唯一的常驻玻璃面（fixed，不推开内容） */
 .site-header {
   align-items: center;
-  border: 1px solid var(--header-glass-edge);
   border-radius: var(--radius-island);
   box-shadow: var(--header-shadow);
   display: flex;
@@ -515,10 +498,13 @@ label {
   background-color: color-mix(in srgb, var(--field-surface) 70%, var(--label-primary) 6%);
 }
 
-/* 点击或聚焦时整行加深，给出物理确定感 */
+/* 点击或聚焦时整行加深，给出物理确定感。
+   焦点指示器画在整行外面（不是字段内部的轮廓），
+   这样它不会压住下拉箭头，也不会在浅色下变成一圈脏棕色。 */
 .field-row:focus-within {
   background-color: var(--field-surface-active);
-  border-color: var(--hairline-strong);
+  border-color: color-mix(in srgb, var(--label-primary) 28%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--label-primary) 55%, transparent);
 }
 
 .field-row[data-invalid="true"] {
@@ -537,7 +523,9 @@ label > span {
 label:focus-within > .field-label,
 .field-block:focus-within .field-label,
 .field-row:focus-within .field-label {
-  color: var(--accent-text);
+  /* 聚焦时把标签提到主文字色，而不是染成品牌青铜：
+     青铜描边 + 青铜标签叠在一起，整块看着发脏。 */
+  color: var(--label-primary);
 }
 
 .field-hint,
@@ -569,7 +557,8 @@ label > small {
   color: var(--label-tertiary);
   flex: none;
   height: 8px;
-  margin-right: 4px;
+  /* 离右边缘再远一点：紧贴边界时箭头会看着像被裁掉 */
+  margin-right: 10px;
   transform: rotate(45deg) translate(-2px, -2px);
   width: 8px;
 }
@@ -589,9 +578,13 @@ label > small {
   width: 100%;
 }
 
+/* 字段自身的轮廓与内晕全部交给整行：
+   内部再画 3px 描边会压住箭头，而那条 1px 的 --surface-canvas 内晕
+   在深色下是 rgb(8,9,12)，会孤零零地把值框成一个小方块。 */
 .field-control input:focus-visible,
 .field-control select:focus-visible {
-  outline-offset: 1px;
+  box-shadow: none;
+  outline: none;
 }
 
 .field-control input::placeholder {
@@ -620,6 +613,17 @@ select {
 input:hover,
 select:hover {
   border-color: color-mix(in srgb, var(--label-primary) 18%, transparent);
+}
+
+/* 所有表单控件都不用 3px 轮廓：那圈描边又厚又脏，还会压住下拉箭头。
+   焦点改成"描边加深 + 一圈 2px 中性内晕"，观感干净，键盘导航一样看得见。
+   预订面板里的字段更近一步：焦点提示交给整行（见 .field-row:focus-within）。 */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--label-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--label-primary) 30%, transparent);
+  outline: none;
 }
 
 input[aria-invalid="true"],
@@ -2164,7 +2168,7 @@ footer p {
   grid-template-areas:
     "head card"
     "form form";
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   margin: 0 auto;
   max-width: 1200px;
   padding: 16px 0 0;
@@ -2211,7 +2215,7 @@ footer p {
   display: grid;
   gap: 16px;
   grid-area: card;
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: minmax(180px, 0.95fr) minmax(0, 1.05fr);
   padding: 16px;
   transition: border-color 200ms ease-out;
 }
@@ -2221,7 +2225,8 @@ footer p {
 }
 
 .market-card-figure {
-  aspect-ratio: 1 / 1;
+  /* 酒店 banner 原本被压成 112px 正方形，现在按横向照片的常规比例展示 */
+  aspect-ratio: 3 / 2;
   background-color: var(--surface-sunken);
   border-radius: var(--radius-field);
   margin: 0;
@@ -2379,6 +2384,19 @@ footer p {
   }
 }
 
+/* 矮屏（笔记本 720–800px 高）收紧纵向留白：
+   卡片加宽后首屏只剩 1px 余量，留一点真实空间，避免主操作掉出折叠线 */
+@media (min-width: 1024px) and (max-height: 800px) {
+  .task-first {
+    gap: 20px;
+    padding-top: 8px;
+  }
+
+  .task-first > .booking-panel {
+    padding: 24px;
+  }
+}
+
 @media (max-width: 768px) {
   :root {
     --header-height: 64px;
@@ -2430,7 +2448,11 @@ footer p {
   }
 
   .market-card {
-    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .market-card-figure {
+    aspect-ratio: 16 / 9;
   }
 
   .booking-panel,
