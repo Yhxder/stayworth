@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import { formatCurrencyAmount } from "../../lib/currencies";
 import { formatPoints } from "../../lib/format";
 import { calculateCashValuePerTenThousand } from "../../lib/points";
@@ -7,13 +8,18 @@ type ComparisonSectionProps = {
   hotels: Hotel[];
   isOpen: boolean;
   onClose: () => void;
-  onOpen: () => void;
   onUseForRebate: (hotel: Hotel) => void;
+  sectionRef: RefObject<HTMLElement | null>;
 };
 
 type ComparisonTrayProps = {
   hotels: Hotel[];
   onOpen: () => void;
+};
+
+type ComparisonJumpButtonProps = {
+  count: number;
+  onJump: () => void;
 };
 
 /**
@@ -54,19 +60,53 @@ export function ComparisonTray({ hotels, onOpen }: ComparisonTrayProps) {
   );
 }
 
+/**
+ * 手机端的并排比较入口（功能层，仅 ≤768px 出现）。
+ *
+ * 结果列表可能很长，托盘会随页面滚走；桌面端托盘吸顶常驻，手机端没有这个条件，
+ * 所以在右下角放一个常驻按钮，随时把用户带回比较结果。
+ * 材料不用玻璃：全站玻璃点有上限（见 tests/frontend-structure.test.mjs），
+ * 这里沿用主操作的实体块 + 一层环境阴影，浮在内容之上仍然读得出来。
+ */
+export function ComparisonJumpButton({
+  count,
+  onJump,
+}: ComparisonJumpButtonProps) {
+  return (
+    <button
+      aria-label={`跳到并排比较结果（已选 ${count} 家）`}
+      className="primary-button comparison-jump-button"
+      onClick={onJump}
+      type="button"
+    >
+      <span aria-hidden="true" className="jump-chevron" />
+      并排比较
+      <span aria-hidden="true" className="jump-count">
+        {count}
+      </span>
+    </button>
+  );
+}
+
 /** 并排比较结果：内容层标准材料，表格本身是数据，不用玻璃。 */
 export function ComparisonSection({
   hotels,
   isOpen,
   onClose,
   onUseForRebate,
-}: Omit<ComparisonSectionProps, "onOpen">) {
+  sectionRef,
+}: ComparisonSectionProps) {
   const canCompare = hotels.length >= 2 && hotels.length <= 4;
 
   if (!isOpen || !canCompare) return null;
 
   return (
-    <section aria-label="酒店并排比较" className="comparison-table-wrap">
+    <section
+      aria-label="酒店并排比较"
+      className="comparison-table-wrap"
+      ref={sectionRef}
+      tabIndex={-1}
+    >
       <div className="comparison-heading">
         <div>
           <h3>选择结果一览</h3>

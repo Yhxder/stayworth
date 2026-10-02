@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { makeConverter } from "../../data/index-fx.ts";
 import { findMarketReference } from "../../lib/index-reference";
 import { useIndexSummary } from "../../lib/index-summary-client";
@@ -23,6 +23,7 @@ import {
   currencyOptions,
   type CurrencyCode,
   formatCurrencyAmount,
+  formatExchangeRate,
   getCurrencyConfig,
   isSupportedCurrency,
   tryConvertCurrencyAmount,
@@ -33,6 +34,7 @@ import {
   parseNumericInput,
 } from "../../lib/numeric-input";
 import { calculateRebateEstimate } from "../../lib/points";
+import { scrollToElement } from "../../lib/scroll";
 import type { RebatePrefill } from "../../types/hotel";
 
 const memberTiers = {
@@ -84,17 +86,37 @@ export function RebateCalculator({
     String(prefill?.nights ?? 1),
   );
   const [exchangeRateInput, setExchangeRateInput] = useState(
-    String(getCurrencyConfig(initialCurrency).unitsPerUsd),
+    formatExchangeRate(getCurrencyConfig(initialCurrency).unitsPerUsd),
   );
   const [brandId, setBrandId] = useState(initialBrandId);
-  const [memberTier, setMemberTier] = useState<MemberTier>("Platinum");
-  const [cardId, setCardId] = useState("us-amex-brilliant");
+  // 会员等级与信用卡都从「没有额外加成」开始：先看酒店本身能赚多少，
+  // 用户确认自己属于哪个等级、用哪张卡之后再往上加，避免默认值替用户做决定。
+  const [memberTier, setMemberTier] = useState<MemberTier>("Member");
+  const [cardId, setCardId] = useState(NO_CARD_ID);
   const [includeCardStayBonus, setIncludeCardStayBonus] = useState(false);
   const [welcomePointsInput, setWelcomePointsInput] = useState("1000");
   const [promotionalPointsInput, setPromotionalPointsInput] = useState("0");
   const [pointValuationInput, setPointValuationInput] = useState(() =>
     String(convertCurrencyAmount(400, "CNY", initialCurrency)),
   );
+  const ineligibleSpendRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * 从酒店比较「带入回血计算器」进来时，直接把视线放到「不计分金额」。
+   *
+   * 快照没有拆分税费与服务费，这一项必须由用户自己核对填写；
+   * 只把页面带到模块位置（旧行为会让页面停在文档底部）等于让人自己找。
+   * 先滚动再 preventScroll 聚焦，避免浏览器的聚焦补滚盖掉前面的平滑滚动。
+   */
+  useEffect(() => {
+    if (!prefill) return;
+
+    const field = ineligibleSpendRef.current;
+    if (!field) return;
+
+    scrollToElement(field, { block: "center" });
+    field.focus({ preventScroll: true });
+  }, [prefill]);
 
   /**
    * 市场参考中位数：用户从酒店比较带入某家酒店时，按 城市 → 国家/地区 → 全球 回退。
@@ -257,7 +279,7 @@ export function RebateCalculator({
     }
     setCurrencyCode(nextCurrency);
     setExchangeRateInput(
-      String(getCurrencyConfig(nextCurrency).unitsPerUsd),
+      formatExchangeRate(getCurrencyConfig(nextCurrency).unitsPerUsd),
     );
   }
 
@@ -326,6 +348,7 @@ export function RebateCalculator({
                   onChange={(event) =>
                     setIneligibleSpendInput(event.target.value)
                   }
+                  ref={ineligibleSpendRef}
                   type="number"
                   value={ineligibleSpendInput}
                 />

@@ -48,10 +48,39 @@ export type CurrencyCode = (typeof currencyMeta)[number]["code"];
 const unitsPerBase = rates.CNY ?? 1;
 const unitsPerUsdRate = rates.USD ?? 1;
 
+/**
+ * 汇率只保留两位小数，而且直接截断、不做四舍五入。
+ *
+ * 接口给的是 6–8 位小数（如 1 USD ≈ 6.721562765 CNY），对「参考汇率」这个用途
+ * 没有任何意义，却会把输入框和说明文字撑成一行长数字。截断而不是四舍五入，
+ * 是避免把换算结果往「更划算」的方向微调——宁可少一点，也不要看起来比实际更优。
+ */
+export const EXCHANGE_RATE_FRACTION_DIGITS = 2;
+
+function truncateToDigits(value: number, digits: number) {
+  const factor = 10 ** digits;
+  const scaled = value * factor;
+  const nearest = Math.round(scaled);
+
+  // 浮点误差保护：6.72 * 100 可能算出 671.9999999999999，
+  // 直接 Math.floor 会把它截成 6.71。
+  const whole = Math.abs(scaled - nearest) < 1e-6 ? nearest : Math.floor(scaled);
+
+  return whole / factor;
+}
+
 export const currencyOptions = currencyMeta.map((meta) => ({
   ...meta,
-  unitsPerUsd: (rates[meta.code] ?? unitsPerBase) / unitsPerUsdRate,
+  unitsPerUsd: truncateToDigits(
+    (rates[meta.code] ?? unitsPerBase) / unitsPerUsdRate,
+    EXCHANGE_RATE_FRACTION_DIGITS,
+  ),
 }));
+
+/** 展示用汇率：固定两位小数，和计算用的值完全一致（同一个 unitsPerUsd）。 */
+export function formatExchangeRate(value: number) {
+  return value.toFixed(EXCHANGE_RATE_FRACTION_DIGITS);
+}
 
 export function getCurrencyConfig(code: string) {
   const currency = currencyOptions.find((option) => option.code === code);

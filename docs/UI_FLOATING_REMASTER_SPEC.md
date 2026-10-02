@@ -13,7 +13,7 @@
 | 层 | 组件 | 材料 | 关键参数 |
 | --- | --- | --- | --- |
 | 功能层 | `<FloatingHeader />`（含 `<BrandLogo />`、快照徽标、`<ThemeToggle />`） | 毛玻璃悬浮岛（全站仅 2 处玻璃之一） | `fixed top-4` 居中、`max-w-7xl`、`rounded-2xl`、`backdrop-blur-xl`、1px 高光边、多层环境阴影 |
-| 功能层 | `<ComparisonTray />` | 毛玻璃 | 桌面吸顶 / 移动吸底，参数不变 |
+| 功能层 | `<ComparisonTray />` | 毛玻璃 | 桌面吸顶；移动端 2026-10-02 起改为跟随文档流的状态条，常驻入口交给右下角悬浮按钮（见 `UI_APPLE_HIG_SPEC.md` D2-b） |
 | 内容层 | `<BookingPanel />` | 近实心面板，**无毛玻璃** | `--surface-panel-solid`、1px 发丝线、`rounded-2xl`、`p-6`→`p-8` |
 | 内容层 | 酒店卡片、模块面板、Index 表格、信任卡片 | 标准表面 + 发丝线 | 与上一轮一致 |
 

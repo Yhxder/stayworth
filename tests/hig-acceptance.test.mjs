@@ -136,6 +136,7 @@ test("keeps touch targets at the platform minimum", () => {
     ".index-tabs button",
     ".ranking-options label",
     ".field-control",
+    ".comparison-jump-button",
   ]) {
     const height = minHeight(selector);
     assert.ok(height >= 44, `${selector} 的触控目标只有 ${height}px`);

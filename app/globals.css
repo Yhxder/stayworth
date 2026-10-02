@@ -1256,10 +1256,65 @@ dd {
   min-height: 44px;
 }
 
+/* 手机端的并排比较入口：常驻右下角，只负责把视线带回比较结果。
+   桌面端 display:none —— 桌面托盘本来就吸顶常驻，多一个入口只是噪音；
+   同时它也彻底退出可访问性树，不会和托盘按钮撞成两个同名动作。
+   不用玻璃：全站玻璃点有上限（tests/frontend-structure.test.mjs），
+   这里用主操作的实体块 + 一层环境阴影，浮在卡片上仍然读得清。 */
+.comparison-jump-button {
+  align-items: center;
+  animation: jump-button-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--shadow-card);
+  display: none;
+  gap: 8px;
+  min-height: 44px;
+  padding: 12px 20px;
+  position: fixed;
+  right: 16px;
+  z-index: 25;
+}
+
+/* 只动 translate 属性，把 transform 留给 .primary-button 的悬停抬升 */
+@keyframes jump-button-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.jump-chevron {
+  border-bottom: 1.5px solid currentColor;
+  border-right: 1.5px solid currentColor;
+  height: 8px;
+  /* 箭头只画一个折角，和 .field-chevron 同一套做法，这里指向下方 */
+  transform: rotate(45deg) translate(-1px, -1px);
+  width: 8px;
+}
+
+.jump-count {
+  align-items: center;
+  background-color: color-mix(in srgb, var(--surface-canvas) 22%, transparent);
+  border-radius: 999px;
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  justify-content: center;
+  min-width: 20px;
+  padding: 2px 6px;
+}
+
 .comparison-table-wrap {
   border-top: 1px solid var(--hairline);
   margin-top: 32px;
   padding-top: 24px;
+  /* 跳转定位时给吸顶栏留位，否则比较表标题会顶到玻璃岛下面 */
+  scroll-margin-top: calc(var(--header-height) + 24px);
 }
 
 .comparison-heading {
@@ -2465,14 +2520,22 @@ footer p {
     grid-template-columns: 1fr;
   }
 
-  /* 移动端托盘回到单手可达的底部 */
+  /* 手机端托盘退回为「已选了哪几家」的状态条，不再吸底：
+     并排比较这个动作交给常驻右下角的 .comparison-jump-button，
+     同一个动作只在屏幕上留一个入口（点哪个不用想）。 */
   .comparison-tray {
-    background-color: var(--surface-overlay);
-    backdrop-filter: blur(24px) saturate(150%);
-    bottom: 16px;
     padding: 12px;
+    /* top: auto 让它彻底不吸附：手机上它只是状态条，
+       常驻入口交给右下角的悬浮按钮，不占着顶部 72px 的看内容高度。 */
     top: auto;
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
+  }
+
+  .comparison-tray .primary-button {
+    display: none;
+  }
+
+  .comparison-jump-button {
+    display: inline-flex;
   }
 
   /* 移动端把桌面上的小控件抬到 44px 触控目标 */

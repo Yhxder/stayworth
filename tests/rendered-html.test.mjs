@@ -52,7 +52,12 @@ test("server-renders the StayWorth decision home page", async () => {
   assert.match(html, /🇨🇳 中信银行万豪旅享家联名信用卡金卡/);
   assert.match(html, /🇺🇸 Marriott Bonvoy Brilliant/);
   assert.match(html, /🇨🇦 Marriott Bonvoy.*American Express/);
-  assert.match(html, /信用卡积分按发卡国家的计分币种换算/);
+  // 默认不带任何加成：会员等级默认普通会员，信用卡默认不使用，选择权交给用户
+  assert.match(html, /<option value="Member"[^>]*>普通会员<\/option>/);
+  assert.match(html, /<option value="none"[^>]*>不使用万豪联名信用卡<\/option>/);
+  // 没选卡时按「未计入信用卡积分」说明，而不是把某张卡的规则当成默认前提
+  assert.match(html, /未计入信用卡积分/);
+  assert.doesNotMatch(html, /信用卡积分按发卡国家的计分币种换算/);
   assert.doesNotMatch(html, /信用卡倍率（Brilliant 为 6×）/);
   assert.match(html, /每晚有效成本/);
   assert.match(html, /回血比例/);

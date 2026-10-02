@@ -7,6 +7,7 @@ import { TaskFirstSection } from "./components/home/TaskFirstSection";
 import { IndexSection } from "./components/index/IndexSection";
 import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import {
+  ComparisonJumpButton,
   ComparisonSection,
   ComparisonTray,
 } from "./components/search/ComparisonSection";
@@ -16,6 +17,7 @@ import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
 import type { RankingCriterion } from "./lib/hotel-ranking";
 import { getResultsState } from "./lib/hotel-search";
+import { scrollToElement } from "./lib/scroll";
 import { getDefaultStayDates } from "./lib/stay-dates";
 import { createRebatePrefill } from "./lib/rebate-prefill";
 import type {
@@ -31,6 +33,18 @@ type SearchValidation = {
   field: "city" | "checkIn" | "checkOut";
   message: string;
 } | null;
+
+/**
+ * 把视线与键盘焦点一起交给并排比较表。
+ * 只滚动不聚焦的话，触发它的按钮（手机上会随比较表出现而消失）会把焦点
+ * 交还给 body，键盘用户等于被丢回页面开头。
+ */
+function focusComparisonSection(section: HTMLElement | null) {
+  scrollToElement(section, {
+    clear: [".site-header", ".comparison-tray"],
+  });
+  section?.focus({ preventScroll: true });
+}
 
 function createInitialFilters(now?: Date): SearchFilters {
   const stayDates = getDefaultStayDates(now);
@@ -74,6 +88,7 @@ export default function Home() {
   const [rankingCriterion, setRankingCriterion] =
     useState<RankingCriterion>("value");
   const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [comparisonInView, setComparisonInView] = useState(false);
   const [rebatePrefill, setRebatePrefill] =
     useState<RebatePrefill | null>(null);
   const [resultStayDates, setResultStayDates] = useState<{
@@ -84,6 +99,8 @@ export default function Home() {
   const rebatePrefillSequence = useRef(0);
   const resultsFocusTarget = useRef<HTMLHeadingElement>(null);
   const shouldFocusResults = useRef(false);
+  const comparisonSection = useRef<HTMLElement>(null);
+  const shouldScrollToComparison = useRef(false);
 
   useEffect(() => {
     if (
@@ -109,6 +126,50 @@ export default function Home() {
       availableHotels.filter((hotel) => selectedHotelIds.includes(hotel.id)),
     [availableHotels, selectedHotelIds],
   );
+
+  const canCompare = selectedHotels.length >= 2 && selectedHotels.length <= 4;
+
+  /**
+   * 并排比较的跳转触发器：先打开比较表，再等它渲染完成后把视线带过去。
+   * 已经打开时（例如从手机端的悬浮按钮回来）直接跳，不再改状态。
+   */
+  function goToComparison() {
+    if (comparisonOpen) {
+      focusComparisonSection(comparisonSection.current);
+      return;
+    }
+
+    shouldScrollToComparison.current = true;
+    setComparisonOpen(true);
+  }
+
+  useEffect(() => {
+    if (!comparisonOpen || !shouldScrollToComparison.current) return;
+
+    shouldScrollToComparison.current = false;
+    focusComparisonSection(comparisonSection.current);
+  }, [comparisonOpen]);
+
+  /**
+   * 比较表已经在视野里时，悬浮按钮让位：此时它唯一能做的就是把人带回原地。
+   */
+  useEffect(() => {
+    const section = comparisonSection.current;
+
+    if (!section || typeof IntersectionObserver === "undefined") {
+      setComparisonInView(false);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setComparisonInView(entry.isIntersecting),
+      { threshold: 0 },
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+    // 切回「酒店对比」时比较表是重新挂载的，观察器要跟着重新接上
+  }, [activeModule, comparisonOpen]);
 
   const searchValidation = validateSearchFilters(filters);
   const searchError = searchValidation?.message ?? "";
@@ -276,8 +337,14 @@ export default function Home() {
 
         <ComparisonTray
           hotels={selectedHotels}
-          onOpen={() => setComparisonOpen(true)}
+          onOpen={goToComparison}
         />
+        {canCompare && !comparisonInView ? (
+          <ComparisonJumpButton
+            count={selectedHotels.length}
+            onJump={goToComparison}
+          />
+        ) : null}
         <SearchResults
           focusTargetRef={resultsFocusTarget}
           onApplyCoverage={applyCoverage}
@@ -295,6 +362,7 @@ export default function Home() {
           isOpen={comparisonOpen}
           onClose={() => setComparisonOpen(false)}
           onUseForRebate={useHotelForRebate}
+          sectionRef={comparisonSection}
         />
       </section>
 

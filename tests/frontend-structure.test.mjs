@@ -78,6 +78,23 @@ test("keeps Liquid Glass out of the content layer", () => {
   assert.ok(glassUsage.length <= 3, "全站玻璃使用点不超过 3 处");
 });
 
+test("keeps one 并排比较 entry per viewport width", () => {
+  const css = readFileSync("app/globals.css", "utf8");
+
+  // 手机端：托盘的按钮让位给右下角的悬浮按钮，避免同一个动作出现两个同名按钮
+  const mobile = css.slice(css.indexOf("@media (max-width: 768px)"));
+  assert.match(mobile, /\.comparison-tray \.primary-button\s*\{[^}]*display:\s*none/);
+  assert.match(mobile, /\.comparison-jump-button\s*\{[^}]*display:\s*inline-flex/);
+
+  // 桌面端：托盘本来就吸顶常驻，悬浮按钮必须彻底退出（display:none 也让它离开可访问性树）
+  const jumpBase = css.slice(
+    css.indexOf(".comparison-jump-button {"),
+    css.indexOf("@keyframes jump-button-in"),
+  );
+  assert.match(jumpBase, /display:\s*none/);
+  assert.match(jumpBase, /position:\s*fixed/);
+});
+
 test("keeps type at or above the 12px floor and inside the spacing scale", () => {
   const css = readFileSync("app/globals.css", "utf8");
   const tooSmall = [...css.matchAll(/font-size:\s*([\d.]+)(px|rem)/g)].filter(
