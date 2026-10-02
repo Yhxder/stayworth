@@ -10,6 +10,7 @@ import {
 import {
   decodeLandMask,
   greatCirclePoints,
+  isCanvasColor,
   project,
   rotate,
   splitVisibleRuns,
@@ -67,27 +68,57 @@ type Palette = {
   limb: string;
 };
 
-function readPalette(element: HTMLElement): Palette {
-  const style = getComputedStyle(element);
-  const read = (name: string, fallback: string) =>
-    style.getPropertyValue(name).trim() || fallback;
-  return {
-    dot: read("--globe-dot", "rgba(227, 200, 143, 0.34)"),
-    dotFront: read("--globe-dot-front", "rgba(235, 213, 167, 0.9)"),
-    arc: read("--globe-arc", "rgba(227, 200, 143, 0.55)"),
-    node: read("--globe-node", "#ebd5a7"),
-    label: read("--globe-label", "#f7f8fa"),
-    labelBg: read("--globe-label-bg", "rgba(8, 9, 12, 0.72)"),
-    limb: read("--globe-limb", "rgba(227, 200, 143, 0.28)"),
-  };
-}
+/** 取不到颜色时的兜底：深色主题那套。 */
+const FALLBACK: Palette = {
+  arc: "#e3c88f",
+  dot: "#e3c88f",
+  dotFront: "#ebd5a7",
+  label: "#f7f8fa",
+  labelBg: "#08090c",
+  limb: "#e3c88f",
+  node: "#ebd5a7",
+};
 
-function withAlpha(color: string, alpha: number): string {
-  const match = color.match(/rgba?\(([^)]+)\)/);
-  if (!match) return color;
-  const parts = match[1].split(/[,\s/]+/).filter(Boolean);
-  const [r, g, b] = parts;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+/**
+ * 把一个 CSS 变量解析成 canvas 认得的颜色。
+ *
+ * **不能直接读自定义属性的字符串再自己解析**：生产构建会把 `rgba()` 压成 8 位
+ * 十六进制，而 `light-dark()` 在自定义属性里根本不会被求值，读出来是
+ * `light-dark(#654e1273,#e3c88f3d)` 这种半成品。直接塞给 `fillStyle` 会被静默
+ * 忽略，画布退回默认黑——线上那道粗黑弧就是这么来的。
+ *
+ * 这里把变量挂到一个真实属性（color）上，交给浏览器按当前主题解析成具体颜色，
+ * 再用 canvas 归一化一次；解析失败时 canvas 会保留下面的兜底色。
+ */
+function readPalette(
+  element: HTMLElement,
+  context: CanvasRenderingContext2D,
+): Palette {
+  const resolve = (name: string, fallback: string) => {
+    const probe = document.createElement("span");
+    probe.setAttribute("aria-hidden", "true");
+    probe.style.cssText = `position:absolute;visibility:hidden;pointer-events:none;color:var(${name})`;
+    element.appendChild(probe);
+    const resolved = getComputedStyle(probe).color;
+    probe.remove();
+
+    context.save();
+    context.fillStyle = fallback;
+    if (isCanvasColor(resolved)) context.fillStyle = resolved;
+    const normalized = context.fillStyle;
+    context.restore();
+    return normalized;
+  };
+
+  return {
+    arc: resolve("--globe-arc", FALLBACK.arc),
+    dot: resolve("--globe-dot", FALLBACK.dot),
+    dotFront: resolve("--globe-dot-front", FALLBACK.dotFront),
+    label: resolve("--globe-label", FALLBACK.label),
+    labelBg: resolve("--globe-label-bg", FALLBACK.labelBg),
+    limb: resolve("--globe-limb", FALLBACK.limb),
+    node: resolve("--globe-node", FALLBACK.node),
+  };
 }
 
 /**
@@ -122,7 +153,7 @@ export function HeroGlobe() {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     // 窄屏只保留少量标签，否则文字会糊成一团
     const narrowScreen = window.matchMedia("(max-width: 720px)");
-    let palette = readPalette(canvas);
+    let palette = readPalette(canvas, context);
     let width = 0;
     let height = 0;
     let radius = 0;
@@ -157,17 +188,19 @@ export function HeroGlobe() {
       // 球体边缘的暖光：由外向内叠四圈，越贴轮廓越亮，
       // 这样即使球被右边缘裁掉一半，露出的那半圈轮廓也立得住。
       for (const rim of [
-        { alpha: 0.06, spread: 26, width: 24 },
-        { alpha: 0.1, spread: 12, width: 13 },
-        { alpha: 0.18, spread: 3, width: 5 },
-        { alpha: 0.55, spread: 0, width: 1.2 },
+        { alpha: 0.03, spread: 26, width: 24 },
+        { alpha: 0.05, spread: 12, width: 13 },
+        { alpha: 0.1, spread: 3, width: 5 },
+        { alpha: 0.3, spread: 0, width: 1.2 },
       ]) {
         context.beginPath();
         context.arc(cx, cy, radius + rim.spread, 0, TAU);
-        context.strokeStyle = withAlpha(palette.limb, rim.alpha);
+        context.strokeStyle = palette.limb;
+        context.globalAlpha = rim.alpha;
         context.lineWidth = rim.width;
         context.stroke();
       }
+      context.globalAlpha = 1;
 
       // 陆地：按深度分成 5 档透明度批量绘制，避免每个点一次 fill
       const buckets: Array<Array<{ x: number; y: number }>> = [[], [], [], [], []];
@@ -180,10 +213,12 @@ export function HeroGlobe() {
       }
       for (let index = 0; index < buckets.length; index += 1) {
         const depth = (index + 0.5) / buckets.length;
-        context.fillStyle = withAlpha(
-          index >= 3 ? palette.dotFront : palette.dot,
-          0.25 + depth * 0.75,
-        );
+        context.fillStyle = index >= 3 ? palette.dotFront : palette.dot;
+        // 屏幕上看得到的正好是球的边缘带（球心压在视口右边缘），
+        // 那里深度值接近 0，原来的 0.25 下限让点只剩 ~40 亮度、对比度不到 2:1。
+        // 下限抬到 0.72 后实测深色约 6:1、浅色约 3.5:1（非文本图形要 3:1），
+        // 同时保留一点由深到浅的层次。
+        context.globalAlpha = 0.72 + depth * 0.28;
         context.beginPath();
         for (const point of buckets[index]) {
           context.moveTo(point.x + DOT_RADIUS, point.y);
@@ -191,6 +226,7 @@ export function HeroGlobe() {
         }
         context.fill();
       }
+      context.globalAlpha = 1;
 
       // 航线：只画正面半球的连续段
       context.lineWidth = 1;
@@ -208,7 +244,8 @@ export function HeroGlobe() {
           context.beginPath();
           context.moveTo(run[0].x, run[0].y);
           for (const point of run.slice(1)) context.lineTo(point.x, point.y);
-          context.strokeStyle = withAlpha(palette.arc, 0.2);
+          context.strokeStyle = palette.arc;
+          context.globalAlpha = 0.2;
           context.stroke();
 
           // 每条弧线上跑一个光点
@@ -216,8 +253,10 @@ export function HeroGlobe() {
           const pulse = run[Math.min(run.length - 1, Math.floor(progress * run.length))];
           context.beginPath();
           context.arc(pulse.x, pulse.y, 2.4, 0, TAU);
-          context.fillStyle = withAlpha(palette.node, 0.95);
+          context.fillStyle = palette.node;
+          context.globalAlpha = 0.95;
           context.fill();
+          context.globalAlpha = 1;
         }
       }
 
@@ -235,12 +274,15 @@ export function HeroGlobe() {
 
         context.beginPath();
         context.arc(x, y, 5, 0, TAU);
-        context.fillStyle = withAlpha(palette.node, 0.28 * strength);
+        context.fillStyle = palette.node;
+        context.globalAlpha = 0.28 * strength;
         context.fill();
         context.beginPath();
         context.arc(x, y, 2.4, 0, TAU);
-        context.fillStyle = withAlpha(palette.node, strength);
+        context.fillStyle = palette.node;
+        context.globalAlpha = strength;
         context.fill();
+        context.globalAlpha = 1;
 
         if (!city.labelled || (narrowScreen.matches && rotated.z < 0.5)) continue;
 
@@ -259,10 +301,13 @@ export function HeroGlobe() {
         } else {
           context.rect(boxX, boxY - 9, boxWidth, 18);
         }
-        context.fillStyle = withAlpha(palette.labelBg, 0.72 * labelStrength);
+        context.fillStyle = palette.labelBg;
+        context.globalAlpha = 0.72 * labelStrength;
         context.fill();
-        context.fillStyle = withAlpha(palette.label, labelStrength);
+        context.fillStyle = palette.label;
+        context.globalAlpha = labelStrength;
         context.fillText(city.name, boxX + padX, boxY);
+        context.globalAlpha = 1;
       }
     }
 
@@ -300,7 +345,7 @@ export function HeroGlobe() {
     intersectionObserver.observe(canvas);
 
     const themeObserver = new MutationObserver(() => {
-      palette = readPalette(canvas);
+      palette = readPalette(canvas, context);
       if (reduceMotion.matches) draw(performance.now());
     });
     themeObserver.observe(document.documentElement, {
@@ -309,7 +354,7 @@ export function HeroGlobe() {
     });
 
     const onPreferenceChange = () => {
-      palette = readPalette(canvas);
+      palette = readPalette(canvas, context);
       start();
     };
     reduceMotion.addEventListener("change", onPreferenceChange);

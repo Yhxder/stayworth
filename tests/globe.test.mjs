@@ -9,12 +9,29 @@ import {
 import {
   decodeLandMask,
   greatCirclePoints,
+  isCanvasColor,
   project,
   rotate,
   splitVisibleRuns,
   toLatLng,
   toVector,
 } from "../app/lib/globe.ts";
+
+test("rejects the colour forms canvas silently ignores", () => {
+  // 线上压缩后的真实取值：生产构建把 rgba() 压成 8 位十六进制，
+  // 而 light-dark() 在自定义属性里根本不会求值。这两类字符串直接塞给
+  // canvas 的 fillStyle 会被忽略，画布退回默认黑——线上那道粗黑弧就是这么来的。
+  assert.equal(isCanvasColor("light-dark(#654e1273,#e3c88f3d)"), false);
+  assert.equal(isCanvasColor("light-dark(#ffffffd1,#08090cb8)"), false);
+  assert.equal(isCanvasColor("color-mix(in srgb, red 50%, blue)"), false);
+  assert.equal(isCanvasColor("var(--globe-dot)"), false);
+
+  // 浏览器解析之后的形态才是 canvas 认得的
+  assert.equal(isCanvasColor("rgb(101, 78, 18)"), true);
+  assert.equal(isCanvasColor("rgba(101, 78, 18, 0.45)"), true);
+  assert.equal(isCanvasColor("#654e12"), true);
+  assert.equal(isCanvasColor("#654e1280"), true);
+});
 
 test("decodes the land mask into a plausible amount of land", () => {
   const land = decodeLandMask(

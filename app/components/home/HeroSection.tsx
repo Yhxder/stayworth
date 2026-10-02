@@ -60,6 +60,14 @@ export function HeroSection({ onStart, onOpenIndex }: HeroSectionProps) {
   const metric = readMetric(
     indexState.status === "ready" ? indexState.summary : null,
   );
+  // 加载中与读不到要分开说：接口失败时还写「加载中」是在骗人，
+  // 而且徽标不能在没有数据时硬报一个城市数。
+  const marketLine =
+    metric && metric.value !== null
+      ? `市场参考 ${amountFormatter.format(metric.value)} ${metric.currencyCode} / 万分 · ${metric.scopeLabel} · ${metric.snapshotDate}`
+      : indexState.status === "loading"
+        ? "市场参考值加载中…"
+        : "市场参考值暂时读不到——界面只展示有来源与日期的数字";
 
   return (
     <section className="hero" id="top">
@@ -70,9 +78,7 @@ export function HeroSection({ onStart, onOpenIndex }: HeroSectionProps) {
           <p className="hero-badge">
             <span aria-hidden="true" className="hero-badge-dot" />
             StayWorth Index · 每日抽样
-            {metric
-              ? ` ${metric.cityCount} 城 / ${metric.sampleCount} 家样本`
-              : " 20 城"}
+            {metric ? ` ${metric.cityCount} 城 / ${metric.sampleCount} 家样本` : ""}
           </p>
 
           <h1 className="hero-title">现金还是积分，哪个更值？</h1>
@@ -112,11 +118,7 @@ export function HeroSection({ onStart, onOpenIndex }: HeroSectionProps) {
             <span aria-hidden="true" className="hero-trust-dot" />
             <div className="hero-trust-body">
               <strong>数据可追溯 · 输入不外传 · 与万豪无隶属关系</strong>
-              <small>
-                {metric && metric.value !== null
-                  ? `市场参考 ${amountFormatter.format(metric.value)} ${metric.currencyCode} / 万分 · ${metric.scopeLabel} · ${metric.snapshotDate}`
-                  : "市场参考值加载中——界面只展示有来源与日期的数字"}
-              </small>
+              <small>{marketLine}</small>
             </div>
             <span className="hero-trust-tag">示例快照</span>
           </div>

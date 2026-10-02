@@ -52,20 +52,23 @@
   /* 玻璃一律中性：任何带色相的值都会在虚化后把身后的暖色内容染成米黄 */
   --glass-rim: rgba(9, 10, 14, 0.14);
   --glass-highlight: rgba(255, 255, 255, 0.7);
-  /* 点阵地球：暗金 + 深蓝的低饱和发光，浅色下同样用低饱和值 */
+  /* 点阵地球：暗金 + 深蓝的低饱和发光，浅色下同样用低饱和值。
+     球面上的颜色一律给不带 alpha 的实色——透明度由 canvas 的 globalAlpha 控制，
+     混用会在压缩后变成 light-dark(hex) 这种 canvas 读不懂的形式。 */
   --globe-glow-gold: rgba(122, 91, 18, 0.16);
   --globe-glow-blue: rgba(38, 64, 120, 0.12);
-  --globe-dot: rgba(122, 91, 18, 0.3);
-  --globe-dot-front: rgba(90, 66, 10, 0.75);
-  --globe-arc: rgba(122, 91, 18, 0.6);
-  --globe-node: #8a6a1d;
+  --globe-dot: #654e12;
+  --globe-dot-front: #4a3708;
+  --globe-arc: #654e12;
+  --globe-node: #6b5210;
   --globe-label: #101319;
-  --globe-label-bg: rgba(255, 255, 255, 0.82);
-  --globe-limb: rgba(122, 91, 18, 0.18);
+  --globe-label-bg: #ffffff;
+  --globe-limb: #654e12;
   /* 首屏星空底纹 */
   --sky-dot: rgba(122, 91, 18, 0.5);
-  --sky-line: rgba(122, 91, 18, 0.22);
+  --sky-line: rgba(122, 91, 18, 0.3);
   --sky-label: rgba(63, 71, 83, 0.8);
+  --sky-flow: rgba(138, 106, 29, 0.9);
   --header-shadow:
     0 12px 32px -12px rgba(9, 10, 14, 0.24), 0 2px 8px rgba(9, 10, 14, 0.12);
   --surface-panel-solid: #ffffff;
@@ -119,28 +122,23 @@
       rgba(38, 64, 120, 0.12),
       rgba(46, 78, 150, 0.24)
     );
-    --globe-dot: light-dark(rgba(101, 78, 18, 0.5), rgba(227, 200, 143, 0.3));
+    --globe-dot: light-dark(#4f3a0b, #f0dcae);
     --globe-dot-front: light-dark(
-      rgba(74, 55, 8, 0.92),
-      rgba(235, 213, 167, 0.88)
+      #3a2a06,
+      #f9ecd0
     );
-    --globe-arc: light-dark(rgba(101, 78, 18, 0.6), rgba(227, 200, 143, 0.55));
+    --globe-arc: light-dark(#654e12, #e3c88f);
     --globe-node: light-dark(#6b5210, #ebd5a7);
     --globe-label: light-dark(#101319, #f7f8fa);
-    --globe-label-bg: light-dark(
-      rgba(255, 255, 255, 0.82),
-      rgba(8, 9, 12, 0.72)
-    );
-    --globe-limb: light-dark(
-      rgba(101, 78, 18, 0.45),
-      rgba(227, 200, 143, 0.24)
-    );
+    --globe-label-bg: light-dark(#ffffff, #08090c);
+    --globe-limb: light-dark(#654e12, #e3c88f);
     --sky-dot: light-dark(rgba(122, 91, 18, 0.45), rgba(227, 200, 143, 0.42));
-    --sky-line: light-dark(rgba(122, 91, 18, 0.2), rgba(227, 200, 143, 0.16));
+    --sky-line: light-dark(rgba(122, 91, 18, 0.28), rgba(227, 200, 143, 0.22));
     --sky-label: light-dark(
       rgba(63, 71, 83, 0.85),
       rgba(199, 205, 216, 0.8)
     );
+    --sky-flow: light-dark(rgba(138, 106, 29, 0.9), rgba(240, 219, 170, 0.95));
     --header-shadow: light-dark(
       0 12px 32px -12px rgba(9, 10, 14, 0.2),
       0 12px 32px -12px rgba(0, 0, 0, 0.6)
@@ -2473,30 +2471,18 @@ footer p {
   z-index: 0;
 }
 
-.hero-sky-dots {
-  fill: var(--sky-dot);
-}
 
-.hero-sky-links {
-  stroke: var(--sky-line);
-  stroke-width: 1;
+
+/* 流动光点：虚线的一段沿着连线走，看上去就是光在网络里流动。
+   和 caylet.com 移动端首屏那层节点网格是同一个做法。 */
+
+@media (prefers-reduced-motion: reduce) {
 }
 
 /* 带标签的高亮节点只在窄屏出现：宽屏有地球，那里已经有城市标签了 */
-.hero-sky-nodes {
-  fill: var(--sky-dot);
-}
 
-.hero-sky-nodes text {
-  fill: var(--sky-label);
-  font-size: 12px;
-  font-weight: 500;
-}
 
 @media (min-width: 1024px) {
-  .hero-sky-nodes {
-    display: none;
-  }
 }
 
 /* 第二屏：盖着首屏滑上来 */

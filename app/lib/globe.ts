@@ -11,6 +11,16 @@ export type Projected = { x: number; y: number; z: number; visible: boolean };
 
 const DEG = Math.PI / 180;
 
+/**
+ * canvas 只接受具体颜色。`light-dark()`、`var()`、`color-mix()` 这类要看使用场景
+ * 才能定值，直接塞给 `fillStyle` 会被忽略——而且失败是静默的，画布退回上一次的
+ * 颜色（首次就是默认黑）。生产构建的压缩会把 `rgba(...)` 改写成 8 位十六进制，
+ * 再把颜色塞进 `light-dark()`，所以这个判断必须留在取色链路上当闸门。
+ */
+export function isCanvasColor(value: string): boolean {
+  return !/(?:light-dark|color-mix|var)\(/.test(value);
+}
+
 /** 等距圆柱投影的掩码 → 陆地点列表。位序：行优先、低位在前。 */
 export function decodeLandMask(
   base64: string,
