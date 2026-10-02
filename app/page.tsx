@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BookingPanel } from "./components/home/BookingPanel";
 import type { BookingDraft } from "./components/home/BookingPanel";
-import { TaskFirstSection } from "./components/home/TaskFirstSection";
+import { HeroSection } from "./components/home/HeroSection";
 import { IndexSection } from "./components/index/IndexSection";
 import { RebateCalculator } from "./components/rebate/RebateCalculator";
 import {
@@ -13,6 +13,10 @@ import {
 } from "./components/search/ComparisonSection";
 import { SearchResults } from "./components/search/SearchResults";
 import { FloatingHeader } from "./components/shell/FloatingHeader";
+import {
+  ModuleSwitcher,
+  type ModuleName,
+} from "./components/shell/ModuleSwitcher";
 import { TrustAndSources } from "./components/trust/TrustAndSources";
 import { fetchHotelSnapshots } from "./lib/hotel-api";
 import type { RankingCriterion } from "./lib/hotel-ranking";
@@ -26,8 +30,6 @@ import type {
   SearchFilters,
   SearchResultsState,
 } from "./types/hotel";
-
-type ModuleName = "comparison" | "rebate" | "index";
 
 type SearchValidation = {
   field: "city" | "checkIn" | "checkOut";
@@ -275,7 +277,29 @@ export default function Home() {
     <main className="prototype-shell">
       <FloatingHeader snapshotLabel="示例快照，非实时" />
 
-      <TaskFirstSection>
+      <HeroSection
+        onOpenIndex={() => {
+          setActiveModule("index");
+          scrollToElement(document.getElementById("index-title"), {
+            clear: [".site-header"],
+          });
+        }}
+        onStart={() => {
+          const field = document.getElementById("booking-destination");
+          field?.focus({ preventScroll: true });
+          scrollToElement(field, { block: "center" });
+        }}
+      />
+
+      <div className="page-body">
+        <section aria-labelledby="tools-title" className="tools-deck">
+          <div className="tools-deck-head">
+            <h2 id="tools-title">从一个城市和一段日期开始</h2>
+            <p>
+              挑 2 到 4 家并排比较现金价与积分价，也可以先算清回血后的真实成本。
+            </p>
+          </div>
+
         <BookingPanel
           filters={filters}
           invalidField={searchValidation?.field ?? null}
@@ -286,40 +310,12 @@ export default function Home() {
           }}
           validationError={searchError}
         />
-      </TaskFirstSection>
+        </section>
 
-      <nav aria-label="主要功能" className="module-switcher">
-        <button
-          aria-label="切换到酒店对比模块"
-          aria-pressed={activeModule === "comparison"}
-          className={activeModule === "comparison" ? "is-active" : ""}
-          onClick={() => setActiveModule("comparison")}
-          type="button"
-        >
-          <strong>酒店对比</strong>
-          <small>现金价与积分价逐家对照</small>
-        </button>
-        <button
-          aria-label="切换到积分回血模块"
-          aria-pressed={activeModule === "rebate"}
-          className={activeModule === "rebate" ? "is-active" : ""}
-          onClick={() => setActiveModule("rebate")}
-          type="button"
-        >
-          <strong>积分回血</strong>
-          <small>估算入住后赚回多少积分</small>
-        </button>
-        <button
-          aria-label="切换到每万分兑换价值模块"
-          aria-pressed={activeModule === "index"}
-          className={activeModule === "index" ? "is-active" : ""}
-          onClick={() => setActiveModule("index")}
-          type="button"
-        >
-          <strong>每万分兑换价值</strong>
-          <small>市场参考中位数与区间</small>
-        </button>
-      </nav>
+        <ModuleSwitcher
+          activeModule={activeModule}
+          onChange={setActiveModule}
+        />
 
       <section
         aria-labelledby="comparison-title"
@@ -381,6 +377,7 @@ export default function Home() {
         <p>StayWorth 是独立项目，与 Marriott International 没有隶属关系。</p>
         <p>示例快照不是实时库存，不构成预订、兑换或税务建议。</p>
       </footer>
+      </div>
     </main>
   );
 }

@@ -384,61 +384,6 @@ export async function handleCatalogRequest(
   }
 }
 
-type FeaturedHotelRow = {
-  code: string;
-  nameZh: string;
-  nameEn: string;
-  cityNameZh: string;
-  bannerWideUrl: string | null;
-  bannerClassicUrl: string | null;
-};
-
-/**
- * 首页的「一处奢华信号」：从真实目录里挑一家有官方图片的酒店。
- * 排序固定（评级、点评数、代号），同一份数据每次返回同一家，不随机。
- *
- * 目录里的 city_name_zh 记录的是「搜到这家酒店的搜索面板城市」，不是酒店自身的
- * 所在地：半径搜索会把邻市酒店并进来（生产数据里广州的酒店被记在佛山名下）。
- * 首页把城市和酒店名并排展示，两者一旦矛盾，看起来就像数据出错。因此这里要求
- * 酒店中文名里含有所属面板城市名——这只用于挑选门面，不改动目录数据本身。
- */
-export async function handleFeaturedHotelRequest(database: HotelDatabase) {
-  try {
-    const statement = database.prepare(`
-      SELECT
-        hotel_code AS "code",
-        name_zh AS "nameZh",
-        name_en AS "nameEn",
-        city_name_zh AS "cityNameZh",
-        banner_wide_url AS "bannerWideUrl",
-        banner_classic_url AS "bannerClassicUrl"
-      FROM hotel_catalog
-      WHERE (banner_wide_url IS NOT NULL OR banner_classic_url IS NOT NULL)
-        AND city_name_zh <> ''
-        AND name_zh LIKE '%' || city_name_zh || '%'
-      ORDER BY COALESCE(rating, 0) DESC, COALESCE(review_count, 0) DESC, hotel_code ASC
-      LIMIT 1
-    `);
-    const result = await statement.all<FeaturedHotelRow>();
-    const row = result.results?.[0];
-
-    if (!row) {
-      return jsonResponse({ hotel: null });
-    }
-
-    const { bannerWideUrl, bannerClassicUrl, ...rest } = row;
-    return jsonResponse({
-      hotel: {
-        ...rest,
-        imagePath: proxiedImagePath(bannerWideUrl ?? bannerClassicUrl),
-        imageSourceLabel: "万豪官方图片",
-      },
-    });
-  } catch (error) {
-    console.error("Featured hotel query failed", error);
-    return jsonResponse({ hotel: null }, 500);
-  }
-}
 
 type CoverageRow = {
   checkIn: string;

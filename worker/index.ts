@@ -2,7 +2,6 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import {
-  handleFeaturedHotelRequest,
   handleCatalogRequest,
   handleHotelSearchRequest,
   type HotelDatabase,
@@ -39,10 +38,6 @@ const worker = {
 
     if (url.pathname === "/api/hotels") {
       return handleHotelSearchRequest(request, env.DB);
-    }
-
-    if (url.pathname === "/api/catalog/featured") {
-      return handleFeaturedHotelRequest(env.DB);
     }
 
     if (url.pathname === "/api/catalog") {
