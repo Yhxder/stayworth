@@ -5,26 +5,27 @@ import { useEffect, useRef } from "react";
 import { isCanvasColor } from "../../lib/globe";
 
 /**
- * 首屏背景：缓慢漂移的发光节点网络。
+ * 首屏背景：缓慢漂移的发光节点网络（照着 caylet.com 移动端 hero 做的）。
  *
- * 照着 caylet.com 移动端 hero 做的。我把它的 hero 连拍几帧做成运动差异图，
- * 看到动的是**会漂移的发光圆点**（带文字标签），点与点之间的连线跟着一起动，
- * 而不是"沿固定线段跑的光段"——所以这里画漂移的节点，不做虚线动画。
- *
- * 节点坐标来自固定种子的线性同余发生器，服务端与客户端算出来一致，不会水合不一致。
+ * 两个坑记在这里：
+ * 1. 漂移幅度必须用**屏幕像素**，不能乘 viewBox 的缩放系数。乘了之后手机上的
+ *    系数只有 0.25，幅度被压到几像素、周期又长，看起来就是静止的——桌面系数是 1
+ *    所以看不出问题。节点位置按容器尺寸生成，漂移量直接加在屏幕坐标上。
+ * 2. 动画循环不挂在 IntersectionObserver 上：hero 是 sticky 且外面有 overflow，
+ *    观察回调在真机上可能报 not intersecting，一旦报 false 循环就停了。
  */
 
-const VIEW_WIDTH = 1440;
-const VIEW_HEIGHT = 820;
-const NODE_COUNT = 34;
-const LINK_DISTANCE = 172;
+const DESKTOP_NODES = 34;
+const MOBILE_NODES = 20;
+/** 归一化坐标的池子：切换节点数时只增删，不会整体跳位。 */
+const POOL_SIZE = DESKTOP_NODES;
 
 /** 带标签的节点：窄屏没有地球，这几个名字就是"我们抽样了哪些城市"的视觉交代。 */
-const LABELLED: Record<number, string> = {
+const LABELS: Record<number, string> = {
   2: "香港",
   7: "东京",
-  19: "新加坡",
-  28: "伦敦",
+  13: "新加坡",
+  18: "伦敦",
 };
 
 type SkyNode = {
@@ -33,29 +34,28 @@ type SkyNode = {
   speed: number;
   swingX: number;
   swingY: number;
-  x: number;
-  y: number;
+  /** 归一化基准位置（0–1） */
+  nx: number;
+  ny: number;
 };
 
-function buildNodes(): SkyNode[] {
+/** 幅度用屏幕像素、角速度用弧度/秒：约 20–45px 幅度、20–40 秒一个来回，肉眼可见。 */
+const POOL: SkyNode[] = (() => {
   let seed = 20261002;
   const next = () => {
     seed = (seed * 1103515245 + 12345) & 0x7fffffff;
     return seed / 0x7fffffff;
   };
-
-  return Array.from({ length: NODE_COUNT }, (_, index) => ({
-    label: LABELLED[index],
+  return Array.from({ length: POOL_SIZE }, (_, index) => ({
+    label: LABELS[index],
+    nx: 0.04 + next() * 0.92,
+    ny: 0.05 + next() * 0.9,
     phase: next() * Math.PI * 2,
-    speed: 0.05 + next() * 0.11,
-    swingX: 14 + next() * 30,
-    swingY: 10 + next() * 26,
-    x: next() * VIEW_WIDTH,
-    y: next() * VIEW_HEIGHT,
+    speed: 0.16 + next() * 0.22,
+    swingX: 16 + next() * 30,
+    swingY: 12 + next() * 26,
   }));
-}
-
-const NODES = buildNodes();
+})();
 
 type Palette = {
   glow: string;
@@ -74,9 +74,9 @@ const FALLBACK: Palette = {
 };
 
 /**
- * 与地球组件同一套取色方式：把变量挂到真实属性上交给浏览器解析，
- * 再用 canvas 归一化。生产压缩会把颜色改写成 8 位十六进制、`light-dark()`
- * 在自定义属性里也不会求值，自己解析字符串迟早出错。
+ * 与地球组件同一套取色方式：把变量挂到真实属性上交给浏览器解析，再用 canvas 归一化。
+ * 生产压缩会把颜色改写成 8 位十六进制，`light-dark()` 在自定义属性里又不会求值，
+ * 自己解析字符串迟早出错。
  */
 function readPalette(
   element: HTMLElement,
@@ -147,10 +147,7 @@ export function HeroSky() {
     let glow = makeGlowSprite(palette.glow);
     let width = 0;
     let height = 0;
-    let scaleX = 1;
-    let scaleY = 1;
     let frame = 0;
-    let running = true;
     let origin = performance.now();
 
     function resize() {
@@ -162,8 +159,6 @@ export function HeroSky() {
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      scaleX = width / VIEW_WIDTH;
-      scaleY = height / VIEW_HEIGHT;
       palette = readPalette(canvas, context);
       glow = makeGlowSprite(palette.glow);
     }
@@ -172,17 +167,19 @@ export function HeroSky() {
       const t = (now - origin) / 1000;
       context.clearRect(0, 0, width, height);
 
-      const points = NODES.map((node) => ({
+      // 节点数按宽度选：手机上少一些，密度和桌面接近
+      const count = wideScreen.matches ? DESKTOP_NODES : MOBILE_NODES;
+      const nodes = POOL.slice(0, count);
+      const points = nodes.map((node) => ({
         node,
-        x: (node.x + Math.sin(t * node.speed + node.phase) * node.swingX) * scaleX,
+        x: node.nx * width + Math.sin(t * node.speed + node.phase) * node.swingX,
         y:
-          (node.y +
-            Math.cos(t * node.speed * 0.82 + node.phase) * node.swingY) *
-          scaleY,
+          node.ny * height +
+          Math.cos(t * node.speed * 0.82 + node.phase) * node.swingY,
       }));
 
       // 连线：近的才连，越近越亮；端点会漂移，所以每帧重算
-      const limit = LINK_DISTANCE * Math.min(scaleX, scaleY);
+      const limit = Math.min(140, Math.min(width, height) * 0.34);
       context.lineWidth = 1;
       context.strokeStyle = palette.line;
       for (let i = 0; i < points.length; i += 1) {
@@ -222,7 +219,9 @@ export function HeroSky() {
         const boxWidth = textWidth + 20;
         // 靠右的节点把标签放到左边，别让画布边缘把字切掉
         const boxX =
-          point.x + 12 + boxWidth > width ? point.x - 12 - boxWidth : point.x + 12;
+          point.x + 12 + boxWidth > width
+            ? point.x - 12 - boxWidth
+            : point.x + 12;
         context.beginPath();
         if (typeof context.roundRect === "function") {
           context.roundRect(boxX, point.y - 11, boxWidth, 22, 11);
@@ -240,7 +239,7 @@ export function HeroSky() {
 
     function loop(now: number) {
       draw(now);
-      if (running && !reduceMotion.matches) frame = requestAnimationFrame(loop);
+      if (!reduceMotion.matches) frame = requestAnimationFrame(loop);
     }
 
     function startMotion() {
@@ -262,12 +261,12 @@ export function HeroSky() {
     });
     resizeObserver.observe(canvas);
 
-    const intersectionObserver = new IntersectionObserver((entries) => {
-      running = entries.some((entry) => entry.isIntersecting);
-      if (running) startMotion();
-      else cancelAnimationFrame(frame);
-    });
-    intersectionObserver.observe(canvas);
+    // 只按标签页可见性暂停；不用 IntersectionObserver 决定循环是否继续
+    const onVisibilityChange = () => {
+      if (document.hidden) cancelAnimationFrame(frame);
+      else startMotion();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     const onPreferenceChange = () => startMotion();
     reduceMotion.addEventListener("change", onPreferenceChange);
@@ -276,7 +275,7 @@ export function HeroSky() {
     return () => {
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
-      intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       reduceMotion.removeEventListener("change", onPreferenceChange);
       wideScreen.removeEventListener("change", onPreferenceChange);
     };
